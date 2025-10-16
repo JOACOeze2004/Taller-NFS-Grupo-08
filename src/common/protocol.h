@@ -8,8 +8,8 @@
 class Protocol {
 public:
     explicit Protocol(Socket& socket);
-    void send_message(const std::string& message);
-    std::string receive_message();
+    void send_message(const std::string& message) const;
+    std::string receive_message() const;
 private:
     Socket& socket;
 };

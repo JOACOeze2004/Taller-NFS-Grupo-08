@@ -15,8 +15,7 @@ void Client::run() {
     Protocol protocol(client_socket);
     protocol.send_message("Hello");
 
-    std::string response = protocol.receive_message();
-    if (!response.empty()) {
+    if (const std::string response = protocol.receive_message(); !response.empty()) {
         std::cout << "[CLIENT] Received: " << response << std::endl;
     }
 
