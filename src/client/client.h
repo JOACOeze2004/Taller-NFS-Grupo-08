@@ -3,6 +3,7 @@
 
 #include "../common/socket.h"
 #include <string>
+#include <iostream>
 
 class Client {
 public:

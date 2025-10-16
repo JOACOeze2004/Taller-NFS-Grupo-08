@@ -1,9 +1,4 @@
-//
-// Created by malenit on 15/10/25.
-//
-
 #include "client.h"
-#include <iostream>
 #include "src/common/protocol.h"
 
 Client::Client(const std::string& host, const std::string& port)
