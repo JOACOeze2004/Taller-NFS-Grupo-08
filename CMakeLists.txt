@@ -26,7 +26,10 @@ message(CMAKE_CXX_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}")
 
 # Define target: lib common between client, server and editor programs
 # HEY TODO XXX: change the name to something that you like
-add_library(taller_common STATIC)
+add_library(taller_common STATIC
+        src/common/protocol.h
+        src/common/protocol.cpp
+        src/common/protocol.h)
 
 # add the source files that make the lib
 # HEY!! TODO XXX: add more subfolders here
@@ -103,7 +106,9 @@ endif()
 # ---------------
 if(TALLER_CLIENT)
     # HEY!! TODO XXX: Change the name of the executable to the one you like!
-    add_executable(taller_client)
+    add_executable(taller_client
+            src/client/client.cpp
+            src/client/client.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_client taller_common SDL2pp::SDL2pp)
