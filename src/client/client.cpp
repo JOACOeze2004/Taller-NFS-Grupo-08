@@ -1,5 +1,5 @@
 #include "client.h"
-#include "src/common/protocol.h"
+#include "client_protocol.h"
 
 Client::Client(const std::string& host, const std::string& port)
     : host(host), port(port), client_socket(host.c_str(), port.c_str()) {}
@@ -7,7 +7,7 @@ Client::Client(const std::string& host, const std::string& port)
 void Client::run() {
     std::cout << "[CLIENT] Connected to " << host << ":" << port << std::endl;
 
-    Protocol protocol(client_socket);
+    const ClientProtocol protocol(client_socket);
     protocol.send_message("Hello");
 
     if (const std::string response = protocol.receive_message(); !response.empty()) {
