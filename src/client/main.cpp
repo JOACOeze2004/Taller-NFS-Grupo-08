@@ -5,10 +5,8 @@
 #include <SDL2pp/SDL2pp.hh>
 #include <SDL2/SDL.h>
 #include "client.h"
+#include "../common/constants.h"
 
-#define ARGC 3
-#define HOST 1
-#define PORT 2
 
 using namespace SDL2pp;
 
