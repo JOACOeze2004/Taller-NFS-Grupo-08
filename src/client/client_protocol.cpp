@@ -1,6 +1,5 @@
 #include "client_protocol.h"
 
-
 ClientProtocol::ClientProtocol(Socket& _socket) : protocol(_socket) {  }
 
 

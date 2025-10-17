@@ -2,7 +2,7 @@
 #define CLIENT_PROTOCOL_H
 
 #include "../common/socket.h"
-#include "src/common/protocol.h"
+#include "../common/protocol.h"
 
 class ClientProtocol {
     private:

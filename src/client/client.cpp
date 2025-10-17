@@ -8,7 +8,7 @@ void Client::run() {
     std::cout << "[CLIENT] Connected to " << host << ":" << port << std::endl;
 
     const ClientProtocol protocol(client_socket);
-    protocol.send_message("Hello");
+    protocol.send_message("Hello from client");
 
     if (const std::string response = protocol.receive_message(); !response.empty()) {
         std::cout << "[CLIENT] Received: " << response << std::endl;

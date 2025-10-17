@@ -128,7 +128,11 @@ endif()
 
 if(TALLER_SERVER)
     # HEY!! TODO XXX: Change the name of the executable to the one you like!
-    add_executable(taller_server)
+    add_executable(taller_server
+            src/server/server.cpp
+            src/server/server.h
+            src/server/server_protocol.cpp
+            src/server/server_protocol.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)
