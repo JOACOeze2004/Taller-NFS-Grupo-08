@@ -3,7 +3,9 @@
 
 #include <string>
 
-#include "src/common/socket.h"
+#include "socket.h"
+
+
 
 class Protocol {
 public:
