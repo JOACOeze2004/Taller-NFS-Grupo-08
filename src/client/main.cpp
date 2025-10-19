@@ -20,6 +20,7 @@ int main(int const argc, char *argv[]) try {
     Client client(host, port);
     client.run();
 
+
 	/*// Initialize SDL library
 	SDL sdl(SDL_INIT_VIDEO);
 
