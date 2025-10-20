@@ -5,11 +5,14 @@
 
 #include "../common/constants.h"
 
-#include "server_protocol.h"
+#include "client_acceptor.h"
+#include "monitor.h"
 
-Server::Server(const std::string& port): port(port), acceptor(port) {}
+Server::Server(const std::string& port): port(port){}
 
 void Server::run() {
+    Monitor monitor;
+    ClientAcceptor acceptor(port, monitor);
     std::cout << "[SERVER] Listening on port " << port << std::endl;
 
     std::cout << "[SERVER] Acceptor started " << std::endl;
