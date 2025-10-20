@@ -1,29 +1,24 @@
 #ifndef CLIENT_ACCEPTOR_H
 #define CLIENT_ACCEPTOR_H
 
-#include <algorithm>
 #include <string>
-#include <utility>
 #include <vector>
 
-#include <arpa/inet.h>
-
-#include "../common/constants.h"
-#include "../common/liberror.h"
 #include "../common/socket.h"
 #include "../common/thread.h"
 
 #include "client_handler.h"
-
+#include "monitor.h"
 
 class ClientAcceptor: public Thread {
-private:
     Socket acceptor;
     std::vector<ClientHandler*> clients;
     Queue<std::string> command_queue;
+    Monitor& monitor;
+    int next_id;
 
 public:
-    explicit ClientAcceptor(const std::string& port);
+    explicit ClientAcceptor(const std::string& port, Monitor& _monitor);
     void run() override;
     void clear();
     void reap();

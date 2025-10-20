@@ -1,6 +1,6 @@
 #include "client_acceptor.h"
 
-ClientAcceptor::ClientAcceptor(const std::string& port): acceptor(port.c_str()) {}
+ClientAcceptor::ClientAcceptor(const std::string& port, Monitor& _monitor): acceptor(port.c_str()), monitor(_monitor), next_id(1) {}
 
 void ClientAcceptor::run() {
     std::cout << "[Acceptor] acceptor thread is running" << std::endl;
@@ -8,17 +8,18 @@ void ClientAcceptor::run() {
         try {
             Socket peer = acceptor.accept();
 
-            auto* client_queue = new Queue<std::string>();
-            ClientHandler* client =
-                    new ClientHandler(std::move(peer), command_queue, *client_queue);
-            reap();
+            auto client =
+                    std::make_unique<ClientHandler>(std::move(peer), command_queue, next_id);
+
             std::cout << "[Acceptor] new client added to the handler list" << std::endl;
 
-            clients.push_back(client);
+            monitor.reap();
+            monitor.add_client(std::move(client));
             
             std::cout << "[Acceptor] Handler thread is running" << std::endl;
 
             client->start();
+            next_id++;
         } catch (const std::exception& e) {
             break;
         }
@@ -41,14 +42,7 @@ void ClientAcceptor::reap() {
 }
 
 void ClientAcceptor::clear() {
-    for (ClientHandler* client : clients) {
-        client->kill();
-        client->join();
-        Queue<std::string>* q = client->get_client_queue();
-        delete q;
-        delete client;
-    }
-    clients.clear();
+    monitor.clear_clients();
 }
 
 void ClientAcceptor::close_acceptor_socket(){
