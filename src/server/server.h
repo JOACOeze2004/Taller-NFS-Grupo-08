@@ -3,6 +3,7 @@
 
 #include <string>
 #include "../common/socket.h"
+#include "client_acceptor.h"
 
 class Server {
 public:
@@ -11,7 +12,8 @@ public:
 
 private:
     std::string port;
-    Socket server_socket;
+    //Socket server_socket;
+    ClientAcceptor acceptor;
 };
 
 #endif  // TALLER_TP_SERVER_H

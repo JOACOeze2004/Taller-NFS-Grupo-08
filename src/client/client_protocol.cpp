@@ -10,3 +10,7 @@ void ClientProtocol::send_message(const std::string& message) const {
 std::string ClientProtocol::receive_message() const {
     return protocol.receive_message();
 }
+
+void ClientProtocol::close(){
+    protocol.close_socket();
+}

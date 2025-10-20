@@ -10,6 +10,7 @@ public:
     explicit ServerProtocol(Socket& socket);
     void send_message(const std::string& message) const;
     std::string receive_message() const;
+    void close();
 
 };
 

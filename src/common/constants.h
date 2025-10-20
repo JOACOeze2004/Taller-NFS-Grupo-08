@@ -6,6 +6,11 @@
 #define HOST 1
 #define PORT 2
 
+// SERVER CONSTANTES
+#define ARGC_SERVER 2
+#define SERVER_PORT 1
+
+
 //MENU INITIAL COMMANDS
 #define SEND_CONNECT 0x01
 #define SEND_SELECT_CAR 0x02

@@ -1,17 +1,15 @@
 #include "server.h"
 #include <iostream>
 #include <cstdlib>
-
-#define ARGC 2
-#define PORT 1
+#include "../common/constants.h"
 
 int main(int const argc, char* argv[]) try {
-    if (argc != ARGC) {
+    if (argc != ARGC_SERVER) {
         std::cerr << "Usage: ./server [PORT]" << std::endl;
         return EXIT_FAILURE;
     }
 
-    const std::string port = argv[PORT];
+    const std::string port = argv[SERVER_PORT];
 
     Server server(port);
     server.run();

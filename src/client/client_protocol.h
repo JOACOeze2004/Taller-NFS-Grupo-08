@@ -11,7 +11,7 @@ class ClientProtocol {
         explicit ClientProtocol(Socket& _socket);
         void send_message(const std::string& message) const;
         std::string receive_message() const;
-
+        void close();
 };
 
 #endif  // CLIENT_PROTOCOL_H

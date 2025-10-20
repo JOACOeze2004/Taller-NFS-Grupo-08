@@ -20,3 +20,12 @@ std::string Protocol::receive_message() const {
 
     return result;
 }
+
+void Protocol::close_socket(){
+    try {
+        socket.shutdown(2);
+        socket.close();
+    } catch(const std::exception& e){
+        std::cerr << "Socket already closed in protocol: " << e.what() << '\n';
+    }
+}
