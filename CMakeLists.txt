@@ -132,7 +132,14 @@ if(TALLER_SERVER)
             src/server/server.cpp
             src/server/server.h
             src/server/server_protocol.cpp
-            src/server/server_protocol.h)
+            src/server/server_protocol.h
+            src/server/gameloop.cpp
+            src/server/gameloop.h
+            src/server/monitor.cpp
+            src/server/monitor.h
+            src/server/client_handler.cpp
+            src/server/client_handler.h
+            src/server/command.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)
