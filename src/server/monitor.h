@@ -14,6 +14,7 @@ public:
     void add_client(std::unique_ptr<ClientHandler> client);
     void broadcast();
     void clear_clients();
+    void reap();
 };
 
 
