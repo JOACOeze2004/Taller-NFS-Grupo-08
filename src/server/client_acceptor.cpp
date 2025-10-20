@@ -56,7 +56,7 @@ void ClientAcceptor::close_acceptor_socket(){
         acceptor.shutdown(SHUT_RDWR);
         acceptor.close();
     } catch (const std::exception& e) {
-        std::cerr << "Socket already closed in Aceptor: " << e.what() << '\n';
+        std::cerr << "Socket already closed in Acceptor: " << e.what() << '\n';
     }
 
 }
