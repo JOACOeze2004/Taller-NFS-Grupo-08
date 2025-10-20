@@ -1,12 +1,13 @@
 #include "client_handler.h"
 
-ClientHandler::ClientHandler(Socket&& peer, Queue<std::string>& commands, Queue<std::string>& messages):
+ClientHandler::ClientHandler(Socket&& peer, Queue<std::string>& commands, int _id):
         peer(std::move(peer)),
         protocol(this->peer),
         command_queue(commands),
-        client_queue(messages),
+        client_queue(50),
         receiver(protocol, command_queue),
-        sender(protocol, command_queue) {}  //Cambiar a clientQueue cuando tengamos el broadcast.
+        sender(protocol, command_queue),
+        id(_id) {}  //Cambiar a clientQueue cuando tengamos el broadcast.
 
 void ClientHandler::run() {
     std::cout << "[HANDLER] receiver and sender threads have started" << std::endl;
@@ -29,7 +30,5 @@ void ClientHandler::kill_threads() {
 }
 
 bool ClientHandler::is_dead() const { return !sender.is_alive() && !receiver.is_alive(); }
-
-Queue<std::string>* ClientHandler::get_client_queue() const { return &client_queue; }
 
 ClientHandler::~ClientHandler() {}

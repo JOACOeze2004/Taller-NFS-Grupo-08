@@ -21,19 +21,18 @@ private:
     ServerProtocol protocol;
 
     Queue<std::string>& command_queue;
-    Queue<std::string>& client_queue;
+    Queue<std::string> client_queue;
 
     ClientReceiver receiver;
     ClientSender sender;
+    int id;
 
 public:
-    explicit ClientHandler(Socket&& peer, Queue<std::string>& commands,
-                           Queue<std::string>& messages);
+    explicit ClientHandler(Socket&& peer, Queue<std::string>& commands, int _id);
     void run() override;
     void kill();
     void kill_threads();
     bool is_dead() const;
-    Queue<std::string>* get_client_queue() const;
 
     ~ClientHandler();
 };

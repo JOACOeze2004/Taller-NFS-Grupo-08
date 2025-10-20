@@ -13,7 +13,6 @@ public:
 private:
     std::string port;
     //Socket server_socket;
-    ClientAcceptor acceptor;
 };
 
 #endif  // TALLER_TP_SERVER_H
