@@ -2,8 +2,10 @@
 #define TALLER_TP_SERVER_H
 
 #include <string>
+
 #include "../common/socket.h"
-#include "client_acceptor.h"
+
+#include "acceptor.h"
 
 class Server {
 public:

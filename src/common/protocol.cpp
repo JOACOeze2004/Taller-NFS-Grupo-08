@@ -1,5 +1,4 @@
 #include "protocol.h"
-#include <iostream>
 
 Protocol::Protocol(Socket& socket)
     : socket(socket) {}

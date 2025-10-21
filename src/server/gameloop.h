@@ -3,7 +3,7 @@
 
 #include "monitor.h"
 #include "../common/queue.h"
-#include "command.h"
+#include "client_command.h"
 
 
 class Gameloop {

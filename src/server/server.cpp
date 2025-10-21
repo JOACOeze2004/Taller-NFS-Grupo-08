@@ -5,7 +5,7 @@
 
 #include "../common/constants.h"
 
-#include "client_acceptor.h"
+#include "acceptor.h"
 #include "monitor.h"
 
 Server::Server(const std::string& port): port(port){}
@@ -24,7 +24,6 @@ void Server::run() {
         }
     }
 
-    // while (true) {
     //     Socket client_socket = server_socket.accept();
     //     std::cout << "[SERVER] Client connected" << std::endl;
 
@@ -35,11 +34,6 @@ void Server::run() {
     //     while (keep_running) {
     //         std::string message = protocol.receive_message();
 
-    //         if (message.empty()) {
-    //             std::cout << "[SERVER] Client disconnected" << std::endl;
-    //             break;
-    //         }
-
     //         std::cout << "[SERVER] Received message (size: " << message.size() << ")" << std::endl;
 
     //         // Verifica el tipo de mensaje
@@ -47,7 +41,6 @@ void Server::run() {
     //             uint8_t msg_type = static_cast<uint8_t>(message[0]);
     //             std::cout << "[SERVER] Message type: " << static_cast<int>(msg_type) << std::endl;
 
-    //             // Si es QUIT, termina el loop
     //             if (msg_type == SEND_QUIT) {
     //                 std::cout << "[SERVER] Client sent QUIT" << std::endl;
     //                 protocol.send_message("Goodbye");
@@ -122,7 +115,6 @@ void Server::run() {
     //             }
     //         }
     //     }
-    // }
     std::cout << "[SERVER] Acceptor close" << std::endl;
     acceptor.close_acceptor_socket();
     acceptor.join();

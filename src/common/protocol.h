@@ -2,10 +2,10 @@
 #define TALLER_TP_PROTOCOL_H
 
 #include <string>
-
 #include "socket.h"
-
-
+#include "constants.h"
+#include <iostream>
+#include <cstdint>
 
 class Protocol {
 public:

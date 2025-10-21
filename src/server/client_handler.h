@@ -11,8 +11,8 @@
 #include "../common/socket.h"
 #include "../common/thread.h"
 
-#include "client_receiver.h"
-#include "client_sender.h"
+#include "receiver.h"
+#include "sender.h"
 #include "server_protocol.h"
 
 class ClientHandler: public Thread {
