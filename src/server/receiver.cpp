@@ -1,4 +1,4 @@
-#include "client_receiver.h"
+#include "receiver.h"
 
 ClientReceiver::ClientReceiver(ServerProtocol& prot, Queue<std::string>& queue):
         protocol(prot), command_queue(queue) {}

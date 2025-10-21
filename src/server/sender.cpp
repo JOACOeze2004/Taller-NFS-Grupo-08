@@ -1,4 +1,4 @@
-#include "client_sender.h"
+#include "sender.h"
 
 ClientSender::ClientSender(ServerProtocol& prot, Queue<std::string>& queue):
         protocol(prot), client_queue(queue) {}
