@@ -9,7 +9,6 @@ class Client {
 public:
     Client(const std::string& host, const std::string& port);
     void run();
-    void test_msgs(); // linea a borrar esta solo para demostrar comunicacion entre cliente y server
 
 private:
     std::string host;

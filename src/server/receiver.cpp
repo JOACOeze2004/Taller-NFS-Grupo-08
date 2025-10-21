@@ -8,7 +8,11 @@ void ClientReceiver::run() {
     while (should_keep_running()) {
         try {
             std::string request = protocol.receive_message();
-            command_queue.push(request);
+            if (!request.empty()) {
+                std::cout << request << std::endl;
+                protocol.send_message("hello from server");
+            }
+            //command_queue.push(request);
         } catch (const std::exception& e) {
             this->stop();
             break;
