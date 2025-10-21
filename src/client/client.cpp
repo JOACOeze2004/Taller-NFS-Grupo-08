@@ -15,7 +15,7 @@ void Client::run() {
         std::cout << "[CLIENT] Received: " << response << std::endl;
     }
 
-    test_msgs(); // linea a borrar esta solo para demostrar comunicacion entre cliente y server
+    //test_msgs(); // linea a borrar esta solo para demostrar comunicacion entre cliente y server
 
 
     client_socket.shutdown(2);
