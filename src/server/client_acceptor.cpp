@@ -14,11 +14,11 @@ void ClientAcceptor::run() {
             std::cout << "[Acceptor] new client added to the handler list" << std::endl;
 
             monitor.reap();
-            monitor.add_client(std::move(client));
             
             std::cout << "[Acceptor] Handler thread is running" << std::endl;
-
+            
             client->start();
+            monitor.add_client(std::move(client));
             next_id++;
         } catch (const std::exception& e) {
             break;
@@ -27,18 +27,8 @@ void ClientAcceptor::run() {
     clear();
 }
 
-void ClientAcceptor::reap() { 
-    for (size_t i = 0; i < clients.size();) {
-        ClientHandler* client = clients[i];
-        if (!client->is_alive()) {
-            client->kill();
-            client->join();
-            delete client;
-            clients.erase(clients.begin() + i);
-        }else{
-            i++;
-        }
-    }   
+void ClientAcceptor::reap() {     
+    monitor.reap();  
 }
 
 void ClientAcceptor::clear() {

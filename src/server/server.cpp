@@ -19,7 +19,7 @@ void Server::run() {
     acceptor.start();
     std::string line;
     while (std::getline(std::cin, line)) {
-        if (!line.empty() && line[0] == 'q') {
+        if (!line.empty() && line[0] == SERVER_CLOSE) {
             break;
         }
     }
@@ -122,12 +122,9 @@ void Server::run() {
     //             }
     //         }
     //     }
-    //     client_socket.shutdown(2);
-    //     client_socket.close();
-
-    //     std::cout << "[SERVER] Connection closed" << std::endl;
     // }
     std::cout << "[SERVER] Acceptor close" << std::endl;
     acceptor.close_acceptor_socket();
     acceptor.join();
+    std::cout << "[SERVER] Connection closed" << std::endl;
 }
