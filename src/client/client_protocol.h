@@ -1,0 +1,17 @@
+#ifndef CLIENT_PROTOCOL_H
+#define CLIENT_PROTOCOL_H
+
+#include "../common/socket.h"
+#include "../common/protocol.h"
+
+class ClientProtocol {
+    private:
+        Protocol protocol;
+    public:
+        explicit ClientProtocol(Socket& _socket);
+        void send_message(const std::string& message) const;
+        std::string receive_message() const;
+        void close();
+};
+
+#endif  // CLIENT_PROTOCOL_H

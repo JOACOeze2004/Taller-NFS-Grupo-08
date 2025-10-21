@@ -26,7 +26,11 @@ message(CMAKE_CXX_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}")
 
 # Define target: lib common between client, server and editor programs
 # HEY TODO XXX: change the name to something that you like
-add_library(taller_common STATIC)
+add_library(taller_common STATIC
+        src/common/protocol.h
+        src/common/protocol.cpp
+        src/common/protocol.h
+        src/common/command.h)
 
 # add the source files that make the lib
 # HEY!! TODO XXX: add more subfolders here
@@ -103,7 +107,19 @@ endif()
 # ---------------
 if(TALLER_CLIENT)
     # HEY!! TODO XXX: Change the name of the executable to the one you like!
-    add_executable(taller_client)
+    add_executable(taller_client
+            src/client/client.cpp
+            src/client/client.h
+            src/client/client_handler.cpp
+            src/client/client_handler.h
+            src/client/client_sender.cpp
+            src/client/client_sender.h
+            src/client/client_receiver.cpp
+            src/client/client_receiver.h
+            src/client/client_protocol.cpp
+            src/client/client_protocol.h
+            src/client/input_parser.cpp
+            src/client/input_parser.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_client taller_common SDL2pp::SDL2pp)
@@ -123,7 +139,25 @@ endif()
 
 if(TALLER_SERVER)
     # HEY!! TODO XXX: Change the name of the executable to the one you like!
-    add_executable(taller_server)
+    add_executable(taller_server
+            src/server/server.cpp
+            src/server/server.h
+            src/server/server_protocol.cpp
+            src/server/server_protocol.h
+            src/server/acceptor.cpp
+            src/server/acceptor.h
+            src/server/client_command.h
+            src/server/gameloop.cpp
+            src/server/gameloop.h
+            src/server/monitor.cpp
+            src/server/monitor.h
+            src/server/receiver.h
+            src/server/receiver.cpp
+            src/server/sender.h
+            src/server/sender.cpp
+            src/server/client_handler.cpp
+            src/server/client_handler.h
+            src/server/client_command.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)
