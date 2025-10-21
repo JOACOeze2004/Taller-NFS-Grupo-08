@@ -4,16 +4,16 @@ target_sources(taller_server
     main.cpp
         server.cpp
         server_protocol.cpp
-        client_acceptor.cpp
+        acceptor.cpp
         client_handler.cpp
-        client_receiver.cpp
-        client_sender.cpp
+        receiver.cpp
+        sender.cpp
     PUBLIC
         server.h
         server_protocol.h
-        client_acceptor.h
+        acceptor.h
         client_handler.h
-        client_receiver.h
-        client_sender.h
+        receiver.h
+        sender.h
     # .h files
     )
