@@ -5,7 +5,10 @@
 #include "../common/queue.h"
 #include "../common/thread.h"
 
+#include "car_state.h"
 #include "client_command.h"
+#include "monitor.h"
+#include <map>
 
 class Monitor;
 
@@ -13,12 +16,13 @@ class Monitor;
 class Gameloop: public Thread {
 
 public:
-    explicit Gameloop(Queue<Command>& _cmd_queue, Monitor& _monitor);
+    explicit Gameloop(Queue<ClientCommand>& _cmd_queue, Monitor& _monitor);
     void run() override;
 
 private:
+    Queue<ClientCommand>& cmd_queue;
     Monitor& monitor;
-    Queue<Command>& cmd_queue;
+    std::map<int, CarState> cars;
     // Parser parser;
     // Workshop workshop; para entre carreras mejorar el auto
     // GameMap game_map; quiza que guarde todos los mapas y circuitos posibles (lo recibe por parametro)
@@ -26,8 +30,8 @@ private:
 
 
     void process_commands();
-    void update_game();
-    void broadcast();
+    void update_positions();
+    void broadcast(std::map<int, CarState>& _cars) const;
 };
 
 
