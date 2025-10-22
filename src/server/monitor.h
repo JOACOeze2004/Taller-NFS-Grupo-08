@@ -1,12 +1,12 @@
 #ifndef TALLER_TP_MONITOR_H
 #define TALLER_TP_MONITOR_H
-
+#pragma once
 #include <unordered_map>
 #include <memory>
-#include "gameloop.h"
 #include "client_handler.h"
 #include "../common/command.h"
 
+class Gameloop;
 
 class Monitor {
 private:
@@ -20,7 +20,7 @@ private:
     std::string generate_game_id();
 
 public:
-    Monitor() = default;
+    Monitor();
     void add_client(std::unique_ptr<ClientHandler> client);
     void broadcast();
     void clear_clients();

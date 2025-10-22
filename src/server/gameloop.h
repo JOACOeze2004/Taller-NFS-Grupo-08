@@ -1,16 +1,20 @@
 #ifndef TALLER_TP_GAMELOOP_H
 #define TALLER_TP_GAMELOOP_H
 
-#include "monitor.h"
+#pragma once
 #include "../common/queue.h"
+#include "../common/thread.h"
+
 #include "client_command.h"
+
+class Monitor;
 
 
 class Gameloop: public Thread {
 
 public:
     explicit Gameloop(Queue<Command>& _cmd_queue, Monitor& _monitor);
-    void run();
+    void run() override;
 
 private:
     Monitor& monitor;

@@ -1,4 +1,5 @@
 #include "monitor.h"
+#include "gameloop.h"
 
 Monitor::Monitor() { game_id = 0; }
 
@@ -67,7 +68,7 @@ void Monitor::remove_player(const std::string& username){
     players.erase(username);
 }
 
-void Monitor::remove_player(const std::string& game_id){
+void Monitor::remove_game(const std::string& game_id){
     std::unique_lock<std::mutex> lock(mutex);
     current_games.erase(game_id);
     for (auto i = players.begin(); i != players.end();) {
