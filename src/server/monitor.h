@@ -21,6 +21,7 @@ private:
     std::map<int, std::unique_ptr<ClientHandler>> clients; //Este en el futuro, vuela.
 
     std::string generate_game_id();
+    void clear_remaining_clients(const std::string& _game_id);
 
 public:
     Monitor();

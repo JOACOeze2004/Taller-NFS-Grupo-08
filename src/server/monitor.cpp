@@ -82,16 +82,25 @@ void Monitor::remove_player(const std::string& username){
 
 void Monitor::remove_game(const std::string& _game_id){
     std::unique_lock<std::mutex> lock(mutex);
-    current_games.erase(_game_id);
+    auto game_to_remove = current_games.find(_game_id);
+    if (game_to_remove != current_games.end()) {
+        auto game_loop = game_to_remove->second;
+        game_loop->stop();
+        game_loop->join();
+        current_games.erase(_game_id);
+    }  
+    clear_remaining_clients(_game_id);  
+}
+
+void Monitor::clear_remaining_clients(const std::string& _game_id){
     for (auto i = players.begin(); i != players.end();) {
         if (i->second == _game_id){
             i = players.erase(i);
         }else{
             i++;
         }
-    }    
+    }  
 }
-
 
 void Monitor::kill_games() {
     std::unique_lock<std::mutex> lock(mutex);
