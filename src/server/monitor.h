@@ -1,20 +1,39 @@
 #ifndef TALLER_TP_MONITOR_H
 #define TALLER_TP_MONITOR_H
 
+#include <unordered_map>
+#include <memory>
+#include "gameloop.h"
 #include "client_handler.h"
-#include "monitor.h"
+#include "../common/command.h"
 
 
 class Monitor {
 private:
     std::mutex mutex;
-    std::vector<std::unique_ptr<ClientHandler>> clients;
+    int game_id;    
+    std::unordered_map<std::string, std::string> players; //{Nombre de usuario, id partida}
+    std::unordered_map<std::string, std::shared_ptr<Gameloop>> current_games; // {id partida, ptr a esa partida}
+
+    std::vector<std::unique_ptr<ClientHandler>> clients; //Este en el futuro, vuela.
+
+    std::string generate_game_id();
 
 public:
+    Monitor() = default;
     void add_client(std::unique_ptr<ClientHandler> client);
     void broadcast();
     void clear_clients();
     void reap();
+
+    std::shared_ptr<Gameloop> create_game(Queue<Command>& cmd_queue);
+    std::shared_ptr<Gameloop> join_game(const std::string& user_name, const std::string& game_id);
+    Gameloop& get_game(const std::string& game_id);
+    void remove_player(const std::string& username);
+    void remove_game(const std::string& user_id);
+
+    void kill_games();
+
 };
 
 

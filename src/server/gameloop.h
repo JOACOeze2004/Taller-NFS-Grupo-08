@@ -6,7 +6,7 @@
 #include "client_command.h"
 
 
-class Gameloop {
+class Gameloop: public Thread {
 
 public:
     explicit Gameloop(Queue<Command>& _cmd_queue, Monitor& _monitor);
