@@ -13,30 +13,29 @@ void Monitor::add_client(const int client_id, std::unique_ptr<ClientHandler> cli
 }
 
 void Monitor::reap() {
-    for (size_t i = 1; i < clients.size();) {
-        if (!clients.contains(i)) {
-            continue;
-        }
-        auto& client = clients[i];
+    std::unique_lock lock(mutex);
+    std::vector<int> to_remove;
+
+    for ( auto& [id, client] : clients) {
         if (!client->is_alive()) {
             client->kill();
             client->join();
-            clients.erase(i);
-        }else{
-            i++;
+            to_remove.push_back(id);
         }
+    }
+
+    for (auto id : to_remove) {
+        clients.erase(id);
     }
 }
 
 void Monitor::clear_clients() {
     std::unique_lock<std::mutex> lock(mutex);
-    for (size_t i = 1; i < clients.size(); i++) {
-        if (!clients.contains(i)) {
-            continue;
+    for ( auto& [id, client] : clients) {
+        if (!client->is_alive()) {
+            client->kill();
+            client->join();
         }
-        const auto& client = clients[i];
-        client->kill();
-        client->join();
     }
     clients.clear();
 }
@@ -66,7 +65,7 @@ std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const 
         return nullptr;
     }
     //quizas handelear si el game esta muerto, tirar una excepcion de q la palmo la partida.
-    players[username] = game_id;
+    players[username] = _game_id;
     return  game->second;
 }
 

@@ -16,7 +16,7 @@ void Gameloop::run() {
 }
 
 void Gameloop::process_commands() {
-    ClientCommand cmd;
+    ClientCommand cmd{};
     while (cmd_queue.try_pop(cmd)) {
         CarState& car = cars[cmd.id];
 
