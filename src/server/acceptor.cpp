@@ -18,7 +18,7 @@ void ClientAcceptor::run() {
             std::cout << "[Acceptor] Handler thread is running" << std::endl;
             
             client->start();
-            monitor.add_client(std::move(client));
+            monitor.add_client(next_id, std::move(client));
             next_id++;
         } catch (const std::exception& e) {
             break;
