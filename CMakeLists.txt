@@ -157,7 +157,8 @@ if(TALLER_SERVER)
             src/server/sender.cpp
             src/server/client_handler.cpp
             src/server/client_handler.h
-            src/server/client_command.h)
+            src/server/client_command.h
+            src/server/car_state.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)

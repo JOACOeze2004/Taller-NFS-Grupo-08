@@ -1,10 +1,13 @@
 #ifndef TALLER_TP_MONITOR_H
 #define TALLER_TP_MONITOR_H
 #pragma once
-#include <unordered_map>
+#include <map>
 #include <memory>
+#include <unordered_map>
+
+#include "client_command.h"
+
 #include "client_handler.h"
-#include "../common/command.h"
 
 class Gameloop;
 
@@ -15,18 +18,18 @@ private:
     std::unordered_map<std::string, std::string> players; //{Nombre de usuario, id partida}
     std::unordered_map<std::string, std::shared_ptr<Gameloop>> current_games; // {id partida, ptr a esa partida}
 
-    std::vector<std::unique_ptr<ClientHandler>> clients; //Este en el futuro, vuela.
+    std::map<int, std::unique_ptr<ClientHandler>> clients; //Este en el futuro, vuela.
 
     std::string generate_game_id();
 
 public:
     Monitor();
-    void add_client(std::unique_ptr<ClientHandler> client);
-    void broadcast();
+    void add_client(const int client_id, std::unique_ptr<ClientHandler> client);
+    void broadcast(std::map<int, CarState>& cars);
     void clear_clients();
     void reap();
 
-    std::shared_ptr<Gameloop> create_game(Queue<Command>& cmd_queue);
+    std::shared_ptr<Gameloop> create_game(Queue<ClientCommand>& cmd_queue);
     std::shared_ptr<Gameloop> join_game(const std::string& user_name, const std::string& game_id);
     Gameloop& get_game(const std::string& game_id);
     void remove_player(const std::string& username);

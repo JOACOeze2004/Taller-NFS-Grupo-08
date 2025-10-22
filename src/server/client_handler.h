@@ -11,6 +11,7 @@
 #include "../common/socket.h"
 #include "../common/thread.h"
 
+#include "car_state.h"
 #include "receiver.h"
 #include "sender.h"
 #include "server_protocol.h"
@@ -21,7 +22,7 @@ private:
     ServerProtocol protocol;
 
     Queue<std::string>& command_queue;
-    Queue<std::string> client_queue;
+    Queue<CarState> client_queue;
 
     ClientReceiver receiver;
     ClientSender sender;
@@ -30,6 +31,7 @@ private:
 public:
     explicit ClientHandler(Socket&& peer, Queue<std::string>& commands, int _id);
     void run() override;
+    void send_state(CarState& state);
     void kill();
     void kill_threads();
     bool is_dead() const;
