@@ -7,18 +7,21 @@ std::string Monitor::generate_game_id(){
     return std::to_string(game_id++);
 }
 
-void Monitor::add_client(std::unique_ptr<ClientHandler> client) {
+void Monitor::add_client(const int client_id, std::unique_ptr<ClientHandler> client) {
     std::unique_lock<std::mutex> lock(mutex);
-    clients.push_back(std::move(client));
+    clients[client_id] = std::move(client);
 }
 
 void Monitor::reap() {
-    for (size_t i = 0; i < clients.size();) {
+    for (size_t i = 1; i < clients.size();) {
+        if (!clients.contains(i)) {
+            continue;
+        }
         auto& client = clients[i];
         if (!client->is_alive()) {
             client->kill();
             client->join();
-            clients.erase(clients.begin() + i);
+            clients.erase(i);
         }else{
             i++;
         }
@@ -27,19 +30,28 @@ void Monitor::reap() {
 
 void Monitor::clear_clients() {
     std::unique_lock<std::mutex> lock(mutex);
-    for (auto& client : clients) {
+    for (size_t i = 1; i < clients.size(); i++) {
+        if (!clients.contains(i)) {
+            continue;
+        }
+        const auto& client = clients[i];
         client->kill();
         client->join();
     }
     clients.clear();
 }
 
-void Monitor::broadcast() {
+void Monitor::broadcast(std::map<int, CarState>& cars) {
     std::unique_lock<std::mutex> lock(mutex);
-    return;
+    for (auto& [id, car] : cars) {
+        if (!clients.contains(id)) {
+            continue;
+        }
+        clients[id]->send_state(car);
+    }
 }
 
-std::shared_ptr<Gameloop> Monitor::create_game(Queue<Command>& cmd_queue) {
+std::shared_ptr<Gameloop> Monitor::create_game(Queue<ClientCommand>& cmd_queue) {
     std::unique_lock<std::mutex> lock(mutex);
     std::string id = generate_game_id();
     auto game_loop = std::make_shared<Gameloop>(cmd_queue,*this);
@@ -47,9 +59,9 @@ std::shared_ptr<Gameloop> Monitor::create_game(Queue<Command>& cmd_queue) {
     return game_loop;
 }
 
-std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const std::string& game_id) {
+std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const std::string& _game_id) {
     std::unique_lock<std::mutex> lock(mutex);
-    auto game = current_games.find(game_id);
+    auto game = current_games.find(_game_id);
     if (game == current_games.end()){
         return nullptr;
     }
@@ -58,9 +70,9 @@ std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const 
     return  game->second;
 }
 
-Gameloop& Monitor::get_game(const std::string& game_id) {
+Gameloop& Monitor::get_game(const std::string& _game_id) {
     std::unique_lock<std::mutex> lock(mutex);
-    return *(current_games.at(game_id));
+    return *(current_games.at(_game_id));
 }
 
 void Monitor::remove_player(const std::string& username){
@@ -68,11 +80,11 @@ void Monitor::remove_player(const std::string& username){
     players.erase(username);
 }
 
-void Monitor::remove_game(const std::string& game_id){
+void Monitor::remove_game(const std::string& _game_id){
     std::unique_lock<std::mutex> lock(mutex);
-    current_games.erase(game_id);
+    current_games.erase(_game_id);
     for (auto i = players.begin(); i != players.end();) {
-        if (i->second == game_id){
+        if (i->second == _game_id){
             i = players.erase(i);
         }else{
             i++;

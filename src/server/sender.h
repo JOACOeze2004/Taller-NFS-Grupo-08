@@ -11,14 +11,15 @@
 #include "../common/socket.h"
 #include "../common/thread.h"
 
+#include "car_state.h"
 #include "server_protocol.h"
 
 class ClientSender: public Thread {
     ServerProtocol& protocol;
-    Queue<std::string>& client_queue;
+    Queue<CarState>& client_queue;
 
 public:
-    ClientSender(ServerProtocol& protocol, Queue<std::string>& queue);
+    ClientSender(ServerProtocol& protocol, Queue<CarState>& queue);
     void run() override;
 
     ~ClientSender();

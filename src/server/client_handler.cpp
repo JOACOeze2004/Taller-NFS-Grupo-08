@@ -6,13 +6,17 @@ ClientHandler::ClientHandler(Socket&& peer, Queue<std::string>& commands, int _i
         command_queue(commands),
         client_queue(50),
         receiver(protocol, command_queue),
-        sender(protocol, command_queue),
+        sender(protocol, client_queue),
         id(_id) {}  //Cambiar a clientQueue cuando tengamos el broadcast.
 
 void ClientHandler::run() {
     std::cout << "[HANDLER] receiver and sender threads have started" << std::endl;
     receiver.start();
     sender.start();
+}
+
+void ClientHandler::send_state(CarState& state) {
+    client_queue.push(state);
 }
 
 void ClientHandler::kill() {
