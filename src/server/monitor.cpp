@@ -7,7 +7,7 @@ std::string Monitor::generate_game_id(){
     return std::to_string(game_id++);
 }
 
-cavoid Monitor::add_client(const int client_id, std::unique_ptr<ClientHandler> client) {
+void Monitor::add_client(const int client_id, std::unique_ptr<ClientHandler> client) {
     std::unique_lock<std::mutex> lock(mutex);
     clients[client_id] = std::move(client);
 }
