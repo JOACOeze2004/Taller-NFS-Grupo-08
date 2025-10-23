@@ -1,6 +1,6 @@
 #include "receiver.h"
 
-ClientReceiver::ClientReceiver(ServerProtocol& prot, Queue<std::string>& queue):
+ClientReceiver::ClientReceiver(ServerProtocol& prot, Queue<ClientCommand>& queue):
         protocol(prot), command_queue(queue) {}
 
 void ClientReceiver::run() {

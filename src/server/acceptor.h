@@ -9,11 +9,14 @@
 
 #include "client_handler.h"
 #include "monitor.h"
+#include "client_command.h"
+#include "gameloop.h"
+
 
 class ClientAcceptor: public Thread {
     Socket acceptor;
     std::vector<ClientHandler*> clients;
-    Queue<std::string> command_queue;
+    Queue<ClientCommand> command_queue;
     Monitor& monitor;
     int next_id;
 

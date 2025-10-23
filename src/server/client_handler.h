@@ -15,13 +15,15 @@
 #include "receiver.h"
 #include "sender.h"
 #include "server_protocol.h"
+#include "client_command.h"
+
 
 class ClientHandler: public Thread {
 private:
     Socket peer; 
     ServerProtocol protocol;
 
-    Queue<std::string>& command_queue;
+    Queue<ClientCommand>& command_queue;
     Queue<CarState> client_queue;
 
     ClientReceiver receiver;
@@ -29,7 +31,7 @@ private:
     int id;
 
 public:
-    explicit ClientHandler(Socket&& peer, Queue<std::string>& commands, int _id);
+    explicit ClientHandler(Socket&& peer, Queue<ClientCommand>& commands, int _id);
     void run() override;
     void send_state(CarState& state);
     void kill();

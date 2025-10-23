@@ -15,7 +15,6 @@ void Monitor::add_client(const int client_id, std::unique_ptr<ClientHandler> cli
 void Monitor::reap() {
     std::unique_lock lock(mutex);
     std::vector<int> to_remove;
-
     for ( auto& [id, client] : clients) {
         if (!client->is_alive()) {
             client->kill();

@@ -2,6 +2,8 @@
 #define TALLER_TP_SERVER_PROTOCOL_H
 
 #include "../common/protocol.h"
+#include "car_state.h"
+
 
 class ServerProtocol {
 private:

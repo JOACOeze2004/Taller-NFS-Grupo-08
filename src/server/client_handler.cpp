@@ -1,6 +1,6 @@
 #include "client_handler.h"
 
-ClientHandler::ClientHandler(Socket&& peer, Queue<std::string>& commands, int _id):
+ClientHandler::ClientHandler(Socket&& peer, Queue<ClientCommand>& commands, int _id):
         peer(std::move(peer)),
         protocol(this->peer),
         command_queue(commands),
