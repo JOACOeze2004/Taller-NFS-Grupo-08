@@ -2,6 +2,8 @@
 #define TALLER_TP_SERVER_PROTOCOL_H
 
 #include "../common/protocol.h"
+#include "src/common/car_DTO.h"
+
 #include "car_state.h"
 
 
@@ -15,8 +17,7 @@ public:
     
     uint8_t receive_standar_command() const; //a prioiri para el movimiento
     std::string receive_message() const;
-    CarState receive_car_state();
-    void send_car_state(CarState car);
+    void send_car_state(CarDTO& car);
 
     void close();
 

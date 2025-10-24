@@ -48,14 +48,14 @@ void Monitor::clear_clients() {
     clients.clear();
 }
 
-void Monitor::broadcast(std::map<int, CarState>& cars) {
+void Monitor::broadcast(std::map<int, car>& cars) {
     std::unique_lock<std::mutex> lock(mutex);
     for (auto& [id, car] : cars) {
         auto i = clients.find(id);
         if (i == clients.end()) {
             continue;
         }
-        i->second->send_state(car);
+        i->second->send_state(car.get_state());
     }
 }
 

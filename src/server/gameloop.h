@@ -2,13 +2,14 @@
 #define TALLER_TP_GAMELOOP_H
 
 #pragma once
+#include <map>
+
 #include "../common/queue.h"
 #include "../common/thread.h"
 
-#include "car_state.h"
+#include "car.h"
 #include "client_command.h"
 #include "monitor.h"
-#include <map>
 
 class Monitor;
 
@@ -23,7 +24,7 @@ public:
 private:
     Queue<ClientCommand>& cmd_queue;
     Monitor& monitor;
-    std::map<int, CarState> cars;
+    std::map<int, car> cars;
     // Parser parser;
     // Workshop workshop; para entre carreras mejorar el auto
     // GameMap game_map; quiza que guarde todos los mapas y circuitos posibles (lo recibe por parametro)
@@ -32,7 +33,7 @@ private:
 
     void process_commands();
     void update_positions();
-    void broadcast(std::map<int, CarState>& _cars) const;
+    void broadcast(std::map<int, car>& _cars) const;
 };
 
 

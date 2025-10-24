@@ -34,7 +34,7 @@ void Client::run() {
 
         protocol.send_byte(cmd);
 
-        CarState state = protocol.receive_car_state();
+        CarDTO state = protocol.receive_car_state();
         std::cout << "[CLIENT] Car x:" << state.x 
                   << " y:" << state.y 
                   << " vel:" << state.velocity 

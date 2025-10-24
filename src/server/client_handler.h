@@ -6,7 +6,7 @@
 
 #include <arpa/inet.h>
 
-#include "../common/constants.h"
+#include "../common/car_DTO.h"
 #include "../common/queue.h"
 #include "../common/socket.h"
 #include "../common/thread.h"
@@ -24,7 +24,7 @@ private:
     ServerProtocol protocol;
 
     Queue<ClientCommand>& command_queue;
-    Queue<CarState> client_queue;
+    Queue<CarDTO> client_queue;
     
     int id;
     ClientReceiver receiver;
@@ -33,7 +33,7 @@ private:
 public:
     explicit ClientHandler(Socket&& peer, Queue<ClientCommand>& commands, int _id);
     void run() override;
-    void send_state(CarState& state);
+    void send_state(CarDTO state);
     void kill();
     void kill_threads();
     bool is_dead() const;

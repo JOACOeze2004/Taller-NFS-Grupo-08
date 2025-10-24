@@ -69,15 +69,15 @@ std::string Protocol::receive_string(size_t size) const{
 }
 
 
-void Protocol::send_car_state(const CarState& state) const {
+void Protocol::send_car_state(const CarDTO& state) const {
     socket.sendall(&state.x, sizeof(state.x));
     socket.sendall(&state.y, sizeof(state.y));
     socket.sendall(&state.velocity, sizeof(state.velocity));
     socket.sendall(&state.angle, sizeof(state.angle));
 }
 
-CarState Protocol::receive_car_state() const {
-    CarState state;
+CarDTO Protocol::receive_car_state() const {
+    CarDTO state;
     socket.recvall(&state.x, sizeof(state.x));
     socket.recvall(&state.y, sizeof(state.y));
     socket.recvall(&state.velocity, sizeof(state.velocity));

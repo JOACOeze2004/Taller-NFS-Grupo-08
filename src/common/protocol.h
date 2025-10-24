@@ -1,15 +1,18 @@
 #ifndef TALLER_TP_PROTOCOL_H
 #define TALLER_TP_PROTOCOL_H
 
-#include <string>
-#include "socket.h"
-#include "constants.h"
-#include <iostream>
 #include <cstdint>
-#include <arpa/inet.h>
+#include <iostream>
+#include <string>
 #include <vector>
 
+#include <arpa/inet.h>
+
 #include "../server/car_state.h"
+
+#include "car_DTO.h"
+#include "constants.h"
+#include "socket.h"
 
 class Protocol {
 public:
@@ -29,8 +32,8 @@ public:
     void send_string(const std::string& str) const;
     std::string receive_string(size_t size) const;
 
-    void send_car_state(const CarState& state) const;
-    CarState receive_car_state() const;
+    void send_car_state(const CarDTO& state) const;
+    CarDTO receive_car_state() const;
 
     void close_socket();
 private:

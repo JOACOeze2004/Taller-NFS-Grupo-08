@@ -15,7 +15,7 @@ void ClientHandler::run() {
     sender.start();
 }
 
-void ClientHandler::send_state(CarState& state) {
+void ClientHandler::send_state(CarDTO state) {
     client_queue.push(state);
 }
 

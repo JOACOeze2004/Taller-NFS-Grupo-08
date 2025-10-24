@@ -30,7 +30,8 @@ add_library(taller_common STATIC
         src/common/protocol.h
         src/common/protocol.cpp
         src/common/protocol.h
-        src/common/command.h)
+        src/common/command.h
+        src/common/car_DTO.h)
 
 # add the source files that make the lib
 # HEY!! TODO XXX: add more subfolders here
@@ -158,7 +159,9 @@ if(TALLER_SERVER)
             src/server/client_handler.cpp
             src/server/client_handler.h
             src/server/client_command.h
-            src/server/car_state.h)
+            src/server/car_state.h
+            src/server/car.cpp
+            src/server/car.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)

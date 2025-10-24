@@ -11,7 +11,7 @@ std::string ClientProtocol::receive_message() const {
     return protocol.receive_message();
 }
 
-CarState ClientProtocol::receive_car_state() const {
+CarDTO ClientProtocol::receive_car_state() const {
     return protocol.receive_car_state();
 }
 

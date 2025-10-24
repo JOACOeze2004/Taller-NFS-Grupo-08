@@ -5,8 +5,8 @@
 #include <memory>
 #include <unordered_map>
 
+#include "car.h"
 #include "client_command.h"
-
 #include "client_handler.h"
 
 class Gameloop;
@@ -26,7 +26,7 @@ private:
 public:
     Monitor();
     void add_client(const int client_id, std::unique_ptr<ClientHandler> client);
-    void broadcast(std::map<int, CarState>& cars);
+    void broadcast(std::map<int, car>& cars);
     void clear_clients();
     void reap();
 

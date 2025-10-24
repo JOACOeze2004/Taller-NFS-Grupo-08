@@ -1,6 +1,6 @@
 #include "gameloop.h"
 
-#include <cmath>
+
 #include "src/common/constants.h"
 
 Gameloop::Gameloop(Queue<ClientCommand>& _cmd_queue, Monitor& _monitor):
@@ -18,21 +18,21 @@ void Gameloop::run() {
 void Gameloop::process_commands() {
     ClientCommand cmd{};
     while (cmd_queue.try_pop(cmd)) {
-        CarState& car = cars[cmd.id];
+        car& car = cars[cmd.id];
 
-        std::cout << "[GL] cmd: " << int(cmd.cmd.cmd) << " vel: " << car.velocity << " ang: " << car.angle << std::endl;
+        std::cout << "[GL] cmd: " << int(cmd.cmd.cmd) << " vel: " << car.get_velocity() << " ang: " << car.get_angle() << std::endl;
         switch (cmd.cmd.cmd) {
             case SEND_ACCELERATE:
-                car.velocity += 0.5;
+                car.accelerate();
                 break;
             case SEND_ROTATE_LEFT:
-                car.angle -= 0.1;
+                car.turn_left();
                 break;
             case SEND_ROTATE_RIGHT:
-                car.angle += 0.1;
+                car.turn_right();
                 break;
             case SEND_BRAKE:
-                car.velocity -= 0.3;
+                car.brake();
                 break;
             default:
                 break;
@@ -41,21 +41,16 @@ void Gameloop::process_commands() {
 }
 
 void Gameloop::add_car(const int client_id) {
-    CarState car{};
-    car.x = 0;
-    car.y = 0;
-    car.angle = 0;
-    car.velocity = 0;
+    car car;
     cars[client_id] = car;
 }
 
 void Gameloop::update_positions() {
     for (auto& [id, car] : cars) {
-        car.x += car.velocity * cos(car.angle);
-        car.y += car.velocity * sin(car.angle);
+        car.update_position();
     }
 }
 
-void Gameloop::broadcast(std::map<int, CarState>& _cars) const {
+void Gameloop::broadcast(std::map<int, car>& _cars) const {
     monitor.broadcast(_cars);
 }
