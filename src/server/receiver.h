@@ -18,9 +18,10 @@
 class ClientReceiver: public Thread {
     ServerProtocol& protocol;
     Queue<ClientCommand>& command_queue;
+    int reciver_id;
 
 public:
-    ClientReceiver(ServerProtocol& prot, Queue<ClientCommand>& queue);
+    ClientReceiver(ServerProtocol& prot, Queue<ClientCommand>& queue, int id);
     void run() override;
 
     ~ClientReceiver();

@@ -19,6 +19,7 @@ public:
     explicit Gameloop(Queue<ClientCommand>& _cmd_queue, Monitor& _monitor);
     void run() override;
 
+    void add_car(const int client_id);
 private:
     Queue<ClientCommand>& cmd_queue;
     Monitor& monitor;

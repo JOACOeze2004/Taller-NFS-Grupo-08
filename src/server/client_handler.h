@@ -25,10 +25,10 @@ private:
 
     Queue<ClientCommand>& command_queue;
     Queue<CarState> client_queue;
-
+    
+    int id;
     ClientReceiver receiver;
     ClientSender sender;
-    int id;
 
 public:
     explicit ClientHandler(Socket&& peer, Queue<ClientCommand>& commands, int _id);

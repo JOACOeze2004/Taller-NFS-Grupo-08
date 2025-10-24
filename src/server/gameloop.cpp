@@ -20,6 +20,7 @@ void Gameloop::process_commands() {
     while (cmd_queue.try_pop(cmd)) {
         CarState& car = cars[cmd.id];
 
+        std::cout << "[GL] cmd: " << int(cmd.cmd.cmd) << " vel: " << car.velocity << " ang: " << car.angle << std::endl;
         switch (cmd.cmd.cmd) {
             case SEND_ACCELERATE:
                 car.velocity += 0.5;
@@ -37,6 +38,15 @@ void Gameloop::process_commands() {
                 break;
         }
     }
+}
+
+void Gameloop::add_car(const int client_id) {
+    CarState car{};
+    car.x = 0;
+    car.y = 0;
+    car.angle = 0;
+    car.velocity = 0;
+    cars[client_id] = car;
 }
 
 void Gameloop::update_positions() {
