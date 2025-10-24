@@ -39,10 +39,8 @@ void Monitor::reap() {
 void Monitor::clear_clients() {
     std::unique_lock<std::mutex> lock(mutex);
     for ( auto& [id, client] : clients) {
-        if (client->is_dead()) {
-            client->kill();
-            client->join();
-        }
+        client->kill();
+        client->join();
     }
     clients.clear();
 }
