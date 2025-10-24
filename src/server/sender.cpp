@@ -7,8 +7,8 @@ void ClientSender::run() {
     std::cout << "[Sender] sender loop " << std::endl;
     while (should_keep_running()) {
         try {
-            //CarState carState = client_queue.pop();
-            //protocol.send_message(carState);
+            CarState carState = client_queue.pop();
+            protocol.send_car_state(carState);
         } catch (const ClosedQueue&) {
             break;
         }
