@@ -10,13 +10,12 @@ ClientHandler::ClientHandler(Socket&& peer, Queue<ClientCommand>& commands, int 
         sender(protocol, client_queue) {} 
 
 void ClientHandler::run() {
-    std::cout << "[HANDLER] receiver and sender threads have started" << std::endl;
     receiver.start();
     sender.start();
 }
 
 void ClientHandler::send_state(CarDTO state) {
-    client_queue.push(state);
+    client_queue.try_push(state);
 }
 
 void ClientHandler::kill() {

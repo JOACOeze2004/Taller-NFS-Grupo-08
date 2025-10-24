@@ -18,14 +18,13 @@ void Monitor::add_client(const int client_id, std::unique_ptr<ClientHandler> cli
     if (i != current_games.end()){
         i->second->add_car(client_id);
     }
-
 }
 
 void Monitor::reap() {
     std::unique_lock lock(mutex);
     std::vector<int> to_remove;
     for ( auto& [id, client] : clients) {
-        if (!client->is_alive()) {
+        if (client->is_dead()) {
             client->kill();
             client->join();
             to_remove.push_back(id);
@@ -40,7 +39,7 @@ void Monitor::reap() {
 void Monitor::clear_clients() {
     std::unique_lock<std::mutex> lock(mutex);
     for ( auto& [id, client] : clients) {
-        if (!client->is_alive()) {
+        if (client->is_dead()) {
             client->kill();
             client->join();
         }

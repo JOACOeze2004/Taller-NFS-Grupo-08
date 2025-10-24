@@ -4,7 +4,6 @@ ClientReceiver::ClientReceiver(ServerProtocol& prot, Queue<ClientCommand>& queue
         protocol(prot), command_queue(queue), reciver_id(id) {}
 
 void ClientReceiver::run() {
-    std::cout << "[Receiver] reciver loop " << std::endl;
     while (should_keep_running()) {
         try {
             uint8_t request = protocol.receive_standar_command();

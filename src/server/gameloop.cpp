@@ -19,7 +19,6 @@ void Gameloop::process_commands() {
     ClientCommand cmd{};
     while (cmd_queue.try_pop(cmd)) {
         car& car = cars[cmd.id];
-
         std::cout << "[GL] cmd: " << int(cmd.cmd.cmd) << " vel: " << car.get_velocity() << " ang: " << car.get_angle() << std::endl;
         switch (cmd.cmd.cmd) {
             case SEND_ACCELERATE:
