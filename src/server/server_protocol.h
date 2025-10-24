@@ -11,7 +11,13 @@ private:
 public:
     explicit ServerProtocol(Socket& socket);
     void send_message(const std::string& message) const;
+
+    
+    uint8_t receive_standar_command() const; //a prioiri para el movimiento
     std::string receive_message() const;
+    CarState receive_car_state();
+    void send_car_state(CarState car);
+
     void close();
 
 };

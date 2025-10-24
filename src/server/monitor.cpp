@@ -7,9 +7,18 @@ std::string Monitor::generate_game_id(){
     return std::to_string(game_id++);
 }
 
+std::string Monitor::get_last_created_game_id() const {
+    return std::to_string(game_id - 1);
+}
+
 void Monitor::add_client(const int client_id, std::unique_ptr<ClientHandler> client) {
     std::unique_lock<std::mutex> lock(mutex);
     clients[client_id] = std::move(client);
+    auto i = current_games.find(std::to_string(game_id));
+    if (i != current_games.end()){
+        i->second->add_car(client_id);
+    }
+
 }
 
 void Monitor::reap() {
@@ -42,10 +51,11 @@ void Monitor::clear_clients() {
 void Monitor::broadcast(std::map<int, CarState>& cars) {
     std::unique_lock<std::mutex> lock(mutex);
     for (auto& [id, car] : cars) {
-        if (!clients.contains(id)) {
+        auto i = clients.find(id);
+        if (i == clients.end()) {
             continue;
         }
-        clients[id]->send_state(car);
+        i->second->send_state(car);
     }
 }
 

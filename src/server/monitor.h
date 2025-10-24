@@ -35,6 +35,7 @@ public:
     Gameloop& get_game(const std::string& game_id);
     void remove_player(const std::string& username);
     void remove_game(const std::string& user_id);
+    std::string get_last_created_game_id() const;
 
     void kill_games();
 
