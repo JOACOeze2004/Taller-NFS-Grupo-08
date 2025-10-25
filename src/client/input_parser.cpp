@@ -1,25 +1,19 @@
 #include "input_parser.h"
+#include "../common/constants.h"
 
-#include <unordered_map>
-/*
-std::unordered_map<MsgType, std::string> command_names = {
-    {SEND_CONNECT, "CONNECT"},
-    {SEND_SELECT_CAR, "SELECT_CAR"},
-    {SEND_READY_TO_PLAY, "READY_TO_PLAY"},
-    {SEND_ACCELERATE, "ACCELERATE"},
-    {SEND_ROTATE_RIGHT, "ROTATE_RIGHT"},
-    {SEND_ROTATE_LEFT, "ROTATE_LEFT"},
-    {SEND_BRAKE, "BRAKE"},
-    {SEND_USE_NITRO, "USE_NITRO"},
-    {SEND_LIFE_UPGRADE, "LIFE_UPGRADE"},
-    {SEND_VELOCITY_UPGRADE, "VELOCITY_UPGRADE"},
-    {SEND_ACCELERATION_UPGRADE, "ACCELERATION_UPGRADE"},
-    {SEND_HANDLING_UPGRADE, "HANDLING_UPGRADE"},
-    {SEND_CONTROL_UPGRADE, "CONTROL_UPGRADE"},
-    {SEND_WIN_RACE_CHEAT, "WIN_RACE_CHEAT"},
-    {SEND_RESTORE_LIFE_CHEAT, "RESTORE_LIFE_CHEAT"},
-    {SEND_INFINITE_LIFE_CHEAT, "INFINITE_LIFE_CHEAT"},
-    {SEND_LOSE_RACE_CHEAT, "LOSE_RACE_CHEAT"},
-    {SEND_INFINITE_NITRO_CHEAT, "INFINITE_NITRO_CHEAT"}
-};
-*/
+InputParser::InputParser(ClientSender& _sender, Queue<Command>& _command_queue)
+    : sender(_sender), command_queue(_command_queue) {}
+
+void InputParser::parse(std::string& input) {
+    //no se sabe si se usa
+    input = input; //para q no se queje el compilador
+}
+
+void InputParser::parse_command(int command) {
+    // Crear el comando y pushearlo a la cola // ver como manejar esto seguro cambia el comando
+    Command cmd;
+    cmd.cmd = static_cast<uint8_t>(command);
+    
+    // Push a la cola del sender
+    command_queue.push(cmd);
+}
