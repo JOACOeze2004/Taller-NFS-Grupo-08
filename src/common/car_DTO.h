@@ -4,8 +4,8 @@
 struct CarDTO {
     float x;
     float y;
-    float angle;
     float velocity;
+    float angle;
 };
 
 #endif  // TALLER_TP_CAR_DTO_H
