@@ -6,7 +6,7 @@
 ClientHandler::ClientHandler(InputParser& _parser): parser(_parser) {}
 
 void ClientHandler::handle_event() {
-    // TODO: Implementar si es necesario
+    // Implementar si es necesario
 }
 
 // KeyboardHandler implementation

@@ -123,6 +123,8 @@ if(TALLER_CLIENT)
             src/client/client_protocol.h
             src/client/input_parser.cpp
             src/client/input_parser.h
+            src/client/client_car.cpp
+            src/client/client_car.h
             src/client/login/login_window.cpp
             src/client/login/login_window.h
     )
@@ -140,7 +142,7 @@ if(TALLER_CLIENT)
     target_include_directories(taller_client PRIVATE ${libSDL2pp_SOURCE_DIR})
 
     # Link the taller_common lib target
-    target_link_libraries(taller_client taller_common SDL2pp::SDL2pp Qt5::Widgets)
+    target_link_libraries(taller_client taller_common SDL2_image::SDL2_image SDL2pp::SDL2pp Qt5::Widgets)
 endif()
 
 if(TALLER_SERVER)
