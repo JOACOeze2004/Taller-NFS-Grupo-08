@@ -2,6 +2,9 @@
 #define TALLER_TP_CLIENT_HANDLER_H
 
 #include "input_parser.h"
+#include <SDL2/SDL.h>
+#include <unordered_map>
+#include <functional>
 
 class ClientHandler {
     InputParser& parser;
@@ -11,5 +14,16 @@ public:
     void handle_event();
 };
 
+class KeyboardHandler {
+public:
+    explicit KeyboardHandler(InputParser& _parser);
+    void process_event(const SDL_Event& event);
+
+private:
+    void initialize_key_map();
+    
+    InputParser& parser;
+    std::unordered_map<SDL_Keycode, std::function<void()>> key_map;
+};
 
 #endif  // TALLER_TP_CLIENT_HANDLER_H
