@@ -102,6 +102,8 @@ if(TALLER_CLIENT OR TALLER_EDITOR)
     )
 
     FetchContent_MakeAvailable(SDL2 SDL2_image SDL2_mixer SDL2_ttf libSDL2pp)
+    find_package(Qt5 REQUIRED COMPONENTS Widgets)
+    set(CMAKE_AUTOMOC ON)
 endif()
 
 # Program section
@@ -120,7 +122,10 @@ if(TALLER_CLIENT)
             src/client/client_protocol.cpp
             src/client/client_protocol.h
             src/client/input_parser.cpp
-            src/client/input_parser.h)
+            src/client/input_parser.h
+            src/client/login/login_window.cpp
+            src/client/login/login_window.h
+    )
 
     # Make them depend on taller_common lib
     add_dependencies(taller_client taller_common SDL2pp::SDL2pp)
@@ -135,7 +140,7 @@ if(TALLER_CLIENT)
     target_include_directories(taller_client PRIVATE ${libSDL2pp_SOURCE_DIR})
 
     # Link the taller_common lib target
-    target_link_libraries(taller_client taller_common SDL2pp::SDL2pp)
+    target_link_libraries(taller_client taller_common SDL2pp::SDL2pp Qt5::Widgets)
 endif()
 
 if(TALLER_SERVER)
