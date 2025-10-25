@@ -29,6 +29,11 @@ void car::turn_left() {
 void car::update_position() {
     state.x += state.velocity * cos(state.angle);
     state.y += state.velocity * sin(state.angle);
+
+    state.velocity = state.velocity * 0.95;
+    if (std::abs(state.velocity) < 0.1) {
+        state.velocity = 0;
+    }
 }
 
 CarDTO car::get_state() const {
