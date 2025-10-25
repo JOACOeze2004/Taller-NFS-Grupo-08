@@ -9,6 +9,7 @@ void ClientSender::run() {
             CarDTO carState = client_queue.pop();
             protocol.send_car_state(carState);
         } catch (const ClosedQueue&) {
+            this->stop();
             break;
         }
     }
