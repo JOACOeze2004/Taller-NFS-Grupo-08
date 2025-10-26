@@ -72,7 +72,7 @@ void Client::run() {
     }
     // Cargar imagen de fondo
 
-    SDL_Surface* bg_surface = IMG_Load("assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - San Andreas.png"); 
+    SDL_Surface* bg_surface = IMG_Load("../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - San Andreas.png"); 
     if (!bg_surface) {
         std::cerr << "[CLIENT] Error cargando fondo: " << SDL_GetError() << std::endl;
     }
@@ -92,7 +92,11 @@ void Client::run() {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 running = false;
-            }
+            } else if (event.type == SDL_KEYDOWN){
+                if (event.key.keysym.sym == SDLK_q) {
+                    running = false;
+                }                
+            }           
             keyboard.process_event(event);
         }
         
