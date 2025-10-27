@@ -8,10 +8,10 @@ void ClientReceiver::run() {
         try {
             uint8_t request = protocol.receive_standar_command();
             if (request != 0) {
-                ClientCommand cmd;
-                cmd.id = this->reciver_id;
-                cmd.cmd.cmd = request;
-                command_queue.push(cmd);
+                ClientCommand client_command;
+                client_command.id = this->reciver_id;
+                client_command.cmd_struct.cmd = request;
+                command_queue.push(client_command);
             }
         } catch (const std::exception& e) {
             this->stop();

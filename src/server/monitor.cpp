@@ -45,7 +45,7 @@ void Monitor::clear_clients() {
     clients.clear();
 }
 
-void Monitor::broadcast(std::map<int, car>& cars) {
+void Monitor::broadcast(std::map<int, Car>& cars) {
     std::unique_lock<std::mutex> lock(mutex);
     for (auto& [id, car] : cars) {
         auto i = clients.find(id);

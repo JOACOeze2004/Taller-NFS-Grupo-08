@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-void car::accelerate() {
+void Car::accelerate() {
     state.velocity += acceleration;
 
     if (state.velocity > max_speed) {
@@ -10,7 +10,7 @@ void car::accelerate() {
     }
 }
 
-void car::brake() {
+void Car::brake() {
     state.velocity -= braking;
 
     if (state.velocity < -max_speed) {
@@ -18,15 +18,15 @@ void car::brake() {
     }
 }
 
-void car::turn_right() {
+void Car::turn_right() {
     state.angle += handling;
 }
 
-void car::turn_left() {
+void Car::turn_left() {
     state.angle -= handling;
 }
 
-void car::update_position() {
+void Car::update_position() {
     state.x += state.velocity * cos(state.angle);
     state.y += state.velocity * sin(state.angle);
 
@@ -36,14 +36,6 @@ void car::update_position() {
     }
 }
 
-CarDTO car::get_state() const {
+CarDTO Car::get_state() const {
     return CarDTO(state.x, state.y, state.velocity, state.angle);
-}
-
-float car::get_velocity() {
-    return state.velocity;
-}
-
-float car::get_angle() {
-    return state.angle;
 }
