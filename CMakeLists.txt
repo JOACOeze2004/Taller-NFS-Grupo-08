@@ -53,7 +53,8 @@ target_include_directories(taller_common PUBLIC .)
 # In xubuntu 24.04 these are:
 #
 # sudo apt-get install libopus-dev libopusfile-dev libxmp-dev libfluidsynth-dev fluidsynth libwavpack1 libwavpack-dev libfreetype-dev wavpack
-#
+# sudo apt-get install qt5-qmake qtbase5-dev
+# sudo apt-get install libsdl2-image-dev
 
 # Install libSDL2 and libSDL2pp (for client or editor)
 # HEY!! TODO XXX: add more dependendies (either for client, server or editor)

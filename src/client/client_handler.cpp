@@ -12,6 +12,9 @@ void ClientHandler::handle_event() {
 // KeyboardHandler implementation
 KeyboardHandler::KeyboardHandler(InputParser& _parser): parser(_parser) {
     initialize_key_map();
+    for (auto& [key, state] : key_state) {
+        key_state[key] = false;
+    }
 }
 
 void KeyboardHandler::initialize_key_map() {
@@ -23,9 +26,15 @@ void KeyboardHandler::initialize_key_map() {
 
 void KeyboardHandler::process_event(const SDL_Event& event) {
     if (event.type == SDL_KEYDOWN) {
-        auto it = key_map.find(event.key.keysym.sym);
-        if (it != key_map.end()) {
-            it->second();
-        }
+        key_state[event.key.keysym.sym] = true;
+    }
+    else if (event.type == SDL_KEYUP) {
+        key_state[event.key.keysym.sym] = false;
+    }
+}
+
+void KeyboardHandler::update() {
+    for (auto& [key, func] : key_map) {
+        if (key_state[key]) {func();}
     }
 }
