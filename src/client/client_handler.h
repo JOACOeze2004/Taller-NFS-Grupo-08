@@ -8,24 +8,18 @@
 
 class ClientHandler {
     InputParser& parser;
+    std::unordered_map<SDL_Keycode, std::function<void()>> key_map;
+    std::unordered_map<SDL_Keycode, bool> key_state;
 
 public:
     explicit ClientHandler(InputParser& _parser);
     void handle_event();
-};
-
-class KeyboardHandler {
-public:
-    explicit KeyboardHandler(InputParser& _parser);
-    void process_event(const SDL_Event& event);
-    void update();
 
 private:
+    void process_event(const SDL_Event& event);
+    void update();
     void initialize_key_map();
-    
-    InputParser& parser;
-    std::unordered_map<SDL_Keycode, std::function<void()>> key_map;
-    std::unordered_map<SDL_Keycode, bool> key_state;
+
 };
 
 #endif  // TALLER_TP_CLIENT_HANDLER_H
