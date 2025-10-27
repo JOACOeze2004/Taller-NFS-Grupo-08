@@ -113,10 +113,11 @@ void Client::run() {
         SDL_RenderPresent(renderer);
         SDL_Delay(16); 
     }
-    
-
+    command_queue.close();
     receiver.stop();
     receiver.join();
+    sender.stop();
+    sender.join();
     protocol.close();
     SDL_DestroyWindow(window);
     SDL_Quit();
