@@ -32,8 +32,8 @@ public:
     void send_string(const std::string& str) const;
     std::string receive_string(size_t size) const;
 
-    void send_car_state(const CarDTO& state) const;
-    CarDTO receive_car_state() const;
+    void send_float(const float value) const;
+    float receive_float() const;
 
     void close_socket();
 private:

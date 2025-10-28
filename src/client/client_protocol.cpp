@@ -3,17 +3,13 @@
 
 ClientProtocol::ClientProtocol(Socket& _socket) : protocol(_socket) {  }
 
-
-void ClientProtocol::send_message(const std::string& message) const {
-    protocol.send_message(message);
-}
-
-std::string ClientProtocol::receive_message() const {
-    return protocol.receive_message();
-}
-
 CarDTO ClientProtocol::receive_car_state() const {
-    return protocol.receive_car_state();
+    CarDTO car;
+    car.x = protocol.receive_float();
+    car.y = protocol.receive_float();
+    car.velocity = protocol.receive_float();
+    car.angle = protocol.receive_float();
+    return car;
 }
 
 void ClientProtocol::send_byte(const uint8_t byte) const {
@@ -22,10 +18,6 @@ void ClientProtocol::send_byte(const uint8_t byte) const {
 
 uint8_t ClientProtocol::receive_byte() const{
     return protocol.receive_byte();
-}
-
-void ClientProtocol::close(){
-    protocol.close_socket();
 }
 
 void ClientProtocol::send_player_config(const std::string& name, uint8_t car_id,
@@ -50,4 +42,8 @@ void ClientProtocol::receive_game_init_data(std::string& map_path,
 
     std::memcpy(&spawn_x, &x_bytes, sizeof(float));
     std::memcpy(&spawn_y, &y_bytes, sizeof(float));
+}
+
+void ClientProtocol::close(){
+    protocol.close_socket();
 }

@@ -10,9 +10,6 @@ class ClientProtocol {
         Protocol protocol;
     public:
         explicit ClientProtocol(Socket& _socket);
-        void send_message(const std::string& message) const;
-        std::string receive_message() const;
-
         void send_player_config(const std::string& name, uint8_t car_id,
                             const std::string& map_name) ;
         void receive_game_init_data(std::string& map_path,

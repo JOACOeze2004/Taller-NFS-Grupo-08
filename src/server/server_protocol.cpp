@@ -3,25 +3,15 @@
 
 ServerProtocol::ServerProtocol(Socket& _socket) : protocol(_socket) {  }
 
-
-void ServerProtocol::send_message(const std::string& message) const {
-    protocol.send_message(message);
-}
-
-std::string ServerProtocol::receive_message() const {
-    return protocol.receive_message();
-}
-
 uint8_t ServerProtocol::receive_standar_command() const {
     return protocol.receive_byte();
 }
 
 void ServerProtocol::send_car_state(CarDTO& car){
-    protocol.send_car_state(car);
-}
-
-void ServerProtocol::close(){
-    protocol.close_socket();    
+    protocol.send_float(car.x);
+    protocol.send_float(car.y);
+    protocol.send_float(car.velocity);
+    protocol.send_float(car.angle);
 }
 
 void ServerProtocol::send_game_init_data(const std::string& map_path,
@@ -48,4 +38,8 @@ void ServerProtocol::receive_player_config(std::string& name, uint8_t& car_id,
     car_id = protocol.receive_byte();
     uint16_t map_length = protocol.receive_big_endian_16();
     map_name = protocol.receive_string(map_length);
+}
+
+void ServerProtocol::close(){
+    protocol.close_socket();    
 }

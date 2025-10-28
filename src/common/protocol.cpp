@@ -1,4 +1,5 @@
 #include "protocol.h"
+#include <cstring>
 
 Protocol::Protocol(Socket& socket)
     : socket(socket) {}
@@ -76,21 +77,20 @@ std::string Protocol::receive_string(size_t size) const{
     return std::string(buffer.begin(), buffer.end());
 }
 
-
-void Protocol::send_car_state(const CarDTO& state) const {
-    socket.sendall(&state.x, sizeof(state.x));
-    socket.sendall(&state.y, sizeof(state.y));
-    socket.sendall(&state.velocity, sizeof(state.velocity));
-    socket.sendall(&state.angle, sizeof(state.angle));
+void Protocol::send_float(const float value) const {
+    uint32_t parsed_value;
+    std::memcpy(&parsed_value, &value, sizeof(float));
+    parsed_value = htonl(parsed_value);
+    socket.sendall(&parsed_value, sizeof(parsed_value));
 }
 
-CarDTO Protocol::receive_car_state() const {
-    CarDTO state;
-    socket.recvall(&state.x, sizeof(state.x));
-    socket.recvall(&state.y, sizeof(state.y));
-    socket.recvall(&state.velocity, sizeof(state.velocity));
-    socket.recvall(&state.angle, sizeof(state.angle));
-    return state;
+float Protocol::receive_float() const {
+    uint32_t parsed_value;
+    socket.recvall(&parsed_value, sizeof(parsed_value));
+    parsed_value = ntohl(parsed_value);
+    float value;
+    std::memcpy(&value, &parsed_value, sizeof(float));
+    return value;
 }
 
 void Protocol::close_socket(){
