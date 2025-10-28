@@ -60,6 +60,7 @@ void GraphicClient::draw() {
      car.render();
 
      SDL_RenderPresent(renderer);
+    SDL_Delay(16);
  }
 
 void GraphicClient::update_car(const CarDTO& state) {
