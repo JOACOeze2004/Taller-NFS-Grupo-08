@@ -54,13 +54,12 @@ void GraphicClient::draw() {
      SDL_RenderClear(renderer);
 
      if (bg_texture) {
-         SDL_RenderCopy(renderer, bg_texture, NULL, NULL);  // Dibujar fondo completo
+         SDL_RenderCopy(renderer, bg_texture, NULL, NULL);
      }
 
      car.render();
 
      SDL_RenderPresent(renderer);
-     SDL_Delay(16);
  }
 
 void GraphicClient::update_car(const CarDTO& state) {

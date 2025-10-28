@@ -14,7 +14,6 @@ public:
 
 private:
     std::string port;
-    //Socket server_socket;
 };
 
 #endif  // TALLER_TP_SERVER_H

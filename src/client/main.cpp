@@ -42,7 +42,6 @@ int main(int argc, char *argv[]) try {
 
 	return 0;
 } catch (std::exception& e) {
-	// If case of error, print it and exit with error
 	std::cerr << e.what() << std::endl;
 	return EXIT_FAILURE;
 }

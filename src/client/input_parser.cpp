@@ -13,7 +13,6 @@ void InputParser::parse_command(int command) {
     // Crear el comando y pushearlo a la cola // ver como manejar esto seguro cambia el comando
     Command cmd;
     cmd.cmd = static_cast<uint8_t>(command);
-    
-    // Push a la cola del sender
+
     command_queue.push(cmd);
 }
