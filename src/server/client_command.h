@@ -5,7 +5,7 @@
 
 struct ClientCommand {
     int id;
-    Command cmd;
+    Command cmd_struct;
 };
 
 #endif  // TALLER_TP_CLIENT_COMMAND_H

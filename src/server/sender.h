@@ -8,17 +8,18 @@
 
 #include "../common/constants.h"
 #include "../common/queue.h"
-#include "../common/socket.h"
+#include "../common/car_DTO.h"
 #include "../common/thread.h"
 
+#include "car_state.h"
 #include "server_protocol.h"
 
 class ClientSender: public Thread {
     ServerProtocol& protocol;
-    Queue<std::string>& client_queue;
+    Queue<CarDTO>& client_queue;
 
 public:
-    ClientSender(ServerProtocol& protocol, Queue<std::string>& queue);
+    ClientSender(ServerProtocol& protocol, Queue<CarDTO>& queue);
     void run() override;
 
     ~ClientSender();

@@ -6,46 +6,42 @@
 #include <SDL2/SDL.h>
 #include "client.h"
 #include "../common/constants.h"
-
+#include "login/login_window.h"
+#include <QApplication>
+#include <QWidget>
 
 using namespace SDL2pp;
 
-int main(int const argc, char *argv[]) try {
+int main(int argc, char *argv[]) try {
     if (argc != ARGC) {
         std::cerr << "Usage: ./client [HOST] [PORT]" << std::endl;
         return EXIT_FAILURE;
     }
     const std::string host = argv[HOST];
     const std::string port = argv[PORT];
-    Client client(host, port);
-    client.run();
 
+    const QApplication app(argc, argv);
+    const auto loginWindow = new LoginWindow();
+    bool startPressed = false;
+    PlayerConfig playerConfig;
 
-	/*// Initialize SDL library
-	SDL sdl(SDL_INIT_VIDEO);
+    QObject::connect(loginWindow, &LoginWindow::startButtonClicked, [&]() {
+        playerConfig = loginWindow->getPlayerConfig();
+        startPressed = true;
+        loginWindow->close();
+        QApplication::quit();
+    });
 
-	// Create main window: 640x480 dimensions, resizable, "SDL2pp demo" title
-	Window window("SDL2pp demo",
-			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			640, 480,
-			SDL_WINDOW_RESIZABLE);
+    loginWindow->show();
+    QApplication::exec();
 
-	// Create accelerated video renderer with default driver
-	Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (startPressed) {
+        Client client(host, port);
+        client.run(playerConfig);
+    }
 
-	// Clear screen
-	renderer.Clear();
-
-	// Show rendered frame
-	renderer.Present();
-
-	// 5 second delay
-	SDL_Delay(5000);
-
-	// Here all resources are automatically released and library deinitialized*/
 	return 0;
 } catch (std::exception& e) {
-	// If case of error, print it and exit with error
 	std::cerr << e.what() << std::endl;
 	return EXIT_FAILURE;
 }

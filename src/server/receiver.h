@@ -12,13 +12,16 @@
 #include "../common/thread.h"
 
 #include "server_protocol.h"
+#include "client_command.h"
+
 
 class ClientReceiver: public Thread {
     ServerProtocol& protocol;
-    Queue<std::string>& command_queue;
+    Queue<ClientCommand>& command_queue;
+    int reciver_id;
 
 public:
-    ClientReceiver(ServerProtocol& prot, Queue<std::string>& queue);
+    ClientReceiver(ServerProtocol& prot, Queue<ClientCommand>& queue, int id);
     void run() override;
 
     ~ClientReceiver();

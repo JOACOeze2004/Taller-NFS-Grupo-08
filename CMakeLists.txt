@@ -30,7 +30,9 @@ add_library(taller_common STATIC
         src/common/protocol.h
         src/common/protocol.cpp
         src/common/protocol.h
-        src/common/command.h)
+        src/common/command.h
+        src/common/car_DTO.h
+        src/common/DTO.h)
 
 # add the source files that make the lib
 # HEY!! TODO XXX: add more subfolders here
@@ -52,7 +54,8 @@ target_include_directories(taller_common PUBLIC .)
 # In xubuntu 24.04 these are:
 #
 # sudo apt-get install libopus-dev libopusfile-dev libxmp-dev libfluidsynth-dev fluidsynth libwavpack1 libwavpack-dev libfreetype-dev wavpack
-#
+# sudo apt-get install qt5-qmake qtbase5-dev
+# sudo apt-get install libsdl2-image-dev
 
 # Install libSDL2 and libSDL2pp (for client or editor)
 # HEY!! TODO XXX: add more dependendies (either for client, server or editor)
@@ -101,6 +104,8 @@ if(TALLER_CLIENT OR TALLER_EDITOR)
     )
 
     FetchContent_MakeAvailable(SDL2 SDL2_image SDL2_mixer SDL2_ttf libSDL2pp)
+    find_package(Qt5 REQUIRED COMPONENTS Widgets)
+    set(CMAKE_AUTOMOC ON)
 endif()
 
 # Program section
@@ -119,7 +124,15 @@ if(TALLER_CLIENT)
             src/client/client_protocol.cpp
             src/client/client_protocol.h
             src/client/input_parser.cpp
-            src/client/input_parser.h)
+            src/client/input_parser.h
+            src/client/client_car.cpp
+            src/client/client_car.h
+            src/client/login/login_window.cpp
+            src/client/login/login_window.h
+            src/client/graphic_client.cpp
+            src/client/graphic_client.h
+            src/client/ClientQuitException.h
+    )
 
     # Make them depend on taller_common lib
     add_dependencies(taller_client taller_common SDL2pp::SDL2pp)
@@ -134,7 +147,7 @@ if(TALLER_CLIENT)
     target_include_directories(taller_client PRIVATE ${libSDL2pp_SOURCE_DIR})
 
     # Link the taller_common lib target
-    target_link_libraries(taller_client taller_common SDL2pp::SDL2pp)
+    target_link_libraries(taller_client taller_common SDL2_image::SDL2_image SDL2pp::SDL2pp Qt5::Widgets)
 endif()
 
 if(TALLER_SERVER)
@@ -157,7 +170,10 @@ if(TALLER_SERVER)
             src/server/sender.cpp
             src/server/client_handler.cpp
             src/server/client_handler.h
-            src/server/client_command.h)
+            src/server/client_command.h
+            src/server/car_state.h
+            src/server/car.cpp
+            src/server/car.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)
