@@ -42,6 +42,14 @@ void Protocol::send_big_endian_16(const uint16_t value) const{
     }
 }
 
+void Protocol::send_big_endian_32(const uint32_t value) const{
+    uint32_t big_endian_to_send = htonl(value);
+    size_t size_sent = socket.sendall(&big_endian_to_send, sizeof(big_endian_to_send));
+    if (size_sent != sizeof(big_endian_to_send)) {
+        throw std::runtime_error("Error: uint32 was not sent");
+    }
+}
+
 uint16_t Protocol::receive_big_endian_16() const{
     uint16_t big_endian_to_receive;
     socket.recvall(&big_endian_to_receive, sizeof(big_endian_to_receive));
