@@ -47,7 +47,7 @@ void Car::render() {
     corners[4] = corners[0];
     
     // Dibujar el auto (rectángulo azul)
-    SDL_SetRenderDrawColor(renderer, 0, 100, 255, 255);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
     
     // Dibujar las líneas del rectángulo
     for (int i = 0; i < 4; i++) {
