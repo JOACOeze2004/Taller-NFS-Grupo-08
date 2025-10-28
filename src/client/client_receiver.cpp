@@ -6,9 +6,9 @@ void ClientReceiver::run(){
     while (this->should_keep_running()) {
         try {
             CarDTO car = protocol.receive_car_state();
-            queue.try_push(car);
+            queue.push(car);
         }
-        catch(const ClosedQueue& e) {
+        catch(const std::exception& e) {
             this->stop();
             break;
         } 

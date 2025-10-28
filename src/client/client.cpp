@@ -57,10 +57,10 @@ void Client::run(const PlayerConfig& config) {
         graphic_client.draw();
     }
     command_queue.close();
+    protocol.close();
     receiver.stop();
     receiver.join();
     sender.stop();
     sender.join();
-    protocol.close();
     SDL_Quit();
 }
