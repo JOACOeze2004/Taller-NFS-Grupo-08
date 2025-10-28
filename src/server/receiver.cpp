@@ -13,6 +13,9 @@ void ClientReceiver::run() {
                 client_command.cmd_struct.cmd = request;
                 command_queue.push(client_command);
             }
+            else {
+                break;
+            }
         } catch (const std::exception& e) {
             this->stop();
             break;
