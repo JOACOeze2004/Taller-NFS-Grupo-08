@@ -31,13 +31,13 @@ void LoginWindow::car_sellec(QLabel*& carLabel) {
     carLabel = new QLabel("Elegí tu auto:");
     carLabel->setStyleSheet("color: #00eaff; font-size: 22px; font-weight: bold;");
     carSelector = new QComboBox();
+    carSelector->addItem("auto 0");
     carSelector->addItem("auto 1");
     carSelector->addItem("auto 2");
     carSelector->addItem("auto 3");
     carSelector->addItem("auto 4");
     carSelector->addItem("auto 5");
     carSelector->addItem("auto 6");
-    carSelector->addItem("auto 7");
 
     carSelector->setStyleSheet("QComboBox {"
                                "   background-color: rgba(20, 20, 30, 200);"
@@ -168,4 +168,17 @@ void LoginWindow::paintEvent(QPaintEvent *event) {
     }
 
     QWidget::paintEvent(event);
+}
+
+PlayerConfig LoginWindow::getPlayerConfig() const {
+    PlayerConfig config;
+
+    config.playerName = nameInput->text().toStdString();
+    if (config.playerName.empty()) {
+        config.playerName = "Player";
+    }
+    config.carId = carSelector->currentIndex();
+    config.mapName = mapSelector->currentText().toStdString();
+
+    return config;
 }

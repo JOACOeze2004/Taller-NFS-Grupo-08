@@ -5,7 +5,9 @@
 #include "client_car.h"
 #include <SDL2/SDL_image.h>
 
-GraphicClient::GraphicClient(): car(0,0,nullptr) {
+GraphicClient::GraphicClient(const std::string& map_path)
+    : renderer(nullptr), bg_texture(nullptr), window(nullptr), car(0, 0, nullptr) {
+
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cerr << "[CLIENT] Error inicializando SDL: " << SDL_GetError() << std::endl;
         return;
@@ -32,8 +34,8 @@ GraphicClient::GraphicClient(): car(0,0,nullptr) {
         std::cerr << "Error inicializando SDL_image: " << IMG_GetError() << std::endl;
     }
 
-    SDL_Surface* bg_surface = IMG_Load("../assets/need-for-speed/cities/Game Boy _ GBC - Grand "
-                                       "Theft Auto - Backgrounds - San Andreas.png");
+    SDL_Surface* bg_surface = IMG_Load(map_path.c_str());
+
     if (!bg_surface) {
         std::cerr << "[CLIENT] Error cargando fondo: " << SDL_GetError() << std::endl;
     }

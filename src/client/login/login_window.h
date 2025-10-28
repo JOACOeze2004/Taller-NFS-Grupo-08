@@ -9,6 +9,12 @@
 
 #include <qlabel.h>
 
+struct PlayerConfig {
+    std::string playerName;
+    int carId;
+    std::string mapName;
+};
+
 class LoginWindow final: public QWidget {
     Q_OBJECT
 
@@ -21,6 +27,7 @@ public:
     explicit LoginWindow(QWidget *parent = nullptr);
     ~LoginWindow() override;
 
+    PlayerConfig getPlayerConfig() const;
     signals:
         void startButtonClicked();
 

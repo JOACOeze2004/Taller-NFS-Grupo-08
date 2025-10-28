@@ -23,8 +23,10 @@ int main(int argc, char *argv[]) try {
     const QApplication app(argc, argv);
     const auto loginWindow = new LoginWindow();
     bool startPressed = false;
+    PlayerConfig playerConfig;
 
     QObject::connect(loginWindow, &LoginWindow::startButtonClicked, [&]() {
+        playerConfig = loginWindow->getPlayerConfig();
         startPressed = true;
         loginWindow->close();
         QApplication::quit();
@@ -35,30 +37,9 @@ int main(int argc, char *argv[]) try {
 
     if (startPressed) {
         Client client(host, port);
-        client.run();
+        client.run(playerConfig);
     }
-    /*// Initialize SDL library
-	SDL sdl(SDL_INIT_VIDEO);
 
-	// Create main window: 640x480 dimensions, resizable, "SDL2pp demo" title
-	Window window("SDL2pp demo",
-			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			640, 480,
-			SDL_WINDOW_RESIZABLE);
-
-	// Create accelerated video renderer with default driver
-	Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
-
-	// Clear screen
-	renderer.Clear();
-
-	// Show rendered frame
-	renderer.Present();
-
-	// 5 second delay
-	SDL_Delay(5000);
-
-	// Here all resources are automatically released and library deinitialized*/
 	return 0;
 } catch (std::exception& e) {
 	// If case of error, print it and exit with error

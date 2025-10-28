@@ -30,6 +30,9 @@ private:
     ClientReceiver receiver;
     ClientSender sender;
 
+    std::string player_name;
+    uint8_t car_id{};
+    std::string map_name;
 public:
     explicit ClientHandler(Socket&& peer, Queue<ClientCommand>& commands, int _id);
     void run() override;
