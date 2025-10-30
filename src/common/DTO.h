@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 struct DTO {
-    CarDTO own_car;
+    int id;
     std::unordered_map<int, CarDTO> cars;
 };
 

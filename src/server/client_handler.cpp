@@ -1,5 +1,7 @@
 #include "client_handler.h"
 
+#include "src/common/DTO.h"
+
 ClientHandler::ClientHandler(Socket&& peer, Queue<ClientCommand>& commands, int _id):
         peer(std::move(peer)),
         protocol(this->peer),
@@ -46,8 +48,9 @@ void ClientHandler::run() {
     sender.start();
 }
 
-void ClientHandler::send_state(CarDTO state) {
-    client_queue.try_push(state);
+void ClientHandler::send_state(DTO dto) {
+    dto.id = id;
+    client_queue.try_push(dto);
 }
 
 void ClientHandler::kill() {

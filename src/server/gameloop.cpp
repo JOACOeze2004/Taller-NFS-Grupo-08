@@ -1,6 +1,6 @@
 #include "gameloop.h"
 
-
+#include "src/common/DTO.h"
 #include "src/common/constants.h"
 
 Gameloop::Gameloop(Queue<ClientCommand>& _cmd_queue, Monitor& _monitor):
@@ -25,7 +25,7 @@ void Gameloop::run() {
     while (should_keep_running()) {
         process_commands();
         update_positions();
-        broadcast(cars);
+        broadcast();
         std::this_thread::sleep_for(std::chrono::milliseconds(16)); // no es exacto todavia
     }
 }
@@ -56,6 +56,12 @@ void Gameloop::update_positions() {
     world.update();
 }
 
-void Gameloop::broadcast(std::map<int, Car>& _cars) const {
-    monitor.broadcast(_cars);
+void Gameloop::broadcast() const {
+    std::unordered_map<int, CarDTO> carsDTO;
+    for  (auto& [id, car] : cars) {
+        carsDTO.emplace(id, car.get_state());
+    }
+    DTO dto;
+    dto.cars = std::move(carsDTO);
+    monitor.broadcast(dto);
 }
