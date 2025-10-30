@@ -4,6 +4,7 @@
 #pragma once
 #include <functional>
 #include <map>
+#include "world.h"
 
 #include "../common/queue.h"
 #include "../common/thread.h"
@@ -27,6 +28,7 @@ private:
     Monitor& monitor;
     std::map<int, Car> cars;
     std::map<uint8_t, std::function<void(Car& car)>> car_actions;
+    World world;
     void initialize_car_actions();
     // Parser parser;
     // Workshop workshop; para entre carreras mejorar el auto

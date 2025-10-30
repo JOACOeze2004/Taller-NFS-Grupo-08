@@ -4,7 +4,9 @@
 #include "src/common/constants.h"
 
 Gameloop::Gameloop(Queue<ClientCommand>& _cmd_queue, Monitor& _monitor):
-        cmd_queue(_cmd_queue), monitor(_monitor) { initialize_car_actions(); }
+        cmd_queue(_cmd_queue), monitor(_monitor) {
+    initialize_car_actions();
+}
 
 void Gameloop::initialize_car_actions() {
     car_actions[SEND_ACCELERATE] = [](Car& car) { car.accelerate(); };
@@ -25,7 +27,12 @@ void Gameloop::run() {
 void Gameloop::process_commands() {
     ClientCommand client_command{};
     while (cmd_queue.try_pop(client_command)) {
-        Car& car = cars[client_command.id];
+        auto it = cars.find(client_command.id);
+        if (it == cars.end()) {
+            add_car(client_command.id);
+        }
+        it = cars.find(client_command.id);
+        Car& car = it->second;
         auto action = car_actions.find(client_command.cmd_struct.cmd);
         if (action != car_actions.end()) {
             action->second(car);
@@ -34,14 +41,13 @@ void Gameloop::process_commands() {
 }
 
 void Gameloop::add_car(const int client_id) {
-    Car car;
-    cars[client_id] = car;
+    cars.emplace(std::piecewise_construct,
+    std::forward_as_tuple(client_id),
+    std::forward_as_tuple(world.get_id()));
 }
 
 void Gameloop::update_positions() {
-    for (auto& [id, car] : cars) {
-        car.update_position();
-    }
+    world.update();
 }
 
 void Gameloop::broadcast(std::map<int, Car>& _cars) const {

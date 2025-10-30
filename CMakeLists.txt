@@ -37,6 +37,7 @@ add_library(taller_common STATIC
 # add the source files that make the lib
 # HEY!! TODO XXX: add more subfolders here
 add_subdirectory(src/common/)
+add_subdirectory(src/libs/box2d)
 
 
 # set compiler warnings to the targets
@@ -47,6 +48,7 @@ set_project_warnings(taller_common ${TALLER_MAKE_WARNINGS_AS_ERRORS} FALSE)
 # Make this PUBLIC so any dependant linking lib will inherit this
 # location (so our dependants will not have to explicitly request this)
 target_include_directories(taller_common PUBLIC .)
+include_directories(src/libs/box2d/include)
 
 # HEY!! TODO XXX: you need to install some runtime and dev libraries *before*
 # compiling the client/editor code.
@@ -173,7 +175,9 @@ if(TALLER_SERVER)
             src/server/client_command.h
             src/server/car_state.h
             src/server/car.cpp
-            src/server/car.h)
+            src/server/car.h
+            src/server/world.cpp
+            src/server/world.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)
@@ -185,7 +189,8 @@ if(TALLER_SERVER)
     set_project_warnings(taller_server ${TALLER_MAKE_WARNINGS_AS_ERRORS} FALSE)
 
     # Link the taller_common lib target
-    target_link_libraries(taller_server taller_common)
+    target_include_directories(taller_server PRIVATE libs/box2d/include)
+    target_link_libraries(taller_server taller_common box2d)
 endif()
 
 if(TALLER_EDITOR)
