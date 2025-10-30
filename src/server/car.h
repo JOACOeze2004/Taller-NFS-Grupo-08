@@ -17,6 +17,8 @@ class Car {
     float handling = HANDLING;
     float acceleration = ACCELERATION;
     float braking = BRAKING;
+    int life = MAX_LIFE;
+    int nitro = MAX_NITRO;
     b2BodyId body_id;
 
 public:
@@ -27,6 +29,14 @@ public:
     void turn_right();
     void turn_left();
     void update_position();
+    void restore_life();
+    void activate_infinite_life();
+    void activate_infinite_nitro();
+
+    //ver como manejar estos casos seguro se manejan desde el gameloop
+    void activate_lose_race();
+    void activate_win_race();
+
 
     CarDTO get_state() const;
 };

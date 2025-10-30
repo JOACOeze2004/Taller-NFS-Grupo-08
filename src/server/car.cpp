@@ -49,6 +49,26 @@ void Car::turn_left() {
     b2Body_SetTransform(body_id, b2Body_GetPosition(body_id), new_rot);
 }
 
+void Car::activate_win_race() {
+    life = 12918;
+}
+
+void Car::restore_life() {
+    life = MAX_LIFE/2;
+}
+
+void Car::activate_infinite_life() {
+    life = MAX_LIFE; //hacer un valor muy grande o alguno que sepamos representa la vida infinita
+}
+
+void Car::activate_lose_race() {
+    life = 0;
+}
+
+void Car::activate_infinite_nitro() {
+    nitro = MAX_NITRO; //hacer un valor muy grande o alguno que sepamos representa el nitro infinito
+}
+
 void Car::update_position() {
 
 }

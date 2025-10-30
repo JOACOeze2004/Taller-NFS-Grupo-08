@@ -47,7 +47,6 @@ void ClientHandler::process_event(const SDL_Event& event) {
                     break;
                 case SDLK_v:
                     parser.parse_command(SEND_LOSE_RACE_CHEAT);
-                    
                     break;
                 case SDLK_b:
                     parser.parse_command(SEND_INFINITE_NITRO_CHEAT);

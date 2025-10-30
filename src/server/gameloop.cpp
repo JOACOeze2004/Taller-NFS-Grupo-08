@@ -13,6 +13,12 @@ void Gameloop::initialize_car_actions() {
     car_actions[SEND_ROTATE_RIGHT] = [](Car& car) { car.turn_right(); };
     car_actions[SEND_ROTATE_LEFT] = [](Car& car) { car.turn_left(); };
     car_actions[SEND_BRAKE] = [](Car& car) { car.brake(); };
+
+    car_actions[SEND_WIN_RACE_CHEAT] = [](Car& car) { car.activate_win_race(); };
+    car_actions[SEND_RESTORE_LIFE_CHEAT] = [](Car& car) { car.restore_life(); };
+    car_actions[SEND_INFINITE_LIFE_CHEAT] = [](Car& car) { car.activate_infinite_life(); };
+    car_actions[SEND_LOSE_RACE_CHEAT] = [](Car& car) { car.activate_lose_race(); };
+    car_actions[SEND_INFINITE_NITRO_CHEAT] = [](Car& car) { car.activate_infinite_nitro(); };
 }
 
 void Gameloop::run() {
