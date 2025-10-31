@@ -5,8 +5,8 @@ Car::Car(float x, float y, SDL_Renderer* renderer)
     : x(x), y(y), angle(0.0f), velocity(0.0f), renderer(renderer) {}
 
 void Car::update_from_dto(const CarDTO& state) {
-    x = state.x +200;
-    y = state.y +200;
+    x = state.x;
+    y = state.y;
     angle = state.angle;
     velocity = state.velocity;
 }

@@ -49,8 +49,10 @@ void Client::run(const PlayerConfig& config) {
             for (auto& [id, car] : dto.cars) { 
                 graphic_client.update_car(id, car); 
             }
+            graphic_client.set_player_car(dto.id);
         }
 
+        
         try {
             handler.handle_event();
         } catch (ClientQuitException& e) {
