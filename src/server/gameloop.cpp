@@ -33,6 +33,12 @@ void Gameloop::run() {
 void Gameloop::process_commands() {
     ClientCommand client_command{};
     while (cmd_queue.try_pop(client_command)) {
+
+        if (client_command.cmd_struct.cmd == 0) {
+            cars.erase(client_command.id);
+            continue;
+        }
+
         auto it = cars.find(client_command.id);
         if (it == cars.end()) {
             add_car(client_command.id);
