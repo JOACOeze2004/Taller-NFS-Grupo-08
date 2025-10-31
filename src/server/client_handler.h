@@ -10,12 +10,13 @@
 #include "../common/queue.h"
 #include "../common/socket.h"
 #include "../common/thread.h"
+#include "src/common/DTO.h"
 
 #include "car_state.h"
+#include "client_command.h"
 #include "receiver.h"
 #include "sender.h"
 #include "server_protocol.h"
-#include "client_command.h"
 
 
 class ClientHandler: public Thread {
@@ -24,7 +25,7 @@ private:
     ServerProtocol protocol;
 
     Queue<ClientCommand>& command_queue;
-    Queue<CarDTO> client_queue;
+    Queue<DTO> client_queue;
     
     int id;
     ClientReceiver receiver;
@@ -36,7 +37,7 @@ private:
 public:
     explicit ClientHandler(Socket&& peer, Queue<ClientCommand>& commands, int _id);
     void run() override;
-    void send_state(CarDTO state);
+    void send_state(DTO dto);
     void kill();
     void kill_threads();
     bool is_dead() const;

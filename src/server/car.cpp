@@ -50,7 +50,7 @@ void Car::turn_left() {
 }
 
 void Car::activate_win_race() {
-    life = 12918;
+    life = 26062011;
 }
 
 void Car::restore_life() {

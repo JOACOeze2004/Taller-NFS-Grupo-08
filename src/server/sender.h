@@ -8,7 +8,7 @@
 
 #include "../common/constants.h"
 #include "../common/queue.h"
-#include "../common/car_DTO.h"
+#include "../common/DTO.h"
 #include "../common/thread.h"
 
 #include "car_state.h"
@@ -16,10 +16,10 @@
 
 class ClientSender: public Thread {
     ServerProtocol& protocol;
-    Queue<CarDTO>& client_queue;
+    Queue<DTO>& client_queue;
 
 public:
-    ClientSender(ServerProtocol& protocol, Queue<CarDTO>& queue);
+    ClientSender(ServerProtocol& protocol, Queue<DTO>& queue);
     void run() override;
 
     ~ClientSender();

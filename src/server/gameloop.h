@@ -38,7 +38,7 @@ private:
 
     void process_commands();
     void update_positions();
-    void broadcast(std::map<int, Car>& _cars) const;
+    void broadcast() const;
 };
 
 
