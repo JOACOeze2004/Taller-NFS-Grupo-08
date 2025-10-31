@@ -3,18 +3,22 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include "client_car.h"
+#include <unordered_map>
 
 class GraphicClient {
     SDL_Renderer* renderer;
     SDL_Texture* bg_texture;
     SDL_Window* window;
-    Car car;
-public:
+    std::unordered_map<int, CarDTO> cars; 
+
+    public:
     explicit GraphicClient(const std::string& map_path);
     void draw();
-    void update_car(const CarDTO& state);
+    void update_car(int id, const CarDTO& car_state);
     ~GraphicClient();
 
+    private:
+        void draw_car(const CarDTO& car);
 };
 
 

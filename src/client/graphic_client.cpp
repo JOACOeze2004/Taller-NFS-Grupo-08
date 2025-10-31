@@ -6,7 +6,7 @@
 #include <SDL2/SDL_image.h>
 
 GraphicClient::GraphicClient(const std::string& map_path)
-    : renderer(nullptr), bg_texture(nullptr), window(nullptr), car(0, 0, nullptr) {
+    : renderer(nullptr), bg_texture(nullptr), window(nullptr){
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cerr << "[CLIENT] Error inicializando SDL: " << SDL_GetError() << std::endl;
@@ -46,29 +46,37 @@ GraphicClient::GraphicClient(const std::string& map_path)
         std::cerr << "[CLIENT] Error creando textura: " << SDL_GetError() << std::endl;
     }
 
-    car = Car(200, 200, renderer);
+    
+}
+
+void GraphicClient::update_car(int id, const CarDTO& car_state) {
+    cars[id] = car_state; 
 }
 
 void GraphicClient::draw() {
-     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-     SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
 
-     if (bg_texture) {
-         SDL_RenderCopy(renderer, bg_texture, NULL, NULL);
-     }
-
-     car.render();
-
-     SDL_RenderPresent(renderer);
+    if (bg_texture) {
+        SDL_RenderCopy(renderer, bg_texture, NULL, NULL);
+    }
+    
+    //aca va a haber que filtrar de si esta en la pantalla
+    for (const auto& [id, car] : cars) {
+        draw_car(car);
+    }
+    
+    SDL_RenderPresent(renderer);
+    cars.clear();
     SDL_Delay(16);
- }
+}
 
-void GraphicClient::update_car(const CarDTO& state) {
-     car.update_from_dto(state);
- }
+void GraphicClient::draw_car(const CarDTO& car) {
+    Car temp_car(car.x, car.y, renderer);
+    temp_car.update_from_dto(car);
+    temp_car.render();
+}
 
- GraphicClient::~GraphicClient() {
-     SDL_DestroyWindow(window);
- }
-
-
+GraphicClient::~GraphicClient() {
+    SDL_DestroyWindow(window);
+}

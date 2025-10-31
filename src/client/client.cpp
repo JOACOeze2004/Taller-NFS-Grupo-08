@@ -46,8 +46,8 @@ void Client::run(const PlayerConfig& config) {
 
     while (true) {
         while (receiver.try_pop_car_state(dto)) {
-            for (auto& [id, car] : dto.cars) { //Dudoso pero anda :D
-                graphic_client.update_car(car); 
+            for (auto& [id, car] : dto.cars) { 
+                graphic_client.update_car(id, car); 
             }
         }
 
