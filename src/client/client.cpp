@@ -39,14 +39,16 @@ void Client::run(const PlayerConfig& config) {
     ClientSender sender(protocol, command_queue);
     sender.start();
 
-    CarDTO state;
+    DTO dto;
     InputParser parser(sender, command_queue);
     GraphicClient graphic_client(map_path);
     ClientHandler handler(parser);
 
     while (true) {
-        while (receiver.try_pop_car_state(state)) {
-            graphic_client.update_car(state);
+        while (receiver.try_pop_car_state(dto)) {
+            for (auto& [id, car] : dto.cars) { //Dudoso pero anda :D
+                graphic_client.update_car(car); 
+            }
         }
 
         try {

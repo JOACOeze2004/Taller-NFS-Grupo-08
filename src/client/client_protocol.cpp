@@ -44,6 +44,24 @@ void ClientProtocol::receive_game_init_data(std::string& map_path,
     std::memcpy(&spawn_y, &y_bytes, sizeof(float));
 }
 
+DTO ClientProtocol::receive_game_state() const {
+    DTO dto;
+    dto.id = protocol.receive_byte();
+    uint16_t cars_count = protocol.receive_big_endian_16();
+
+    for (auto i = 0; i < cars_count; ++i) {
+        CarDTO car;
+        car.x = protocol.receive_float();
+        car.y = protocol.receive_float();
+        car.velocity = protocol.receive_float();
+        car.angle = protocol.receive_float();
+        dto.cars[i] = car;
+    }
+
+    return dto;
+}
+
+
 void ClientProtocol::close(){
     protocol.close_socket();
 }

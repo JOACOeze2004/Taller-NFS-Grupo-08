@@ -4,6 +4,8 @@
 #include "../common/socket.h"
 #include "../common/protocol.h"
 #include "login/login_window.h"
+#include "../common/DTO.h"
+
 
 class ClientProtocol {
     private:
@@ -18,6 +20,7 @@ class ClientProtocol {
         CarDTO receive_car_state() const;
         void send_byte(const uint8_t byte) const;
         uint8_t receive_byte() const;
+        DTO receive_game_state() const;
         void close();
 };
 
