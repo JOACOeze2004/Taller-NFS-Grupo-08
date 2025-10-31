@@ -6,7 +6,7 @@
 
 class Car {
 public:
-    Car(float x, float y, SDL_Renderer* renderer);
+    Car(float x, float y, float angle, SDL_Renderer* renderer);
 
     void update_from_dto(const CarDTO& state);
     void render();

@@ -109,7 +109,7 @@ void GraphicClient::draw() {
 
 void GraphicClient::draw_car(const CarDTO& car) {
     // Crear coche con posiciones ajustadas a la cámara
-    Car temp_car(car.x - camera_x, car.y - camera_y, renderer);
+    Car temp_car(car.x - camera_x, car.y - camera_y, car.angle, renderer);
     CarDTO adjusted_car = car;
     adjusted_car.x = car.x - camera_x;
     adjusted_car.y = car.y - camera_y;

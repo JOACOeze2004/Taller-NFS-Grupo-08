@@ -13,6 +13,7 @@ Car::Car(b2WorldId world){
     body_id = b2CreateBody(world, &body);
     b2Body_EnableContactEvents(body_id, true);
     b2Body_EnableHitEvents(body_id, true);
+
     b2Polygon box = b2MakeBox(10.0f, 5.0f);
     b2ShapeDef shape_def = b2DefaultShapeDef();
     b2ShapeId shape = b2CreatePolygonShape(body_id, &shape_def, &box);

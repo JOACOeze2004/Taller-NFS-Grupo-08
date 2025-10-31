@@ -1,8 +1,8 @@
 #include "client_car.h"
 #include <cmath>
 
-Car::Car(float x, float y, SDL_Renderer* renderer)
-    : x(x), y(y), angle(0.0f), velocity(0.0f), renderer(renderer) {}
+Car::Car(float x, float y, float angle, SDL_Renderer* renderer)
+    : x(x), y(y), angle(angle), velocity(0.0f), renderer(renderer) {}
 
 void Car::update_from_dto(const CarDTO& state) {
     x = state.x;
