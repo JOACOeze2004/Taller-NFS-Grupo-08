@@ -12,9 +12,10 @@ class GraphicClient {
     std::unordered_map<int, CarDTO> cars; 
 
     int player_car_id;
-    int camera_x, camera_y;
+    float camera_x, camera_y;
     int screen_width, screen_height;
-    int map_width, map_height;
+    float map_width, map_height;
+    float zoom_factor;  // Factor de zoom (menor = más cerca)
 
     public:
     explicit GraphicClient(const std::string& map_path);

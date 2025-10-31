@@ -24,7 +24,7 @@ GraphicClient::GraphicClient(const std::string& map_path)
         return;
     }
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!renderer) {
         std::cerr << "[CLIENT] Error creando renderer: " << SDL_GetError() << std::endl;
         SDL_DestroyWindow(window);
@@ -69,12 +69,10 @@ void GraphicClient::update_camera() {
     }
 
     const CarDTO& player_car = cars[player_car_id];
-    
-    // Centrar cámara en el coche del jugador
-    camera_x = player_car.x - screen_width / 2;
-    camera_y = player_car.y - screen_height / 2;
-    
-    // Limitar la cámara a los bordes del mapa
+
+    camera_x += (player_car.x - camera_x - screen_width / 2.0f) * 0.1666666666666666666666f;
+    camera_y += (player_car.y - camera_y - screen_height / 2.0f) * 0.16666666666666666666666f;
+
     if (camera_x < 0) camera_x = 0;
     if (camera_y < 0) camera_y = 0;
     if (camera_x > map_width - screen_width) camera_x = map_width - screen_width;
@@ -82,22 +80,18 @@ void GraphicClient::update_camera() {
 }
 
 void GraphicClient::draw() {
-    // Actualizar cámara ANTES de renderizar (mientras cars todavía tiene datos)
     update_camera();
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
     if (bg_texture) {
-        // Definir qué parte del mapa se muestra
-        SDL_Rect src_rect = {camera_x, camera_y, screen_width, screen_height};
+        SDL_Rect src_rect = {static_cast<int>(camera_x), static_cast<int>(camera_y), screen_width, screen_height};
         SDL_Rect dst_rect = {0, 0, screen_width, screen_height};
         SDL_RenderCopy(renderer, bg_texture, &src_rect, &dst_rect);
     }
     
-    // Renderizar coches con posiciones ajustadas a la cámara
     for (const auto& [id, car] : cars) {
-        // Solo renderizar si está en el viewport
         if (car.x >= camera_x && car.x <= camera_x + screen_width &&
             car.y >= camera_y && car.y <= camera_y + screen_height) {
             draw_car(car);
@@ -108,7 +102,6 @@ void GraphicClient::draw() {
 }
 
 void GraphicClient::draw_car(const CarDTO& car) {
-    // Crear coche con posiciones ajustadas a la cámara
     Car temp_car(car.x - camera_x, car.y - camera_y, car.angle, renderer);
     CarDTO adjusted_car = car;
     adjusted_car.x = car.x - camera_x;
