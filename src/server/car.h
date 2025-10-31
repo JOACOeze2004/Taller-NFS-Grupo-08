@@ -5,11 +5,10 @@
 #include "../common/car_DTO.h"
 #include "../common/constants.h"
 #include <box2d/box2d.h>
-#include "world.h"
 
-constexpr float HANDLING = 0.1f;
-constexpr float ACCELERATION = 10000.0f;
-constexpr float BRAKING = 5000.0f;
+constexpr float HANDLING = 150000.0f;
+constexpr float ACCELERATION = 150000.0f;
+constexpr float BRAKING = 50000.0f;
 
 class Car {
     float max_speed = MAX_SPEED;

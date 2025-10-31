@@ -105,7 +105,6 @@ void GraphicClient::draw() {
     }
     
     SDL_RenderPresent(renderer);
-    cars.clear();
 }
 
 void GraphicClient::draw_car(const CarDTO& car) {
