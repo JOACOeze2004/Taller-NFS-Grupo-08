@@ -10,45 +10,30 @@ struct DTO {
     std::unordered_map<int, CarDTO> cars;
 };
 
-struct Snapshot { //deberia ser una clase
-    enum class StateRunning state;
-    int position;
-    int cars_count;
-    int id;
-    std::vector<CarDTO> cars; // capaz es un map
-    enum class Map map;
-    enum class Upgrades upgrade;
-    bool upgradeable;
-    enum class CollisionType collision;
-    bool under_bridge;
-    CheckpointCoords checkpoint;
-    enum class TypeCheckpoint type_checkpoint;
-};
-
-enum class StateRunning {
+enum StateRunning {
     IN_GAME,
     FINISHED,
     DEAD, 
     TIMEOUTED
 };
 
-enum class Map {
+enum Map {
     SAN_ANDREAS,
     VICE_CITY,
     LIBERTY_CITY
 };
 
-enum class Upgrades {
-    NONE,
+enum Upgrades {
+    NONE_UPGRADE,
     SPEED,
-    ACCELERATION,
-    HANDLING,
+    ACCELERATION_UPGRADE,
+    HANDLING_UPGRADE,
     NITRO,
     LIFE
 };
 
-enum class CollisionType {
-    NONE,
+enum CollisionType {
+    NONE_COLLISION,
     CHILL_COLLISION,
     HEAVY_COLLISION
     //ADD MORE COLLISSION TYPES IF NEEDED 
@@ -59,10 +44,27 @@ struct CheckpointCoords{
     float y;
 };
 
-enum class TypeCheckpoint{
+enum TypeCheckpoint{
     REGULAR,
     FINAL,
     FIRST
 };
+
+struct Snapshot { //deberia ser una clase
+    enum StateRunning state;
+    int position;
+    int cars_count;
+    int id;
+    std::vector<CarDTO> cars; // capaz es un map
+    enum Map map;
+    enum Upgrades upgrade;
+    bool upgradeable;
+    enum CollisionType collision;
+    bool under_bridge;
+    CheckpointCoords checkpoint;
+    enum TypeCheckpoint type_checkpoint;
+};
+
+
 
 #endif  // TALLER_TP_DTO_H
