@@ -30,14 +30,14 @@ void Car::accelerate() {
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
     if (speed < max_speed) {
-        b2Vec2 velocity = b2Body_GetWorldVector(body_id, {0,1});
+        b2Vec2 velocity = b2Body_GetWorldVector(body_id, {1,0});
         b2Vec2 force = {velocity.x * acceleration, velocity.y * acceleration};
         b2Body_ApplyForceToCenter(body_id, force, true);
     }
 }
 
 void Car::brake() {
-    b2Vec2 vel = b2Body_GetWorldVector(body_id, {0,1});
+    b2Vec2 vel = b2Body_GetWorldVector(body_id, {1,0});
     b2Vec2 brake = {-vel.x * braking, -vel.y * braking};
     b2Body_ApplyForceToCenter(body_id, brake, true);
 }
