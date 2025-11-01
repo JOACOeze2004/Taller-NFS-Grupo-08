@@ -17,6 +17,8 @@ public:
                               std::string& map_name) ;
     void send_game_init_data(const std::string& map_path,
                             float spawn_x, float spawn_y) ;
+
+    void receive_lobby_action(uint8_t& action, std::string& game_id);
     uint8_t receive_standar_command() const; //a prioiri para el movimiento
     void send_car_state(const CarDTO& car);
 

@@ -40,6 +40,17 @@ void ServerProtocol::receive_player_config(std::string& name, uint8_t& car_id,
     map_name = protocol.receive_string(map_length);
 }
 
+void ServerProtocol::receive_lobby_action(uint8_t& action, std::string& game_id) {
+    action = protocol.receive_byte();
+    
+    if (action == SEND_JOIN_GAME) {
+        uint16_t id_len = protocol.receive_big_endian_16();
+        if (id_len > 0) {
+            game_id = protocol.receive_string(id_len);
+        }
+    }
+}
+
 void ServerProtocol::send_game_state(const DTO& dto) {
     protocol.send_big_endian_32(dto.id);    
     protocol.send_big_endian_16(dto.cars.size());

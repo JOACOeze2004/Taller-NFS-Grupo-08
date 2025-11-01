@@ -24,6 +24,31 @@ void ClientHandler::run() {
         return;
     }
 
+    uint8_t action;
+    std::string game_id_to_join;
+    protocol.receive_lobby_action(action, game_id_to_join);    
+    std::shared_ptr<Gameloop> game;
+    std::string g_id;
+    
+    if (action == SEND_CREATE_GAME) {
+        game = monitor.create_game();
+        g_id = monitor.get_last_created_game_id();
+        game->start();
+        
+    } else if (action == SEND_JOIN_GAME) {
+        game = monitor.join_game(player_name, game_id_to_join);
+        if (!game) {
+            std::cerr << "[SERVER " << id << "] Game not found: " << game_id_to_join << std::endl;
+            return;
+        }        
+        g_id = game_id_to_join;
+        
+    } else {
+        std::cerr << "[SERVER " << id << "] Invalid lobby action: " << static_cast<int>(action) << std::endl;
+        return;
+    }
+    set_game_id(g_id);
+
     std::string map_path;
     if (map_name == "Liberty City") {
         map_path = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - Liberty City.png";
@@ -43,12 +68,7 @@ void ClientHandler::run() {
         std::cerr << "[SERVER " << id << "] Error sending init data: " << e.what() << std::endl;
         return;
     }
-    std::string g_id;
-    std::shared_ptr<Gameloop> game = monitor.create_game();
-    g_id = monitor.get_last_created_game_id();
-    set_game_id(g_id);
 
-    game->start();
     receiver = std::make_shared<ClientReceiver>(protocol, game, id);
     receiver->start();
     sender.start();
