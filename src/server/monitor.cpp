@@ -13,8 +13,10 @@ std::string Monitor::get_last_created_game_id() const {
 
 void Monitor::add_client(const int client_id, std::unique_ptr<ClientHandler> client) {
     std::unique_lock<std::mutex> lock(mutex);
+    std::string g_id = client->get_game_id();
     clients[client_id] = std::move(client);
-    auto i = current_games.find(std::to_string(game_id));
+
+    auto i = current_games.find(g_id);
     if (i != current_games.end()){
         i->second->add_car(client_id);
     }
@@ -45,21 +47,19 @@ void Monitor::clear_clients() {
     clients.clear();
 }
 
-void Monitor::broadcast(DTO& dto) {
+void Monitor::broadcast(DTO& dto, const std::string& gid) {
     std::unique_lock<std::mutex> lock(mutex);
     for (auto& [id, client] : clients) {
-        auto i = clients.find(id);
-        if (i == clients.end()) {
-            continue;
+        if (client->get_game_id() == gid) {
+            client->send_state(dto);
         }
-        i->second->send_state(dto);
     }
 }
 
-std::shared_ptr<Gameloop> Monitor::create_game(Queue<ClientCommand>& cmd_queue) {
+std::shared_ptr<Gameloop> Monitor::create_game() {
     std::unique_lock<std::mutex> lock(mutex);
     std::string id = generate_game_id();
-    auto game_loop = std::make_shared<Gameloop>(cmd_queue,*this);
+    auto game_loop = std::make_shared<Gameloop>(*this,id);
     current_games[id] = game_loop;
     return game_loop;
 }
@@ -108,7 +108,6 @@ void Monitor::clear_remaining_clients(const std::string& _game_id){
 }
 
 void Monitor::kill_games() {
-    std::unique_lock<std::mutex> lock(mutex);
     for (auto& [id, gameloop] : current_games) {
         gameloop->stop();
         gameloop->join();

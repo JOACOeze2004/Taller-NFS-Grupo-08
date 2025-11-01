@@ -11,6 +11,7 @@
 #include "client_command.h"
 #include "client_handler.h"
 
+class ClientHandler;
 class Gameloop;
 
 class Monitor {
@@ -28,11 +29,11 @@ private:
 public:
     Monitor();
     void add_client(const int client_id, std::unique_ptr<ClientHandler> client);
-    void broadcast(DTO& dto);
+    void broadcast(DTO& dto,const std::string& gid);
     void clear_clients();
     void reap();
 
-    std::shared_ptr<Gameloop> create_game(Queue<ClientCommand>& cmd_queue);
+    std::shared_ptr<Gameloop> create_game();
     std::shared_ptr<Gameloop> join_game(const std::string& user_name, const std::string& game_id);
     Gameloop& get_game(const std::string& game_id);
     void remove_player(const std::string& username);
