@@ -41,24 +41,40 @@ void Client::run(const PlayerConfig& config) {
 
     DTO dto;
     InputParser parser(sender, command_queue);
-    GraphicClient graphic_client(map_path);
+    
+    while (!receiver.try_pop_car_state(dto)) {
+        SDL_Delay(10); 
+    }
+    
+
+    
+    GraphicClient graphic_client(map_path,dto);
     ClientHandler handler(parser);
+    const Uint32 FRAME_DELAY = 1000 / 60;  // ~60 FPS
+
+
 
     while (true) {
+        Uint32 frame_start = SDL_GetTicks();
+
         while (receiver.try_pop_car_state(dto)) {
-            for (auto& [id, car] : dto.cars) { 
-                graphic_client.update_car(id, car); 
+            for (auto& [id, car] : dto.cars) {
+                graphic_client.update_car(id, car);
             }
-            graphic_client.set_player_car(dto.id);
         }
 
-        
         try {
             handler.handle_event();
         } catch (ClientQuitException& e) {
             break;
         }
+
         graphic_client.draw();
+
+        Uint32 frame_time = SDL_GetTicks() - frame_start;
+        if (frame_time < FRAME_DELAY) {
+            SDL_Delay(FRAME_DELAY - frame_time);
+        }
     }
     command_queue.close();
     protocol.close();

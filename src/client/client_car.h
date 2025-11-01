@@ -7,6 +7,7 @@
 class Car {
 public:
     Car(float x, float y, float angle, SDL_Renderer* renderer);
+    ~Car();
 
     void update_from_dto(const CarDTO& state);
     void render();
@@ -23,9 +24,11 @@ private:
     float velocity;
     
     SDL_Renderer* renderer;
+    SDL_Texture* texture = nullptr; // Sprite texture (spritesheet)
+    SDL_Rect srcRect{0, 0, 0, 0};   // Source rect within spritesheet
 
-    static constexpr float CAR_WIDTH = 20.0f;
-    static constexpr float CAR_HEIGHT = 10.0f;
+    static constexpr float CAR_WIDTH = 40.0f;
+    static constexpr float CAR_HEIGHT = 35.0f;
 };
 
 #endif // CAR_H

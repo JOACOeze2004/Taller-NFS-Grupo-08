@@ -4,6 +4,7 @@
 #include <string>
 #include "client_car.h"
 #include <unordered_map>
+#include "../common/DTO.h"
 
 class GraphicClient {
     SDL_Renderer* renderer;
@@ -15,18 +16,18 @@ class GraphicClient {
     float camera_x, camera_y;
     int screen_width, screen_height;
     float map_width, map_height;
-    float zoom_factor;  // Factor de zoom (menor = más cerca)
+    
 
     public:
-    explicit GraphicClient(const std::string& map_path);
+    explicit GraphicClient(const std::string& map_path, const DTO& initial_dto);
     void draw();
     void update_car(int id, const CarDTO& car_state);
-    void set_player_car(int id);
     ~GraphicClient();
-
+    
     private:
-        void draw_car(const CarDTO& car);
-        void update_camera();
+    void draw_car(const CarDTO& car);
+    void update_camera();
+    void set_player_car(int id);
 };
 
 

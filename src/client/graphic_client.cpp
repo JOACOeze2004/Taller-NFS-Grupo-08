@@ -5,7 +5,7 @@
 #include "client_car.h"
 #include <SDL2/SDL_image.h>
 
-GraphicClient::GraphicClient(const std::string& map_path)
+GraphicClient::GraphicClient(const std::string& map_path, const DTO& initial_dto)
     : renderer(nullptr), bg_texture(nullptr), window(nullptr), 
       player_car_id(-1), camera_x(0), camera_y(0), 
       screen_width(1200), screen_height(900) {
@@ -52,6 +52,13 @@ GraphicClient::GraphicClient(const std::string& map_path)
         std::cerr << "[CLIENT] Error creando textura: " << SDL_GetError() << std::endl;
     }
 
+    for (const auto& [id, car_state] : initial_dto.cars) {
+        update_car(id, car_state);
+    }
+
+    set_player_car(initial_dto.id);
+
+    update_camera();
     
 }
 
@@ -70,8 +77,8 @@ void GraphicClient::update_camera() {
 
     const CarDTO& player_car = cars[player_car_id];
 
-    camera_x += (player_car.x - camera_x - screen_width / 2.0f) * 0.1666666666666666666666f;
-    camera_y += (player_car.y - camera_y - screen_height / 2.0f) * 0.16666666666666666666666f;
+    camera_x += (player_car.x - camera_x - screen_width / 2.0f);
+    camera_y += (player_car.y - camera_y - screen_height / 2.0f);
 
     if (camera_x < 0) camera_x = 0;
     if (camera_y < 0) camera_y = 0;
@@ -82,11 +89,11 @@ void GraphicClient::update_camera() {
 void GraphicClient::draw() {
     update_camera();
 
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer);
+    //SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    //SDL_RenderClear(renderer);
 
     if (bg_texture) {
-        SDL_Rect src_rect = {static_cast<int>(camera_x), static_cast<int>(camera_y), screen_width, screen_height};
+        SDL_Rect src_rect = {static_cast<int>(camera_x), static_cast<int>(camera_y), screen_width/2, screen_height/2};
         SDL_Rect dst_rect = {0, 0, screen_width, screen_height};
         SDL_RenderCopy(renderer, bg_texture, &src_rect, &dst_rect);
     }
