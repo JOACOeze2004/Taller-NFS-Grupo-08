@@ -12,6 +12,9 @@
 #include "client_command.h"
 #include "gameloop.h"
 
+class Monitor;
+class Gameloop;
+class ClientHandler;
 
 class ClientAcceptor: public Thread {
     Socket acceptor;
