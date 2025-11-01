@@ -19,12 +19,15 @@ class Monitor;
 class Gameloop: public Thread {
 
 public:
-    explicit Gameloop(Queue<ClientCommand>& _cmd_queue, Monitor& _monitor);
+    explicit Gameloop(Monitor& _monitor, const std::string& game_id);
     void run() override;
 
     void add_car(const int client_id);
+    void push_command(const ClientCommand& cmd);
+    const std::string& get_game_id() const;
 private:
-    Queue<ClientCommand>& cmd_queue;
+    Queue<ClientCommand> cmd_queue;
+    std::string game_id;
     Monitor& monitor;
     std::map<int, Car> cars;
     std::map<uint8_t, std::function<void(Car& car)>> car_actions;

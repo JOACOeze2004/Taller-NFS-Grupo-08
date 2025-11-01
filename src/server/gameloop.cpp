@@ -3,8 +3,8 @@
 #include "src/common/DTO.h"
 #include "src/common/constants.h"
 
-Gameloop::Gameloop(Queue<ClientCommand>& _cmd_queue, Monitor& _monitor):
-        cmd_queue(_cmd_queue), monitor(_monitor) {
+Gameloop::Gameloop(Monitor& _monitor,const std::string& gid):
+        cmd_queue(),game_id(gid), monitor(_monitor) {
     initialize_car_actions();
 }
 
@@ -58,6 +58,10 @@ void Gameloop::add_car(const int client_id) {
     std::forward_as_tuple(world.get_id()));
 }
 
+void Gameloop::push_command(const ClientCommand& cmd){
+    this->cmd_queue.push(cmd);
+}
+
 void Gameloop::update_positions() {
     world.update();
 }
@@ -69,5 +73,7 @@ void Gameloop::broadcast() const {
     }
     DTO dto;
     dto.cars = std::move(carsDTO);
-    monitor.broadcast(dto);
+    monitor.broadcast(dto,this->game_id);
 }
+
+const std::string& Gameloop::get_game_id() const{ return this->game_id; }
