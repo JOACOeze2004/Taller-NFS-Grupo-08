@@ -20,7 +20,7 @@ void LoginWindow::player_name(QLabel*& nameLabel) {
     nameInput->setPlaceholderText("Ingresá tu nombre...");
     nameInput->setStyleSheet("QLineEdit {"
                              "   background-color: rgba(20, 20, 30, 200);"
-                             "   color: white;"
+                             "   color: grey;"
                              "   border: 2px solid #00eaff;"
                              "   border-radius: 10px;"
                              "   padding: 8px;"
@@ -41,7 +41,7 @@ void LoginWindow::car_sellec(QLabel*& carLabel) {
 
     carSelector->setStyleSheet("QComboBox {"
                                "   background-color: rgba(20, 20, 30, 200);"
-                               "   color: white;"
+                               "   color: grey;"
                                "   border: 2px solid #00eaff;"
                                "   border-radius: 10px;"
                                "   padding: 6px;"
@@ -60,7 +60,7 @@ void LoginWindow::map_sellec(QLabel*& mapLabel) {
     mapSelector->addItem("Vice City");
     mapSelector->setStyleSheet("QComboBox {"
                                "   background-color: rgba(20, 20, 30, 200);"
-                               "   color: white;"
+                               "   color: grey;"
                                "   border: 2px solid #00eaff;"
                                "   border-radius: 10px;"
                                "   padding: 6px;"
