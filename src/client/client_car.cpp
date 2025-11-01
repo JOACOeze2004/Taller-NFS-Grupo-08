@@ -5,7 +5,6 @@
 #include <SDL2/SDL_image.h>
 
 namespace {
-// Try to load a texture from a list of candidate paths. Returns nullptr if all fail.
 SDL_Texture* loadTextureFromCandidates(SDL_Renderer* renderer, const std::vector<std::string>& candidates) {
     for (const auto& path : candidates) {
         SDL_Texture* tex = IMG_LoadTexture(renderer, path.c_str());
@@ -17,9 +16,7 @@ SDL_Texture* loadTextureFromCandidates(SDL_Renderer* renderer, const std::vector
 
 Car::Car(float x, float y, float angle, SDL_Renderer* renderer)
     : x(x), y(y), angle(angle), velocity(0.0f), renderer(renderer) {
-    // Ensure PNG support is initialized (safe to call multiple times)
     if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) == 0) {
-        // If initialization fails, we'll render fallback debug shape
     }
 
     const std::vector<std::string> candidates = {
@@ -54,16 +51,13 @@ void Car::update_from_dto(const CarDTO& state) {
 }
 
 void Car::render() {
-    // If texture is available, render sprite; otherwise fall back to debug shape
     if (texture && srcRect.w > 0 && srcRect.h > 0) {
-        // Destination rect centered at (x, y)
         SDL_Rect dstRect;
         dstRect.w = static_cast<int>(CAR_WIDTH);
         dstRect.h = static_cast<int>(CAR_HEIGHT);
         dstRect.x = static_cast<int>(x - dstRect.w / 2.0f);
         dstRect.y = static_cast<int>(y - dstRect.h / 2.0f);
 
-        // Convert radians to degrees; SDL uses clockwise rotation
         const double angleDeg = angle * 180.0 / M_PI;
         SDL_Point center{dstRect.w / 2, dstRect.h / 2};
 
@@ -71,7 +65,6 @@ void Car::render() {
         return;
     }
 
-    // Fallback: original debug rectangle + front direction line
     float half_width = CAR_WIDTH / 2.0f;
     float half_height = CAR_HEIGHT / 2.0f;
 

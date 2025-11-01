@@ -7,7 +7,7 @@
 
 GraphicClient::GraphicClient(const std::string& map_path, const DTO& initial_dto)
     : renderer(nullptr), bg_texture(nullptr), window(nullptr), 
-      player_car_id(-1), camera_x(0), camera_y(0), 
+      player_car_id(-1), camera_x(0.0f), camera_y(0.0f), 
       screen_width(1200), screen_height(900) {
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -41,8 +41,8 @@ GraphicClient::GraphicClient(const std::string& map_path, const DTO& initial_dto
     if (!bg_surface) {
         std::cerr << "[CLIENT] Error cargando fondo: " << SDL_GetError() << std::endl;
     } else {
-        map_width = bg_surface->w;
-        map_height = bg_surface->h;
+        map_width = static_cast<float>(bg_surface->w);
+        map_height = static_cast<float>(bg_surface->h);
     }
     
     bg_texture = SDL_CreateTextureFromSurface(renderer, bg_surface);
@@ -77,30 +77,33 @@ void GraphicClient::update_camera() {
 
     const CarDTO& player_car = cars[player_car_id];
 
-    camera_x += (player_car.x - camera_x - screen_width / 2.0f);
-    camera_y += (player_car.y - camera_y - screen_height / 2.0f);
+    camera_x += (player_car.x - camera_x - static_cast<float>(screen_width) / 2.0f);
+    camera_y += (player_car.y - camera_y - static_cast<float>(screen_height) / 2.0f);
 
-    if (camera_x < 0) camera_x = 0;
-    if (camera_y < 0) camera_y = 0;
-    if (camera_x > map_width - screen_width) camera_x = map_width - screen_width;
-    if (camera_y > map_height - screen_height) camera_y = map_height - screen_height;
+    if (camera_x < 0.0f) camera_x = 0.0f;
+    if (camera_y < 0.0f) camera_y = 0.0f;
+    if (camera_x > map_width - static_cast<float>(screen_width)) 
+        camera_x = map_width - static_cast<float>(screen_width);
+    if (camera_y > map_height - static_cast<float>(screen_height)) 
+        camera_y = map_height - static_cast<float>(screen_height);
 }
 
 void GraphicClient::draw() {
     update_camera();
 
-    //SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    //SDL_RenderClear(renderer);
-
     if (bg_texture) {
-        SDL_Rect src_rect = {static_cast<int>(camera_x), static_cast<int>(camera_y), screen_width/2, screen_height/2};
-        SDL_Rect dst_rect = {0, 0, screen_width, screen_height};
-        SDL_RenderCopy(renderer, bg_texture, &src_rect, &dst_rect);
+        SDL_Rect src_rect = {static_cast<int>(camera_x), static_cast<int>(camera_y), 
+                            (screen_width) / 2, 
+                            (screen_height) / 2};
+        SDL_FRect dst_rect = {0.0f, 0.0f, 
+                              static_cast<float>(screen_width), 
+                              static_cast<float>(screen_height)};
+        SDL_RenderCopyF(renderer, bg_texture, &src_rect, &dst_rect);
     }
     
     for (const auto& [id, car] : cars) {
-        if (car.x >= camera_x && car.x <= camera_x + screen_width &&
-            car.y >= camera_y && car.y <= camera_y + screen_height) {
+        if (car.x >= camera_x && car.x <= camera_x + static_cast<float>(screen_width) &&
+            car.y >= camera_y && car.y <= camera_y + static_cast<float>(screen_height)) {
             draw_car(car);
         }
     }
