@@ -7,8 +7,8 @@
 #include <box2d/box2d.h>
 
 constexpr float HANDLING = 150000.0f;
-constexpr float ACCELERATION = 150000.0f;
-constexpr float BRAKING = 50000.0f;
+constexpr float ACCELERATION = 80000.0f;
+constexpr float BRAKING = 10000.0f;
 
 class Car {
     float max_speed = MAX_SPEED;

@@ -8,7 +8,7 @@ Car::Car(b2WorldId world){
     b2BodyDef body = b2DefaultBodyDef();
     body.type = b2_dynamicBody;
     body.linearDamping = 2.0f;
-    body.angularDamping = 5.0f;
+    body.angularDamping = 7.0f;
     body.position = {300.0f,300.0f};
     body_id = b2CreateBody(world, &body);
     b2Body_EnableContactEvents(body_id, true);
@@ -35,12 +35,14 @@ void Car::accelerate() {
         b2Vec2 force = {velocity.x * acceleration, velocity.y * acceleration};
         b2Body_ApplyForceToCenter(body_id, force, true);
     }
+    update_position();
 }
 
 void Car::brake() {
     b2Vec2 vel = b2Body_GetWorldVector(body_id, {1,0});
     b2Vec2 brake = {-vel.x * braking, -vel.y * braking};
     b2Body_ApplyForceToCenter(body_id, brake, true);
+    update_position();
 }
 
 void Car::turn_right() {
@@ -48,6 +50,7 @@ void Car::turn_right() {
     float speed = b2Length(vel);
     if (speed > 1.0f) {
         b2Body_ApplyTorque(body_id, handling, true);
+        update_position();
     }
 }
 
@@ -56,6 +59,7 @@ void Car::turn_left() {
     float speed = b2Length(vel);
     if (speed > 1.0f) {
         b2Body_ApplyTorque(body_id, -handling, true);
+        update_position();
     }
 }
 
@@ -80,6 +84,19 @@ void Car::activate_infinite_nitro() {
 }
 
 void Car::update_position() {
+    //b2Vec2 forward = b2Body_GetWorldVector(body_id, {1,0});
+    b2Vec2 right = b2Body_GetWorldVector(body_id, {0,1});
+
+    b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
+
+    //float forward_speed = b2Dot(forward, vel); es de friccion lineal pero no se si box2d ya se encarga
+    float lateral_speed = b2Dot(right, vel);
+
+    b2Vec2 lateral_impulse = {
+        -lateral_speed*right.x*b2Body_GetMass(body_id),
+        -lateral_speed*right.y*b2Body_GetMass(body_id),
+    };
+    b2Body_ApplyLinearImpulseToCenter(body_id, lateral_impulse, true);
 
 }
 

@@ -11,7 +11,7 @@
 #define SERVER_PORT 1
 #define SERVER_CLOSE 'q'
 #define CLIENT_QUEUE_LEN 100
-#define MAX_SPEED 1700
+#define MAX_SPEED 10000
 #define MAX_LIFE 1000
 #define MAX_NITRO 500
 
