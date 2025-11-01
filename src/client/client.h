@@ -9,7 +9,7 @@
 class Client {
 public:
     Client(const std::string& host, const std::string& port);
-    void run(const PlayerConfig& config);
+    void run(const PlayerConfig& config,uint8_t lobby_action, const std::string& game_id);
 
 private:
     std::string host;

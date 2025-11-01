@@ -16,6 +16,7 @@ class ClientProtocol {
                             const std::string& map_name) ;
         void receive_game_init_data(std::string& map_path,
                                    float& spawn_x, float& spawn_y) ;
+        void send_lobby_action(uint8_t action, const std::string& game_id);
 
         CarDTO receive_car_state() const;
         void send_byte(const uint8_t byte) const;

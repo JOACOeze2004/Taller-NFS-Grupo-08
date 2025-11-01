@@ -20,6 +20,17 @@ uint8_t ClientProtocol::receive_byte() const{
     return protocol.receive_byte();
 }
 
+void ClientProtocol::send_lobby_action(uint8_t action, const std::string& game_id) {
+    protocol.send_byte(action);
+    if (action == SEND_JOIN_GAME) {
+        uint16_t id_len = static_cast<uint16_t>(game_id.size());
+        protocol.send_big_endian_16(id_len);
+        if (id_len > 0) {
+            protocol.send_string(game_id);
+        }
+    }
+}
+
 void ClientProtocol::send_player_config(const std::string& name, uint8_t car_id,
                                   const std::string& map_name) {
     auto name_length = static_cast<uint16_t>(name.size());

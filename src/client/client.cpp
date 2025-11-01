@@ -12,13 +12,16 @@
 Client::Client(const std::string& host, const std::string& port)
     : host(host), port(port), client_socket(host.c_str(), port.c_str()) {}
 
-void Client::run(const PlayerConfig& config) {
+void Client::run(const PlayerConfig& config,uint8_t lobby_action, const std::string& game_id) {
     std::cout << "[CLIENT] Connected to " << host << ":" << port << std::endl;
 
     ClientProtocol protocol(client_socket);
 
     try {
         protocol.send_player_config(config.playerName, config.carId, config.mapName);
+        std::cout << "[CLIENT] Action: " << static_cast<int>(lobby_action) << std::endl;
+
+        protocol.send_lobby_action(lobby_action, game_id);
     } catch (const std::exception& e) {
         std::cerr << "[CLIENT] Error sending config: " << e.what() << std::endl;
         return;
