@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) try {
 
     if (startPressed) {
         Client client(host, port);
-        client.run(playerConfig);
+        client.run(playerConfig,loginWindow->getLobbyAction(), loginWindow->getSelectedGameId());
     }
 
 	return 0;

@@ -28,7 +28,7 @@ void LoginWindow::player_name(QLabel*& nameLabel) {
                              "}");
 }
 void LoginWindow::car_sellec(QLabel*& carLabel) {
-    carLabel = new QLabel("Elegí tu auto:");
+    carLabel = new QLabel("Choose your vehicle:");
     carLabel->setStyleSheet("color: #00eaff; font-size: 22px; font-weight: bold;");
     carSelector = new QComboBox();
     carSelector->addItem("auto 0");
@@ -52,7 +52,7 @@ void LoginWindow::car_sellec(QLabel*& carLabel) {
                                "}");
 }
 void LoginWindow::map_sellec(QLabel*& mapLabel) {
-    mapLabel = new QLabel("Elegí el mapa:");
+    mapLabel = new QLabel("Map:");
     mapLabel->setStyleSheet("color: #00eaff; font-size: 22px; font-weight: bold;");
     mapSelector = new QComboBox();
     mapSelector->addItem("Liberty City");
@@ -110,7 +110,10 @@ LoginWindow::LoginWindow(QWidget *parent)
       layout(nullptr),
       nameInput(nullptr),
       carSelector(nullptr),
-      mapSelector(nullptr)
+      mapSelector(nullptr),
+      gameIdInput(nullptr),
+      lobbyAction(SEND_CREATE_GAME),
+      selectedGameId("") 
 {
     setWindowTitle("Need for Speed - Login");
     showMaximized();
@@ -142,11 +145,71 @@ LoginWindow::LoginWindow(QWidget *parent)
     layout->addWidget(mapLabel);
     layout->addWidget(mapSelector);
     layout->addSpacing(40);
+
+    createGameButton = new QPushButton("CREATE GAME");
+    createGameButton->setStyleSheet("QPushButton {"
+                                "   font-size: 28px;"
+                                "   font-weight: bold;"
+                                "   color: #00eaff;"
+                                "   background-color: rgba(10, 10, 20, 180);"
+                                "   border: 2px solid #00eaff;"
+                                "   border-radius: 12px;"
+                                "   padding: 15px 30px;"
+                                "}");
+    layout->addWidget(createGameButton, 0, Qt::AlignHCenter);
+
+    gameIdInput = new QLineEdit();
+    gameIdInput->setPlaceholderText("Enter the game ID...");
+    gameIdInput->setStyleSheet("QLineEdit {"
+                               "   background-color: rgba(20, 20, 30, 200);"
+                               "   color: white;"
+                               "   border: 2px solid #00eaff;"
+                               "   border-radius: 10px;"
+                               "   padding: 8px;"
+                               "   font-size: 20px;"
+                               "}");
+    layout->addWidget(gameIdInput);
+    
+    joinGameButton = new QPushButton("JOIN GAME");
+    joinGameButton->setStyleSheet("QPushButton {"
+                                "   font-size: 28px;"
+                                "   font-weight: bold;"
+                                "   color: #00eaff;"
+                                "   background-color: rgba(10, 10, 20, 180);"
+                                "   border: 2px solid #00eaff;"
+                                "   border-radius: 12px;"
+                                "   padding: 15px 30px;"
+                                "}");
+
+    layout->addWidget(joinGameButton, 0, Qt::AlignHCenter);
+
     layout->addWidget(startButton, 0, Qt::AlignHCenter);
 
     setLayout(layout);
 
-    connect(startButton, &QPushButton::clicked, this, &LoginWindow::startButtonClicked);
+    connect(startButton, &QPushButton::clicked, this, [this]() {
+        this->lobbyAction = SEND_CREATE_GAME;
+        this->selectedGameId = "";
+        emit startButtonClicked();
+    });
+    
+    connect(createGameButton, &QPushButton::clicked, this, [this]() {
+        this->lobbyAction = SEND_CREATE_GAME;
+        this->selectedGameId = "";
+        emit startButtonClicked();
+    });
+
+    connect(joinGameButton, &QPushButton::clicked, this, [this]() {
+        std::string gameId = gameIdInput->text().toStdString();
+        
+        if (gameId.empty()) {
+            std::cout << "[CLIENT] ERROR: Debes ingresar un ID de partida" << std::endl;
+            return;
+        }
+        this->lobbyAction = SEND_JOIN_GAME;
+        this->selectedGameId = gameId;
+        emit startButtonClicked();
+    });
 }
 
 LoginWindow::~LoginWindow() = default;
@@ -168,6 +231,14 @@ void LoginWindow::paintEvent(QPaintEvent *event) {
     }
 
     QWidget::paintEvent(event);
+}
+
+uint8_t LoginWindow::getLobbyAction() const { 
+    return lobbyAction; 
+}
+
+std::string LoginWindow::getSelectedGameId() const { 
+    return selectedGameId; 
 }
 
 PlayerConfig LoginWindow::getPlayerConfig() const {

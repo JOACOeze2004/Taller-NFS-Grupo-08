@@ -6,6 +6,8 @@
 #include <QLineEdit>
 #include <QPainter>
 #include <QPushButton>
+#include "../../common/constants.h"
+#include <iostream> 
 
 #include <qlabel.h>
 
@@ -27,6 +29,9 @@ public:
     explicit LoginWindow(QWidget *parent = nullptr);
     ~LoginWindow() override;
 
+    uint8_t getLobbyAction() const;
+    std::string getSelectedGameId() const;
+
     PlayerConfig getPlayerConfig() const;
     signals:
         void startButtonClicked();
@@ -41,6 +46,13 @@ private:
     QLineEdit* nameInput;
     QComboBox* carSelector;
     QComboBox* mapSelector;
+
+    QPushButton *createGameButton;
+    QPushButton *joinGameButton;
+    QLineEdit* gameIdInput;
+    
+    uint8_t lobbyAction;
+    std::string selectedGameId;
 };
 
 #endif  // TALLER_TP_LOGIN_WINDOW_H
