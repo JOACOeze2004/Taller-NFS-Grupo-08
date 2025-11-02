@@ -56,10 +56,10 @@ void Monitor::broadcast(DTO& dto, const std::string& gid) {
     }
 }
 
-std::shared_ptr<Gameloop> Monitor::create_game() {
+std::shared_ptr<Gameloop> Monitor::create_game(std::string map_name) {
     std::unique_lock<std::mutex> lock(mutex);
     std::string id = generate_game_id();
-    auto game_loop = std::make_shared<Gameloop>(*this,id);
+    auto game_loop = std::make_shared<Gameloop>(*this, id, map_name);
     current_games[id] = game_loop;
     return game_loop;
 }

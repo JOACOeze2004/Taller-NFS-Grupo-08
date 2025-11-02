@@ -33,7 +33,7 @@ public:
     void clear_clients();
     void reap();
 
-    std::shared_ptr<Gameloop> create_game();
+    std::shared_ptr<Gameloop> create_game(std::string map_name);
     std::shared_ptr<Gameloop> join_game(const std::string& user_name, const std::string& game_id);
     Gameloop& get_game(const std::string& game_id);
     void remove_player(const std::string& username);

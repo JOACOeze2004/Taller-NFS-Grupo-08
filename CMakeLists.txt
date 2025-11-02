@@ -58,6 +58,7 @@ include_directories(src/libs/box2d/include)
 # sudo apt-get install libopus-dev libopusfile-dev libxmp-dev libfluidsynth-dev fluidsynth libwavpack1 libwavpack-dev libfreetype-dev wavpack
 # sudo apt-get install qt5-qmake qtbase5-dev
 # sudo apt-get install libsdl2-image-dev
+# sudo apt install libyaml-cpp-dev
 
 # Install libSDL2 and libSDL2pp (for client or editor)
 # HEY!! TODO XXX: add more dependendies (either for client, server or editor)
@@ -192,7 +193,7 @@ if(TALLER_SERVER)
 
     # Link the taller_common lib target
     target_include_directories(taller_server PRIVATE libs/box2d/include)
-    target_link_libraries(taller_server taller_common box2d)
+    target_link_libraries(taller_server taller_common box2d yaml-cpp)
 endif()
 
 if(TALLER_EDITOR)

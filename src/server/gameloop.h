@@ -19,7 +19,7 @@ class Monitor;
 class Gameloop: public Thread {
 
 public:
-    explicit Gameloop(Monitor& _monitor, const std::string& game_id);
+    explicit Gameloop(Monitor& _monitor, const std::string& game_id, std::string map_name);
     void run() override;
 
     void add_car(const int client_id);

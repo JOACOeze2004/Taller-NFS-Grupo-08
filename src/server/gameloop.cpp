@@ -3,9 +3,10 @@
 #include "src/common/DTO.h"
 #include "src/common/constants.h"
 
-Gameloop::Gameloop(Monitor& _monitor,const std::string& gid):
+Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_name):
         cmd_queue(),game_id(gid), monitor(_monitor) {
     initialize_car_actions();
+    world.generate_map(map_name);
 }
 
 void Gameloop::initialize_car_actions() {
