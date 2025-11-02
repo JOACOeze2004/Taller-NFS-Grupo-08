@@ -21,11 +21,13 @@ class LoginWindow final: public QWidget {
     Q_OBJECT
 
 public:
+    void styleButton(QPushButton* btn);
+    void applyGlowEffect(QPushButton* btn);
+    void styleInput(QLineEdit* input);
+    void styleCombo(QComboBox* combo);
     void player_name(QLabel*& nameLabel);
     void car_sellec(QLabel*& carLabel);
     void map_sellec(QLabel*& mapLabel);
-    void effects() const;
-    void start_button();
     explicit LoginWindow(QWidget *parent = nullptr);
     ~LoginWindow() override;
 
