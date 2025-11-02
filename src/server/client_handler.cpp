@@ -31,7 +31,7 @@ void ClientHandler::run() {
     std::string g_id;
     
     if (action == SEND_CREATE_GAME) {
-        game = monitor.create_game();
+        game = monitor.create_game(map_name);
         g_id = monitor.get_last_created_game_id();
         game->start();
         

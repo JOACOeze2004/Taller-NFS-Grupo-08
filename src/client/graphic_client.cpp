@@ -63,6 +63,7 @@ GraphicClient::GraphicClient(const std::string& map_path, const DTO& initial_dto
 }
 
 void GraphicClient::set_player_car(int id) {
+    std::cout << "el id es: " << id << std::endl;
     player_car_id = id;
 }
 
@@ -93,8 +94,8 @@ void GraphicClient::draw() {
 
     if (bg_texture) {
         SDL_Rect src_rect = {static_cast<int>(camera_x), static_cast<int>(camera_y), 
-                            (screen_width) / 2, 
-                            (screen_height) / 2};
+                            (screen_width),
+                            (screen_height)};
         SDL_FRect dst_rect = {0.0f, 0.0f, 
                               static_cast<float>(screen_width), 
                               static_cast<float>(screen_height)};

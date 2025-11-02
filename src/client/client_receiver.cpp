@@ -1,5 +1,7 @@
 #include "client_receiver.h"
 
+#include "InvalidId.h"
+
 ClientReceiver::ClientReceiver(ClientProtocol& protocol) : protocol(protocol) {}
 
 void ClientReceiver::run(){
@@ -7,6 +9,9 @@ void ClientReceiver::run(){
         try {
             DTO dto = protocol.receive_game_state();
             queue.push(dto);
+        }
+        catch (const InvalidId& e) {
+
         }
         catch(const std::exception& e) {
             this->stop();

@@ -137,6 +137,7 @@ if(TALLER_CLIENT)
             src/client/ClientQuitException.h
             src/client/final_results/final_results_windows.cpp
             src/client/final_results/final_results_windows.h
+            src/client/InvalidId.h
     )
 
     # Make them depend on taller_common lib
