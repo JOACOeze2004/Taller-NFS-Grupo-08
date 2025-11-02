@@ -134,6 +134,8 @@ if(TALLER_CLIENT)
             src/client/graphic_client.cpp
             src/client/graphic_client.h
             src/client/ClientQuitException.h
+            src/client/final_results/final_results_windows.cpp
+            src/client/final_results/final_results_windows.h
     )
 
     # Make them depend on taller_common lib
