@@ -45,12 +45,15 @@ void Client::run(const PlayerConfig& config,uint8_t lobby_action, const std::str
     DTO dto;
     InputParser parser(sender, command_queue);
     
+    static unsigned int wait_count = 0;
+    
     while (!receiver.try_pop_car_state(dto)) {
-        SDL_Delay(10); 
-    }
-    
+        SDL_Delay(10);
 
-    
+        std::cerr << "[CLIENT] Waiting for initial car state... " << wait_count++ << std::endl;
+
+    }
+
     GraphicClient graphic_client(map_path,dto);
     ClientHandler handler(parser);
     const Uint32 FRAME_DELAY = 1000 / 60;  // ~60 FPS

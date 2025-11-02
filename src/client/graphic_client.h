@@ -26,6 +26,8 @@ class GraphicClient {
     
     private:
     void draw_car(const CarDTO& car);
+    void draw_cars();
+    void draw_minimap();
     void update_camera();
     void set_player_car(int id);
 };
