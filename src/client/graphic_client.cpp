@@ -55,15 +55,13 @@ GraphicClient::GraphicClient(const std::string& map_path, const DTO& initial_dto
     for (const auto& [id, car_state] : initial_dto.cars) {
         update_car(id, car_state);
     }
-
     set_player_car(initial_dto.id);
 
     update_camera();
     
 }
 
-void GraphicClient::set_player_car(int id) {
-    std::cout << "el id es: " << id << std::endl;
+void GraphicClient::set_player_car(int id) { 
     player_car_id = id;
 }
 

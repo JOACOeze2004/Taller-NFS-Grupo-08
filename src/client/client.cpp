@@ -18,10 +18,11 @@ void Client::run(const PlayerConfig& config,uint8_t lobby_action, const std::str
     ClientProtocol protocol(client_socket);
 
     try {
-        protocol.send_player_config(config.playerName, config.carId, config.mapName);
-        std::cout << "[CLIENT] Action: " << static_cast<int>(lobby_action) << std::endl;
-
+        protocol.send_player_config(config.playerName, config.carId, config.mapName);        
         protocol.send_lobby_action(lobby_action, game_id);
+        if (lobby_action == SEND_CREATE_GAME){
+            std::cout << "[CLIENT] Waiting for other player to start: " << std::endl;
+        }        
     } catch (const std::exception& e) {
         std::cerr << "[CLIENT] Error sending config: " << e.what() << std::endl;
         return;

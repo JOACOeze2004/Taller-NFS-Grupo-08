@@ -17,8 +17,6 @@
 class Protocol {
 public:
     explicit Protocol(Socket& socket);
-    void send_message(const std::string& message) const;
-    std::string receive_message() const;
 
     void send_byte(const uint8_t byte) const;
     uint8_t receive_byte() const;
