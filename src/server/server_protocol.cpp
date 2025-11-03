@@ -52,7 +52,7 @@ void ServerProtocol::receive_lobby_action(uint8_t& action, std::string& game_id)
 }
 
 void ServerProtocol::send_game_state(const DTO& dto) {
-    protocol.send_big_endian_32(dto.id);    
+    protocol.send_byte(static_cast<uint8_t>(dto.id));    
     protocol.send_big_endian_16(dto.cars.size());
     
     for (const auto& [car_id, car] : dto.cars) {

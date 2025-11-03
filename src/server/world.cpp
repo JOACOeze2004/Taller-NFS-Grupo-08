@@ -32,7 +32,7 @@ struct StaticBody {
 void World::generate_map(std::string map_name) {
     YAML::Node map;
     if (map_name == "Liberty City") {
-        map = YAML::LoadFile("/home/vboxuser/CLionProjects/Taller-NFS-Grupo-08/src/server/libertycity.yaml");
+        map = YAML::LoadFile("../src/server/libertycity.yaml");
     }
     if (map_name == "San Andreas") {
         map = YAML::LoadFile("libertycity.yaml");
@@ -71,11 +71,6 @@ void World::generate_map(std::string map_name) {
         b2ShapeId shape = b2CreatePolygonShape(body, &shape_def, &box);
         b2Shape_EnableContactEvents(shape, true);
         b2Shape_EnableHitEvents(shape, true);
-
-
-        std::cout << "Edificio ID=" << e.id
-                  << " creado en (" << e.x << "," << e.y << ")"
-                  << " tamaño (" << e.width << "x" << e.height << ")\n";
     }
 }
 
