@@ -11,9 +11,19 @@ std::string Monitor::get_last_created_game_id() const {
     return std::to_string(game_id - 1);
 }
 
+std::string Monitor:: get_client_game_id(int client_id){
+    auto it = clients.find(client_id);
+    if (it != clients.end()) {
+        return it->second->get_game_id();
+    }
+    return "";
+}
+
+
 void Monitor::add_client(const int client_id, std::unique_ptr<ClientHandler> client) {
     std::unique_lock<std::mutex> lock(mutex);
     std::string g_id = client->get_game_id();
+    std::cout << "game id: " << g_id << std::endl;
     clients[client_id] = std::move(client);
 
     auto i = current_games.find(g_id);
@@ -27,6 +37,10 @@ void Monitor::reap() {
     std::vector<int> to_remove;
     for ( auto& [id, client] : clients) {
         if (client->is_dead()) {
+            std::string g_id = client->get_game_id();
+            if (!g_id.empty() && game_player_count.find(g_id) != game_player_count.end()) {
+                game_player_count[g_id]--;
+            }
             client->kill();
             client->join();
             to_remove.push_back(id);
@@ -41,6 +55,10 @@ void Monitor::reap() {
 void Monitor::clear_clients() {
     std::unique_lock<std::mutex> lock(mutex);
     for ( auto& [id, client] : clients) {
+        std::string g_id = client->get_game_id();
+        if (!g_id.empty() && game_player_count.find(g_id) != game_player_count.end()) {
+            game_player_count[g_id]--;
+        }
         client->kill();
         client->join();
     }
@@ -61,18 +79,27 @@ std::shared_ptr<Gameloop> Monitor::create_game(std::string map_name) {
     std::string id = generate_game_id();
     auto game_loop = std::make_shared<Gameloop>(*this, id, map_name);
     current_games[id] = game_loop;
+    game_player_count[id] = 1;
     return game_loop;
 }
 
 std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const std::string& _game_id) {
     std::unique_lock<std::mutex> lock(mutex);
-    auto game = current_games.find(_game_id);
-    if (game == current_games.end()){
+    auto game_i = current_games.find(_game_id);
+    if (game_i == current_games.end()){
         return nullptr;
     }
     //quizas handelear si el game esta muerto, tirar una excepcion de q la palmo la partida.
+    auto game = game_i->second;
     players[username] = _game_id;
-    return  game->second;
+    game_player_count[_game_id]++;
+    int current_players = game_player_count[_game_id];
+
+    if (current_players >= MIN_PLAYERS_TO_START){
+        game->start();
+    }
+
+    return game;
 }
 
 Gameloop& Monitor::get_game(const std::string& _game_id) {

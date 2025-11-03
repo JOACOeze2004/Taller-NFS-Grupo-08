@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "src/common/DTO.h"
+#include "../common/constants.h"
 
 #include "car.h"
 #include "client_command.h"
@@ -20,11 +21,13 @@ private:
     int game_id;    
     std::unordered_map<std::string, std::string> players; //{Nombre de usuario, id partida}
     std::unordered_map<std::string, std::shared_ptr<Gameloop>> current_games; // {id partida, ptr a esa partida}
+    std::unordered_map<std::string, int> game_player_count; // {game_id, cantidad_jugadores} 
 
     std::map<int, std::unique_ptr<ClientHandler>> clients; //Este en el futuro, vuela.
 
     std::string generate_game_id();
     void clear_remaining_clients(const std::string& _game_id);
+    std::string get_client_game_id(int client_id);
 
 public:
     Monitor();

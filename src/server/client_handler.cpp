@@ -33,7 +33,6 @@ void ClientHandler::run() {
     if (action == SEND_CREATE_GAME) {
         game = monitor.create_game(map_name);
         g_id = monitor.get_last_created_game_id();
-        game->start();
         
     } else if (action == SEND_JOIN_GAME) {
         game = monitor.join_game(player_name, game_id_to_join);
