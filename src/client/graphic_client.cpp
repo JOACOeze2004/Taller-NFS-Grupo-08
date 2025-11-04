@@ -57,14 +57,14 @@ GraphicClient::GraphicClient(const std::string& map_path, const DTO& initial_dto
     for (const auto& [id, car_state] : initial_dto.cars) {
         update_car(id, car_state);
     }
-
+    set_player_car(initial_dto.id);
 
     update_camera();
     
     draw();
 }
 
-void GraphicClient::set_player_car(int id) {
+void GraphicClient::set_player_car(int id) { 
     player_car_id = id;
 }
 
@@ -90,13 +90,13 @@ void GraphicClient::update_camera() {
         camera_y = map_height - static_cast<float>(screen_height);
 
     if (bg_texture) {
-    SDL_Rect src_rect = {static_cast<int>(camera_x), static_cast<int>(camera_y), 
-                        (screen_width) / 2, 
-                        (screen_height) / 2};
-    SDL_FRect dst_rect = {0.0f, 0.0f, 
-                            static_cast<float>(screen_width), 
-                            static_cast<float>(screen_height)};
-    SDL_RenderCopyF(renderer, bg_texture, &src_rect, &dst_rect);
+        SDL_Rect src_rect = {static_cast<int>(camera_x), static_cast<int>(camera_y), 
+                            (screen_width),
+                            (screen_height)};
+        SDL_FRect dst_rect = {0.0f, 0.0f, 
+                              static_cast<float>(screen_width), 
+                              static_cast<float>(screen_height)};
+        SDL_RenderCopyF(renderer, bg_texture, &src_rect, &dst_rect);
     }
 }
 

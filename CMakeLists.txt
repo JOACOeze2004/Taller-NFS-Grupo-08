@@ -58,6 +58,7 @@ include_directories(src/libs/box2d/include)
 # sudo apt-get install libopus-dev libopusfile-dev libxmp-dev libfluidsynth-dev fluidsynth libwavpack1 libwavpack-dev libfreetype-dev wavpack
 # sudo apt-get install qt5-qmake qtbase5-dev
 # sudo apt-get install libsdl2-image-dev
+# sudo apt install libyaml-cpp-dev
 
 # Install libSDL2 and libSDL2pp (for client or editor)
 # HEY!! TODO XXX: add more dependendies (either for client, server or editor)
@@ -134,6 +135,9 @@ if(TALLER_CLIENT)
             src/client/graphic_client.cpp
             src/client/graphic_client.h
             src/client/ClientQuitException.h
+            src/client/final_results/final_results_windows.cpp
+            src/client/final_results/final_results_windows.h
+            src/client/InvalidId.h
     )
 
     # Make them depend on taller_common lib
@@ -177,7 +181,9 @@ if(TALLER_SERVER)
             src/server/car.cpp
             src/server/car.h
             src/server/world.cpp
-            src/server/world.h)
+            src/server/world.h
+            src/server/parser_yaml.cpp
+            src/server/parser_yaml.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)
@@ -190,12 +196,35 @@ if(TALLER_SERVER)
 
     # Link the taller_common lib target
     target_include_directories(taller_server PRIVATE libs/box2d/include)
-    target_link_libraries(taller_server taller_common box2d)
+    target_link_libraries(taller_server taller_common box2d yaml-cpp)
 endif()
 
 if(TALLER_EDITOR)
     # HEY!! TODO XXX: Change the name of the executable to the one you like!
-    add_executable(taller_editor)
+    add_executable(taller_editor
+            src/editor/editor_window.cpp
+            src/editor/editor_window.h
+            src/editor/hint_manager.cpp
+            src/editor/hint_manager.h
+            src/editor/checkpoint_manager.cpp
+            src/editor/checkpoint_manager.h
+            src/editor/map_renderer.cpp
+            src/editor/map_renderer.h
+            src/editor/track_serializer.cpp
+            src/editor/track_serializer.h
+            src/editor/race_track_data.h
+            src/editor/editor_toolbar.cpp
+            src/editor/editor_toolbar.h
+            src/editor/editor_input_handler.cpp
+            src/editor/editor_input_handler.h
+            src/editor/track_file_manager.cpp
+            src/editor/track_file_manager.h
+            src/editor/yaml_parser.cpp
+            src/editor/yaml_parser.h
+            src/editor/city_config.cpp
+            src/editor/city_config.h
+            src/editor/city_selec.cpp
+            src/editor/city_selec.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_editor taller_common SDL2pp::SDL2pp)

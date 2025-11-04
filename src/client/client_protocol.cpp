@@ -1,5 +1,6 @@
 #include "client_protocol.h"
 #include <cstring>
+#include "InvalidId.h"
 
 ClientProtocol::ClientProtocol(Socket& _socket) : protocol(_socket) {  }
 
@@ -58,17 +59,20 @@ void ClientProtocol::receive_game_init_data(std::string& map_path,
 DTO ClientProtocol::receive_game_state() const {
     DTO dto;
     dto.id = protocol.receive_byte();
+    if (dto.id == 0) {
+        throw InvalidId();
+    }
     uint16_t cars_count = protocol.receive_big_endian_16();
 
     for (auto i = 0; i < cars_count; ++i) {
+        int car_id = protocol.receive_big_endian_16(); 
         CarDTO car;
         car.x = protocol.receive_float();
         car.y = protocol.receive_float();
         car.velocity = protocol.receive_float();
         car.angle = protocol.receive_float();
-        dto.cars[i] = car;
+        dto.cars[car_id] = car;
     }
-
     return dto;
 }
 

@@ -13,20 +13,81 @@
 #include <QPropertyAnimation>
 #include <QKeyEvent>
 
+void LoginWindow::styleButton(QPushButton* btn) {
+    btn->setStyleSheet(
+        "QPushButton {"
+        "   font-size: 32px;"
+        "   font-weight: bold;"
+        "   color: #00eaff;"
+        "   background-color: rgba(10, 10, 20, 180);"
+        "   border: 2px solid #00eaff;"
+        "   border-radius: 18px;"
+        "   padding: 10px 24px;"
+        "}"
+        "QPushButton:hover {"
+        "   background-color: rgba(0, 60, 80, 200);"
+        "   color: white;"
+        "   border: 2px solid #66ffff;"
+        "}"
+        "QPushButton:pressed {"
+        "   background-color: rgba(0, 120, 150, 255);"
+        "   color: black;"
+        "}"
+    );
+}
+
+void LoginWindow::applyGlowEffect(QPushButton* btn) {
+    auto* glow = new QGraphicsDropShadowEffect();
+    glow->setBlurRadius(40);
+    glow->setColor(QColor(0, 234, 255));
+    glow->setOffset(0, 0);
+    btn->setGraphicsEffect(glow);
+
+    auto* pulse = new QPropertyAnimation(glow, "blurRadius");
+    pulse->setDuration(1500);
+    pulse->setStartValue(30);
+    pulse->setEndValue(60);
+    pulse->setEasingCurve(QEasingCurve::InOutQuad);
+    pulse->setLoopCount(-1);
+    pulse->start();
+}
+
+void LoginWindow::styleInput(QLineEdit* input) {
+    input->setStyleSheet(
+        "QLineEdit {"
+        "   background-color: rgba(20, 20, 30, 200);"
+        "   color: white;"
+        "   border: 2px solid #00eaff;"
+        "   border-radius: 10px;"
+        "   padding: 8px;"
+        "   font-size: 20px;"
+        "}"
+    );
+}
+
+void LoginWindow::styleCombo(QComboBox* combo) {
+    combo->setStyleSheet(
+        "QComboBox {"
+        "   background-color: rgba(20, 20, 30, 200);"
+        "   color: grey;"
+        "   border: 2px solid #00eaff;"
+        "   border-radius: 10px;"
+        "   padding: 6px;"
+        "   font-size: 20px;"
+        "}"
+        "QComboBox::drop-down { border: none; }"
+    );
+}
+
+
 void LoginWindow::player_name(QLabel*& nameLabel) {
     nameLabel = new QLabel("Nombre del jugador:");
     nameLabel->setStyleSheet("color: #00eaff; font-size: 22px; font-weight: bold;");
     nameInput = new QLineEdit();
     nameInput->setPlaceholderText("Ingresá tu nombre...");
-    nameInput->setStyleSheet("QLineEdit {"
-                             "   background-color: rgba(20, 20, 30, 200);"
-                             "   color: grey;"
-                             "   border: 2px solid #00eaff;"
-                             "   border-radius: 10px;"
-                             "   padding: 8px;"
-                             "   font-size: 20px;"
-                             "}");
+    styleInput(nameInput);
 }
+
 void LoginWindow::car_sellec(QLabel*& carLabel) {
     carLabel = new QLabel("Choose your vehicle:");
     carLabel->setStyleSheet("color: #00eaff; font-size: 22px; font-weight: bold;");
@@ -39,18 +100,9 @@ void LoginWindow::car_sellec(QLabel*& carLabel) {
     carSelector->addItem("auto 5");
     carSelector->addItem("auto 6");
 
-    carSelector->setStyleSheet("QComboBox {"
-                               "   background-color: rgba(20, 20, 30, 200);"
-                               "   color: grey;"
-                               "   border: 2px solid #00eaff;"
-                               "   border-radius: 10px;"
-                               "   padding: 6px;"
-                               "   font-size: 20px;"
-                               "}"
-                               "QComboBox::drop-down {"
-                               "   border: none;"
-                               "}");
+    styleCombo(carSelector);
 }
+
 void LoginWindow::map_sellec(QLabel*& mapLabel) {
     mapLabel = new QLabel("Map:");
     mapLabel->setStyleSheet("color: #00eaff; font-size: 22px; font-weight: bold;");
@@ -58,50 +110,7 @@ void LoginWindow::map_sellec(QLabel*& mapLabel) {
     mapSelector->addItem("Liberty City");
     mapSelector->addItem("San Andreas");
     mapSelector->addItem("Vice City");
-    mapSelector->setStyleSheet("QComboBox {"
-                               "   background-color: rgba(20, 20, 30, 200);"
-                               "   color: grey;"
-                               "   border: 2px solid #00eaff;"
-                               "   border-radius: 10px;"
-                               "   padding: 6px;"
-                               "   font-size: 20px;"
-                               "}");
-}
-void LoginWindow::effects() const {
-    const auto glowEffect = new QGraphicsDropShadowEffect();
-    glowEffect->setBlurRadius(40);
-    glowEffect->setColor(QColor(0, 234, 255));
-    glowEffect->setOffset(0, 0);
-    startButton->setGraphicsEffect(glowEffect);
-
-    const auto pulse = new QPropertyAnimation(glowEffect, "blurRadius");
-    pulse->setDuration(1500);
-    pulse->setStartValue(30);
-    pulse->setEndValue(60);
-    pulse->setEasingCurve(QEasingCurve::InOutQuad);
-    pulse->setLoopCount(-1);
-    pulse->start();
-}
-void LoginWindow::start_button() {
-    startButton = new QPushButton("START RACE", this);
-    startButton->setStyleSheet("QPushButton {"
-                               "   font-size: 32px;"
-                               "   font-weight: bold;"
-                               "   color: #00eaff;"
-                               "   background-color: rgba(10, 10, 20, 180);"
-                               "   border: 2px solid #00eaff;"
-                               "   border-radius: 18px;"
-                               "   padding: 10px 24px;"
-                               "}"
-                               "QPushButton:hover {"
-                               "   background-color: rgba(0, 60, 80, 200);"
-                               "   color: white;"
-                               "   border: 2px solid #66ffff;"
-                               "}"
-                               "QPushButton:pressed {"
-                               "   background-color: rgba(0, 120, 150, 255);"
-                               "   color: black;"
-                               "}");
+    styleCombo(mapSelector);
 }
 
 LoginWindow::LoginWindow(QWidget *parent)
@@ -129,9 +138,17 @@ LoginWindow::LoginWindow(QWidget *parent)
     QLabel* mapLabel;
     map_sellec(mapLabel);
 
-    start_button();
+    startButton = new QPushButton("START RACE");
+    createGameButton = new QPushButton("CREATE GAME");
+    joinGameButton = new QPushButton("JOIN GAME");
 
-    effects();
+    styleButton(startButton);
+    styleButton(createGameButton);
+    styleButton(joinGameButton);
+
+    applyGlowEffect(startButton);
+    applyGlowEffect(createGameButton);
+    applyGlowEffect(joinGameButton);
 
     layout = new QVBoxLayout(this);
     layout->setContentsMargins(400, 100, 400, 100);
@@ -145,44 +162,14 @@ LoginWindow::LoginWindow(QWidget *parent)
     layout->addWidget(mapLabel);
     layout->addWidget(mapSelector);
     layout->addSpacing(40);
-
-    createGameButton = new QPushButton("CREATE GAME");
-    createGameButton->setStyleSheet("QPushButton {"
-                                "   font-size: 28px;"
-                                "   font-weight: bold;"
-                                "   color: #00eaff;"
-                                "   background-color: rgba(10, 10, 20, 180);"
-                                "   border: 2px solid #00eaff;"
-                                "   border-radius: 12px;"
-                                "   padding: 15px 30px;"
-                                "}");
     layout->addWidget(createGameButton, 0, Qt::AlignHCenter);
 
     gameIdInput = new QLineEdit();
     gameIdInput->setPlaceholderText("Enter the game ID...");
-    gameIdInput->setStyleSheet("QLineEdit {"
-                               "   background-color: rgba(20, 20, 30, 200);"
-                               "   color: white;"
-                               "   border: 2px solid #00eaff;"
-                               "   border-radius: 10px;"
-                               "   padding: 8px;"
-                               "   font-size: 20px;"
-                               "}");
+    styleInput(gameIdInput);
     layout->addWidget(gameIdInput);
-    
-    joinGameButton = new QPushButton("JOIN GAME");
-    joinGameButton->setStyleSheet("QPushButton {"
-                                "   font-size: 28px;"
-                                "   font-weight: bold;"
-                                "   color: #00eaff;"
-                                "   background-color: rgba(10, 10, 20, 180);"
-                                "   border: 2px solid #00eaff;"
-                                "   border-radius: 12px;"
-                                "   padding: 15px 30px;"
-                                "}");
 
     layout->addWidget(joinGameButton, 0, Qt::AlignHCenter);
-
     layout->addWidget(startButton, 0, Qt::AlignHCenter);
 
     setLayout(layout);

@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "src/common/DTO.h"
+#include "../common/constants.h"
 
 #include "car.h"
 #include "client_command.h"
@@ -25,6 +26,7 @@ private:
 
     std::string generate_game_id();
     void clear_remaining_clients(const std::string& _game_id);
+    std::string get_client_game_id(int client_id);
 
 public:
     Monitor();
@@ -33,8 +35,8 @@ public:
     void clear_clients();
     void reap();
 
-    std::shared_ptr<Gameloop> create_game();
-    std::shared_ptr<Gameloop> join_game(const std::string& user_name, const std::string& game_id);
+    std::shared_ptr<Gameloop> create_game(std::string map_name, const int client_id);
+    std::shared_ptr<Gameloop> join_game(const std::string& user_name, const std::string& game_id, const int client_id);
     Gameloop& get_game(const std::string& game_id);
     void remove_player(const std::string& username);
     void remove_game(const std::string& user_id);
