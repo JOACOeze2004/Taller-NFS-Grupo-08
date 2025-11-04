@@ -20,13 +20,15 @@ class GraphicClient {
 
     public:
     explicit GraphicClient(const std::string& map_path, const DTO& initial_dto);
-    void draw();
+    void draw(const DTO& dto);
     void update_car(int id, const CarDTO& car_state);
     ~GraphicClient();
     
     private:
+    void clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dto);
     void draw_car(const CarDTO& car);
     void draw_cars();
+    void draw_camera();
     void draw_minimap();
     void update_camera();
     void set_player_car(int id);

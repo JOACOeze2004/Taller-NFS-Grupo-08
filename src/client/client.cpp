@@ -70,7 +70,7 @@ void Client::run(const PlayerConfig& config,uint8_t lobby_action, const std::str
             break;
         }
 
-        graphic_client.draw();
+        graphic_client.draw(dto);
 
         Uint32 frame_time = SDL_GetTicks() - frame_start;
         if (frame_time < FRAME_DELAY) {

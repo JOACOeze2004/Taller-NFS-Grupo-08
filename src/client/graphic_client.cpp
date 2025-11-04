@@ -64,7 +64,7 @@ GraphicClient::GraphicClient(const std::string& map_path, const DTO& initial_dto
 
     update_camera();
     
-    draw();
+    draw(initial_dto);
 }
 
 void GraphicClient::set_player_car(int id) { 
@@ -96,9 +96,17 @@ void GraphicClient::update_camera() {
         camera_y = map_height - viewport_height;
 }
 
-void GraphicClient::draw() {
-    update_camera();
+void GraphicClient::clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dto) {
+    for (auto it = cars.begin(); it != cars.end(); ) {
+        if (cars_in_dto.find(it->first) == cars_in_dto.end()) {
+            it = cars.erase(it);
+        } else {
+            ++it;
+        }
+    }    
+}
 
+void GraphicClient::draw_camera(){
     if (bg_texture) {
         const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
         const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
@@ -138,6 +146,14 @@ void GraphicClient::draw() {
         
         SDL_RenderCopyF(renderer, bg_texture, &src_rect, &dst_rect);
     }
+}
+
+void GraphicClient::draw(const DTO& dto) {
+    update_camera();
+
+    clear_cars(dto.cars);
+
+    draw_camera();
 
     draw_cars();
     
