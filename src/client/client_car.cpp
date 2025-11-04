@@ -20,8 +20,8 @@ Car::Car(float x, float y, float angle, SDL_Renderer* renderer, float scale)
     }
 
     const std::vector<std::string> candidates = {
-        "../assets/need-for-speed/cars/Mobile - Grand Theft Auto 4 - Miscellaneous - Cars.png",
-        "assets/need-for-speed/cars/Mobile - Grand Theft Auto 4 - Miscellaneous - Cars.png",
+        "../assets/need-for-speed/cars/Cars_without_bg.png",
+        "assets/need-for-speed/cars/Cars_without_bg.png",
     };
 
     texture = loadTextureFromCandidates(renderer, candidates);
