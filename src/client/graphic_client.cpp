@@ -79,8 +79,8 @@ void GraphicClient::update_camera() {
 
     const CarDTO& player_car = cars[player_car_id];
 
-    camera_x += (player_car.x - camera_x - static_cast<float>(screen_width) / 2.0f);
-    camera_y += (player_car.y - camera_y - static_cast<float>(screen_height) / 2.0f);
+    camera_x = (player_car.x - static_cast<float>(screen_width) / 2.0f);
+    camera_y = (player_car.y - static_cast<float>(screen_height) / 2.0f);
 
     if (camera_x < 0.0f) camera_x = 0.0f;
     if (camera_y < 0.0f) camera_y = 0.0f;
@@ -88,53 +88,106 @@ void GraphicClient::update_camera() {
         camera_x = map_width - static_cast<float>(screen_width);
     if (camera_y > map_height - static_cast<float>(screen_height)) 
         camera_y = map_height - static_cast<float>(screen_height);
-
-    if (bg_texture) {
-        SDL_Rect src_rect = {static_cast<int>(camera_x), static_cast<int>(camera_y), 
-                            (screen_width),
-                            (screen_height)};
-        SDL_FRect dst_rect = {0.0f, 0.0f, 
-                              static_cast<float>(screen_width), 
-                              static_cast<float>(screen_height)};
-        SDL_RenderCopyF(renderer, bg_texture, &src_rect, &dst_rect);
-    }
 }
 
 void GraphicClient::draw() {
     update_camera();
 
+    /* SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer); */
 
+    if (bg_texture) {
+        SDL_Rect src_rect = {
+            static_cast<int>(camera_x), 
+            static_cast<int>(camera_y), 
+            screen_width,
+            screen_height
+        };
+        SDL_FRect dst_rect = {
+            0.0f, 
+            0.0f, 
+            static_cast<float>(screen_width), 
+            static_cast<float>(screen_height)
+        };
+        SDL_RenderCopyF(renderer, bg_texture, &src_rect, &dst_rect);
+    }
 
     draw_cars();
     
     draw_minimap();
     
     SDL_RenderPresent(renderer);
-
 }
 
 void GraphicClient::draw_minimap() {
     if (!bg_texture) return;
 
-    const float minimap_scale = 0.02f;  
+    const float minimap_scale = 0.04f;  
     const int minimap_width = static_cast<int>(map_width * minimap_scale);
     const int minimap_height = static_cast<int>(map_height * minimap_scale);
     const int minimap_x = screen_width - minimap_width - 10;  
     const int minimap_y = 10;  
 
-    SDL_Rect src_rect = {static_cast<int>(camera_x), static_cast<int>(camera_y), static_cast<int>(map_width) / 6, static_cast<int>(map_height) / 6};
-    SDL_FRect dst_rect = {static_cast<float>(minimap_x), static_cast<float>(minimap_y), 
-                          static_cast<float>(minimap_width), static_cast<float>(minimap_height)};
+    const float radar_radius = 400.0f;
+    
+    if (player_car_id < 0 || cars.find(player_car_id) == cars.end()) {
+        return;
+    }
+    
+    const CarDTO& player_car = cars[player_car_id];
+    
+    SDL_Rect src_rect = {
+        static_cast<int>(player_car.x - radar_radius),
+        static_cast<int>(player_car.y - radar_radius),
+        static_cast<int>(radar_radius * 2.0f),
+        static_cast<int>(radar_radius * 2.0f)
+    };
+    
+    if (src_rect.x < 0) src_rect.x = 0;
+    if (src_rect.y < 0) src_rect.y = 0;
+    if (src_rect.x + src_rect.w > static_cast<int>(map_width)) 
+        src_rect.x = static_cast<int>(map_width) - src_rect.w;
+    if (src_rect.y + src_rect.h > static_cast<int>(map_height)) 
+        src_rect.y = static_cast<int>(map_height) - src_rect.h;
+
+    SDL_FRect dst_rect = {
+        static_cast<float>(minimap_x), 
+        static_cast<float>(minimap_y), 
+        static_cast<float>(minimap_width), 
+        static_cast<float>(minimap_height)
+    };
+    
     SDL_RenderCopyF(renderer, bg_texture, &src_rect, &dst_rect);
 
-    for (const auto& [id, car] : cars) {
-        float car_minimap_x = minimap_x + car.x * minimap_scale + 8.0f;
-        float car_minimap_y = minimap_y + car.y * minimap_scale + 8.0f;
+    const float scale = static_cast<float>(minimap_width) / static_cast<float>(src_rect.w);
 
-        SDL_FRect car_rect = {car_minimap_x, car_minimap_y, 4.0f, 4.0f};
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  
-        SDL_RenderFillRectF(renderer, &car_rect);
+    for (const auto& [id, car] : cars) {
+        if (car.x >= src_rect.x && car.x <= src_rect.x + src_rect.w &&
+            car.y >= src_rect.y && car.y <= src_rect.y + src_rect.h) {
+            
+            float car_minimap_x = minimap_x + (car.x - src_rect.x) * scale - 3.0f;
+            float car_minimap_y = minimap_y + (car.y - src_rect.y) * scale - 3.0f;
+
+            SDL_FRect car_rect = {car_minimap_x, car_minimap_y, 6.0f, 6.0f};
+            
+            if (id == player_car_id) {
+                SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);  
+            } else {
+                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  
+            }
+            SDL_RenderFillRectF(renderer, &car_rect);
+        }
     }
+    
+    
+    SDL_FRect border_rect = {
+        static_cast<float>(minimap_x), 
+        static_cast<float>(minimap_y), 
+        static_cast<float>(minimap_width), 
+        static_cast<float>(minimap_height)
+    };
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderDrawRectF(renderer, &border_rect);
 }
 
 void GraphicClient::draw_cars() {
@@ -156,5 +209,15 @@ void GraphicClient::draw_car(const CarDTO& car) {
 }
 
 GraphicClient::~GraphicClient() {
-    SDL_DestroyWindow(window);
+    if (bg_texture) {
+        SDL_DestroyTexture(bg_texture);
+    }
+    if (renderer) {
+        SDL_DestroyRenderer(renderer);
+    }
+    if (window) {
+        SDL_DestroyWindow(window);
+    }
+    IMG_Quit();
+    SDL_Quit();
 }
