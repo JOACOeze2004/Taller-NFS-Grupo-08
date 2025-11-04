@@ -1,9 +1,5 @@
 #include "world.h"
-
-#include <iostream>
-#include <ostream>
 #include <vector>
-#include <yaml-cpp/yaml.h>
 
 World::World() {
     b2WorldDef world_def = b2DefaultWorldDef();
@@ -21,40 +17,13 @@ b2WorldId World::get_id() {
     return world;
 }
 
-struct StaticBody {
-    int id;
-    float x;
-    float y;
-    float width;
-    float height;
-};
+void World::generate_map(std::string& map_name) {
+    std::vector<StaticBody> boxes = parser.parse_map(map_name);
 
-void World::generate_map(std::string map_name) {
-    YAML::Node map;
-    if (map_name == "Liberty City") {
-        map = YAML::LoadFile("../src/server/libertycity.yaml");
-    }
-    if (map_name == "San Andreas") {
-        map = YAML::LoadFile("../src/server/sanandreas.yaml");
-    }
-    if (map_name == "Vice City") {
-        map = YAML::LoadFile("../src/server/vicecity.yaml");
-    }
+    create_collisions(boxes);
+}
 
-    std::vector<StaticBody> boxes;
-    for (const auto& layer : map["layers"]) {
-        if (layer["type"].as<std::string>() != "objectgroup") continue;
-        for (const auto& obj : layer["objects"]) {
-            StaticBody box;
-            box.id = obj["id"].as<int>();
-            box.x = obj["x"].as<float>();
-            box.y = obj["y"].as<float>();
-            box.width = obj["width"].as<float>();
-            box.height = obj["height"].as<float>();
-            boxes.push_back(box);
-        }
-    }
-
+void World::create_collisions(std::vector<StaticBody>& boxes) {
     for (const auto& box : boxes) {
 
         b2BodyDef bodyDef = b2DefaultBodyDef();
@@ -71,9 +40,14 @@ void World::generate_map(std::string map_name) {
         b2ShapeId shape = b2CreatePolygonShape(body, &shape_def, &b2box);
         b2Shape_EnableContactEvents(shape, true);
         b2Shape_EnableHitEvents(shape, true);
+
+        bodies.push_back(body);
     }
 }
 
 World::~World() {
+    for (auto& body : bodies) {
+        b2DestroyBody(body);
+    }
     b2DestroyWorld(world);
 }
