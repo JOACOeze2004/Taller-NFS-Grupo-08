@@ -8,6 +8,7 @@ ClientHandler::ClientHandler(Socket&& peer,Monitor& monitor, int _id):
         protocol(this->peer),
         client_queue(CLIENT_QUEUE_LEN),
         monitor(monitor),
+        game_id(""),
         id(_id),
         sender(protocol, client_queue) {} 
 
@@ -31,22 +32,24 @@ void ClientHandler::run() {
     std::string g_id;
     
     if (action == SEND_CREATE_GAME) {
-        game = monitor.create_game(map_name);
+        game = monitor.create_game(map_name,this->id);
         g_id = monitor.get_last_created_game_id();
-        
+        set_game_id(g_id);
+        game->start();
+
     } else if (action == SEND_JOIN_GAME) {
-        game = monitor.join_game(player_name, game_id_to_join);
+        game = monitor.join_game(player_name, game_id_to_join, this->id);
         if (!game) {
             std::cerr << "[SERVER " << id << "] Game not found: " << game_id_to_join << std::endl;
             return;
         }        
         g_id = game_id_to_join;
+        set_game_id(game_id_to_join);
         
     } else {
         std::cerr << "[SERVER " << id << "] Invalid lobby action: " << static_cast<int>(action) << std::endl;
         return;
     }
-    set_game_id(g_id);
 
     std::string map_path;
     if (map_name == "Liberty City") {

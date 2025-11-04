@@ -33,6 +33,7 @@ private:
     std::map<uint8_t, std::function<void(Car& car)>> car_actions;
     World world;
     void initialize_car_actions();
+    bool ready_to_start; 
     // Parser parser;
     // Workshop workshop; para entre carreras mejorar el auto
     // GameMap game_map; quiza que guarde todos los mapas y circuitos posibles (lo recibe por parametro)

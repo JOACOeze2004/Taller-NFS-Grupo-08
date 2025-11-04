@@ -4,7 +4,7 @@
 #include "src/common/constants.h"
 
 Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_name):
-        cmd_queue(),game_id(gid), monitor(_monitor) {
+        cmd_queue(),game_id(gid), monitor(_monitor), ready_to_start(false) {
     initialize_car_actions();
     world.generate_map(map_name);
 }
@@ -25,8 +25,15 @@ void Gameloop::initialize_car_actions() {
 void Gameloop::run() {
     while (should_keep_running()) {
         process_commands();
-        update_positions();
-        broadcast();
+        //Por ahora, vi q hacen una fase (del phase_handler) para esperar a los jugadores en una sala
+        if (cars.size() == MIN_PLAYERS_TO_START){
+            ready_to_start = true;
+        }
+        if (ready_to_start){
+            update_positions();
+            broadcast();
+        }
+
         std::this_thread::sleep_for(std::chrono::milliseconds(16)); // no es exacto todavia
     }
 }

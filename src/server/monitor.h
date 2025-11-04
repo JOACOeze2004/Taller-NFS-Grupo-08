@@ -21,7 +21,6 @@ private:
     int game_id;    
     std::unordered_map<std::string, std::string> players; //{Nombre de usuario, id partida}
     std::unordered_map<std::string, std::shared_ptr<Gameloop>> current_games; // {id partida, ptr a esa partida}
-    std::unordered_map<std::string, int> game_player_count; // {game_id, cantidad_jugadores} 
 
     std::map<int, std::unique_ptr<ClientHandler>> clients; //Este en el futuro, vuela.
 
@@ -36,8 +35,8 @@ public:
     void clear_clients();
     void reap();
 
-    std::shared_ptr<Gameloop> create_game(std::string map_name);
-    std::shared_ptr<Gameloop> join_game(const std::string& user_name, const std::string& game_id);
+    std::shared_ptr<Gameloop> create_game(std::string map_name, const int client_id);
+    std::shared_ptr<Gameloop> join_game(const std::string& user_name, const std::string& game_id, const int client_id);
     Gameloop& get_game(const std::string& game_id);
     void remove_player(const std::string& username);
     void remove_game(const std::string& user_id);
