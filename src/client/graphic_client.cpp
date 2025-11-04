@@ -94,11 +94,11 @@ void GraphicClient::update_camera() {
         camera_x = map_width - viewport_width;
     if (camera_y > map_height - viewport_height) 
         camera_y = map_height - viewport_height;
+
+    
 }
 
-void GraphicClient::draw() {
-    update_camera();
-
+void GraphicClient::draw_camera() {
     if (bg_texture) {
         const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
         const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
@@ -138,12 +138,61 @@ void GraphicClient::draw() {
         
         SDL_RenderCopyF(renderer, bg_texture, &src_rect, &dst_rect);
     }
+}
+
+void GraphicClient::clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dto) {
+    for (auto it = cars.begin(); it != cars.end(); ) {
+        if (cars_in_dto.find(it->first) == cars_in_dto.end()) {
+            it = cars.erase(it);
+        } else {
+            ++it;
+        }
+    }    
+}
+
+void GraphicClient::draw(const DTO& dto) {
+    
+    update_camera();
+
+    clear_cars(dto.cars);
+
+    draw_camera();
 
     draw_cars();
     
     draw_minimap();
+
+    draw_position(dto.position, dto.cars.size());
+
+    draw_time(dto.time_ms);
+
+    if (player_car_id >= 0 && cars.find(player_car_id) != cars.end()) {
+        draw_speed(cars[player_car_id].speed);
+    }
     
     SDL_RenderPresent(renderer);
+}
+
+void GraphicClient::draw_position(int position, int total_cars) {
+    std::cout << "Position: " << position << " / " << total_cars << std::endl;
+    //mientras lo dejo asi, falta agregar sdlthings
+}
+
+void GraphicClient::draw_time(int time_ms) {
+    int total_seconds = time_ms / 1000;
+    int minutes = total_seconds / 60;
+    int seconds = total_seconds % 60;
+    int milliseconds = time_ms % 1000;
+
+    std::cout << "Time: " << minutes << ":" 
+              << (seconds < 10 ? "0" : "") << seconds << "." 
+              << milliseconds << std::endl;
+    //mientras lo dejo asi, falta agregar sdlthings
+}
+
+void GraphicClient::draw_speed(float speed) {
+    std::cout << "Speed: " << speed << " units/s" << std::endl;
+    //mientras lo dejo asi, falta agregar sdlthings seguro haya que pasar la velocidad debox2d a algo razonable
 }
 
 void GraphicClient::draw_minimap() {
@@ -238,7 +287,7 @@ void GraphicClient::draw_car(const CarDTO& car) {
     adjusted_car.x = screen_x;
     adjusted_car.y = screen_y;
     temp_car.update_from_dto(adjusted_car);
-    temp_car.render();
+    temp_car.render();  //aca tengo que cambiar la implementacion para no usar un aux
 }
 
 GraphicClient::~GraphicClient() {

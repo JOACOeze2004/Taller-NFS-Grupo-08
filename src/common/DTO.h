@@ -60,9 +60,10 @@ struct Snapshot { //deberia ser una clase
     enum Upgrades upgrade;
     bool upgradeable;
     enum CollisionType collision;
-    bool under_bridge;
     CheckpointCoords checkpoint;
     enum TypeCheckpoint type_checkpoint;
+    int time_ms;
+    //ver como manejar el tema de coches q ya no tienen que dibujarse
 };
 
 
