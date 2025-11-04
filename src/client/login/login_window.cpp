@@ -138,15 +138,13 @@ LoginWindow::LoginWindow(QWidget *parent)
     QLabel* mapLabel;
     map_sellec(mapLabel);
 
-    startButton = new QPushButton("START RACE");
     createGameButton = new QPushButton("CREATE GAME");
     joinGameButton = new QPushButton("JOIN GAME");
 
-    styleButton(startButton);
+    //styleButton(startButton);
     styleButton(createGameButton);
     styleButton(joinGameButton);
 
-    applyGlowEffect(startButton);
     applyGlowEffect(createGameButton);
     applyGlowEffect(joinGameButton);
 
@@ -170,15 +168,9 @@ LoginWindow::LoginWindow(QWidget *parent)
     layout->addWidget(gameIdInput);
 
     layout->addWidget(joinGameButton, 0, Qt::AlignHCenter);
-    layout->addWidget(startButton, 0, Qt::AlignHCenter);
 
     setLayout(layout);
 
-    connect(startButton, &QPushButton::clicked, this, [this]() {
-        this->lobbyAction = SEND_CREATE_GAME;
-        this->selectedGameId = "";
-        emit startButtonClicked();
-    });
     
     connect(createGameButton, &QPushButton::clicked, this, [this]() {
         this->lobbyAction = SEND_CREATE_GAME;
