@@ -99,9 +99,6 @@ void GraphicClient::update_camera() {
 void GraphicClient::draw() {
     update_camera();
 
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer);
-
     if (bg_texture) {
         const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
         const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
