@@ -201,7 +201,30 @@ endif()
 
 if(TALLER_EDITOR)
     # HEY!! TODO XXX: Change the name of the executable to the one you like!
-    add_executable(taller_editor)
+    add_executable(taller_editor
+            src/editor/editor_window.cpp
+            src/editor/editor_window.h
+            src/editor/hint_manager.cpp
+            src/editor/hint_manager.h
+            src/editor/checkpoint_manager.cpp
+            src/editor/checkpoint_manager.h
+            src/editor/map_renderer.cpp
+            src/editor/map_renderer.h
+            src/editor/track_serializer.cpp
+            src/editor/track_serializer.h
+            src/editor/race_track_data.h
+            src/editor/editor_toolbar.cpp
+            src/editor/editor_toolbar.h
+            src/editor/editor_input_handler.cpp
+            src/editor/editor_input_handler.h
+            src/editor/track_file_manager.cpp
+            src/editor/track_file_manager.h
+            src/editor/yaml_parser.cpp
+            src/editor/yaml_parser.h
+            src/editor/city_config.cpp
+            src/editor/city_config.h
+            src/editor/city_selec.cpp
+            src/editor/city_selec.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_editor taller_common SDL2pp::SDL2pp)
