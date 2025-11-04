@@ -6,7 +6,7 @@
 
 class Car {
 public:
-    Car(float x, float y, float angle, SDL_Renderer* renderer);
+    Car(float x, float y, float angle, SDL_Renderer* renderer, float scale = 1.0f);
     ~Car();
 
     void update_from_dto(const CarDTO& state);
@@ -22,6 +22,7 @@ private:
     float y;
     float angle;
     float velocity;
+    float render_scale;  
     
     SDL_Renderer* renderer;
     SDL_Texture* texture = nullptr; 

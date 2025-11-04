@@ -4,6 +4,9 @@
 #include "client_handler.h"
 #include "client_car.h"
 #include <SDL2/SDL_image.h>
+#include <cmath>
+
+constexpr float ZOOM_FACTOR = 2.0f;
 
 GraphicClient::GraphicClient(const std::string& map_path, const DTO& initial_dto)
     : renderer(nullptr), bg_texture(nullptr), window(nullptr), 
@@ -79,36 +82,63 @@ void GraphicClient::update_camera() {
 
     const CarDTO& player_car = cars[player_car_id];
 
-    camera_x = (player_car.x - static_cast<float>(screen_width) / 2.0f);
-    camera_y = (player_car.y - static_cast<float>(screen_height) / 2.0f);
+    camera_x = (player_car.x - static_cast<float>(screen_width) / (2.0f * ZOOM_FACTOR));
+    camera_y = (player_car.y - static_cast<float>(screen_height) / (2.0f * ZOOM_FACTOR));
+
+    const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
+    const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
 
     if (camera_x < 0.0f) camera_x = 0.0f;
     if (camera_y < 0.0f) camera_y = 0.0f;
-    if (camera_x > map_width - static_cast<float>(screen_width)) 
-        camera_x = map_width - static_cast<float>(screen_width);
-    if (camera_y > map_height - static_cast<float>(screen_height)) 
-        camera_y = map_height - static_cast<float>(screen_height);
+    if (camera_x > map_width - viewport_width) 
+        camera_x = map_width - viewport_width;
+    if (camera_y > map_height - viewport_height) 
+        camera_y = map_height - viewport_height;
 }
 
 void GraphicClient::draw() {
     update_camera();
 
-    /* SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer); */
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
 
     if (bg_texture) {
-        SDL_Rect src_rect = {
-            static_cast<int>(camera_x), 
-            static_cast<int>(camera_y), 
-            screen_width,
-            screen_height
-        };
+        const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
+        const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
+
+        const int src_x = static_cast<int>(std::floor(camera_x));
+        const int src_y = static_cast<int>(std::floor(camera_y));
+        const int src_w = static_cast<int>(std::ceil(viewport_width)) + 1;
+        const int src_h = static_cast<int>(std::ceil(viewport_height)) + 1;
+
+        SDL_Rect src_rect = {src_x, src_y, src_w, src_h};
+
+        int texW = 0, texH = 0;
+        if (SDL_QueryTexture(bg_texture, nullptr, nullptr, &texW, &texH) == 0) {
+            if (src_rect.x < 0) { 
+                src_rect.w += src_rect.x; 
+                src_rect.x = 0; 
+            }
+            if (src_rect.y < 0) { 
+                src_rect.h += src_rect.y; 
+                src_rect.y = 0; 
+            }
+            if (src_rect.x + src_rect.w > texW) 
+                src_rect.w = texW - src_rect.x;
+            if (src_rect.y + src_rect.h > texH) 
+                src_rect.h = texH - src_rect.y;
+        }
+
+        const float fx = camera_x - static_cast<float>(src_x);
+        const float fy = camera_y - static_cast<float>(src_y);
+
         SDL_FRect dst_rect = {
-            0.0f, 
-            0.0f, 
-            static_cast<float>(screen_width), 
-            static_cast<float>(screen_height)
+            -fx * ZOOM_FACTOR,
+            -fy * ZOOM_FACTOR,
+            static_cast<float>(screen_width) + ZOOM_FACTOR,
+            static_cast<float>(screen_height) + ZOOM_FACTOR
         };
+        
         SDL_RenderCopyF(renderer, bg_texture, &src_rect, &dst_rect);
     }
 
@@ -191,19 +221,25 @@ void GraphicClient::draw_minimap() {
 }
 
 void GraphicClient::draw_cars() {
+    const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
+    const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
+
     for (const auto& [id, car] : cars) {
-        if (car.x >= camera_x && car.x <= camera_x + static_cast<float>(screen_width) &&
-            car.y >= camera_y && car.y <= camera_y + static_cast<float>(screen_height)) {
+        if (car.x >= camera_x && car.x <= camera_x + viewport_width &&
+            car.y >= camera_y && car.y <= camera_y + viewport_height) {
             draw_car(car);
         }
     }
 }
 
 void GraphicClient::draw_car(const CarDTO& car) {
-    Car temp_car(car.x - camera_x, car.y - camera_y, car.angle, renderer);
+    const float screen_x = (car.x - camera_x) * ZOOM_FACTOR;
+    const float screen_y = (car.y - camera_y) * ZOOM_FACTOR;
+    
+    Car temp_car(screen_x, screen_y, car.angle, renderer, ZOOM_FACTOR);
     CarDTO adjusted_car = car;
-    adjusted_car.x = car.x - camera_x;
-    adjusted_car.y = car.y - camera_y;
+    adjusted_car.x = screen_x;
+    adjusted_car.y = screen_y;
     temp_car.update_from_dto(adjusted_car);
     temp_car.render();
 }

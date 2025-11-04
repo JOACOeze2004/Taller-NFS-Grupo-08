@@ -14,8 +14,8 @@ SDL_Texture* loadTextureFromCandidates(SDL_Renderer* renderer, const std::vector
 }
 }
 
-Car::Car(float x, float y, float angle, SDL_Renderer* renderer)
-    : x(x), y(y), angle(angle), velocity(0.0f), renderer(renderer) {
+Car::Car(float x, float y, float angle, SDL_Renderer* renderer, float scale)
+    : x(x), y(y), angle(angle), velocity(0.0f), render_scale(scale), renderer(renderer) {
     if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) == 0) {
     }
 
@@ -53,8 +53,8 @@ void Car::update_from_dto(const CarDTO& state) {
 void Car::render() {
     if (texture && srcRect.w > 0 && srcRect.h > 0) {
         SDL_Rect dstRect;
-        dstRect.w = static_cast<int>(CAR_WIDTH);
-        dstRect.h = static_cast<int>(CAR_HEIGHT);
+        dstRect.w = static_cast<int>(CAR_WIDTH * render_scale);
+        dstRect.h = static_cast<int>(CAR_HEIGHT * render_scale);
         dstRect.x = static_cast<int>(x - dstRect.w / 2.0f);
         dstRect.y = static_cast<int>(y - dstRect.h / 2.0f);
 
@@ -65,8 +65,8 @@ void Car::render() {
         return;
     }
 
-    float half_width = CAR_WIDTH / 2.0f;
-    float half_height = CAR_HEIGHT / 2.0f;
+    float half_width = (CAR_WIDTH * render_scale) / 2.0f;
+    float half_height = (CAR_HEIGHT * render_scale) / 2.0f;
 
     SDL_Point corners[5];
 
