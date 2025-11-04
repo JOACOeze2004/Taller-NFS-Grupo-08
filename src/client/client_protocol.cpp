@@ -65,14 +65,14 @@ DTO ClientProtocol::receive_game_state() const {
     uint16_t cars_count = protocol.receive_big_endian_16();
 
     for (auto i = 0; i < cars_count; ++i) {
+        int car_id = protocol.receive_big_endian_16(); 
         CarDTO car;
         car.x = protocol.receive_float();
         car.y = protocol.receive_float();
         car.velocity = protocol.receive_float();
         car.angle = protocol.receive_float();
-        dto.cars[i] = car;
+        dto.cars[car_id] = car;
     }
-
     return dto;
 }
 

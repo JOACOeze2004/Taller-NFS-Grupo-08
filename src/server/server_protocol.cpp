@@ -56,6 +56,7 @@ void ServerProtocol::send_game_state(const DTO& dto) {
     protocol.send_big_endian_16(dto.cars.size());
     
     for (const auto& [car_id, car] : dto.cars) {
+        protocol.send_big_endian_16(car_id);
         send_car_state(car); 
     }
 

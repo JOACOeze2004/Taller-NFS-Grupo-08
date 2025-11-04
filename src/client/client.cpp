@@ -66,7 +66,6 @@ void Client::run(const PlayerConfig& config,uint8_t lobby_action, const std::str
                 graphic_client.update_car(id, car);
             }
         }
-
         try {
             handler.handle_event();
         } catch (ClientQuitException& e) {
