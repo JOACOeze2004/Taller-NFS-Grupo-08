@@ -61,6 +61,11 @@ void Gameloop::process_commands() {
 }
 
 void Gameloop::add_car(const int client_id) {
+    if (cars.size() == MAX_PLAYERS_PER_GAME){
+        //estaria bueno mandar un command especifico diciendole al jugador q no se pudo unir xq estaba llena la partida. O tirar una excepcion (no me gusta mucho eso)
+        std::cout << "[GAMELOOP] The game is already full.Try to join to other game." << std::endl;        
+        return;
+    }    
     cars.emplace(std::piecewise_construct,
     std::forward_as_tuple(client_id),
     std::forward_as_tuple(world.get_id()));
@@ -83,5 +88,7 @@ void Gameloop::broadcast() const {
     dto.cars = std::move(carsDTO);
     monitor.broadcast(dto,this->game_id);
 }
+
+bool Gameloop::can_join_to_game(){ return cars.size() < MAX_PLAYERS_PER_GAME; }
 
 const std::string& Gameloop::get_game_id() const{ return this->game_id; }
