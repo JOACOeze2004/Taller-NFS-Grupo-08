@@ -6,7 +6,6 @@ struct CarDTO {
     float y;
     float velocity;
     float angle;
-    float speed;
     int car_id;
     bool under_bridge;
 };

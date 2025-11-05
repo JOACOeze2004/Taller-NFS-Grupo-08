@@ -64,7 +64,7 @@ GraphicClient::GraphicClient(const std::string& map_path, const DTO& initial_dto
 
     update_camera();
     
-    draw();
+    draw(initial_dto);
 }
 
 void GraphicClient::set_player_car(int id) { 
@@ -95,10 +95,10 @@ void GraphicClient::update_camera() {
     if (camera_y > map_height - viewport_height) 
         camera_y = map_height - viewport_height;
 
-    
 }
 
-void GraphicClient::draw_camera() {
+
+void GraphicClient::draw_camera(){
     if (bg_texture) {
         const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
         const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
@@ -162,13 +162,13 @@ void GraphicClient::draw(const DTO& dto) {
     
     draw_minimap();
 
-    draw_position(dto.position, dto.cars.size());
+    /* draw_position(dto.position, dto.cars.size());
 
     draw_time(dto.time_ms);
 
     if (player_car_id >= 0 && cars.find(player_car_id) != cars.end()) {
-        draw_speed(cars[player_car_id].speed);
-    }
+        draw_speed(cars[player_car_id].velocity);
+    } */
     
     SDL_RenderPresent(renderer);
 }

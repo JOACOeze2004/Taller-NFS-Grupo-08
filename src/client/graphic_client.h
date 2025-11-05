@@ -25,14 +25,16 @@ class GraphicClient {
     ~GraphicClient();
     
     private:
+    void clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dto);
     void draw_car(const CarDTO& car);
     void draw_cars();
+    void draw_camera();
     void draw_minimap();
     void update_camera();
     void set_player_car(int id);
-    void draw_position();
-    void draw_time();
-    void draw_speed();
+    void draw_position(int position, int total_cars);
+    void draw_time(int time_ms);
+    void draw_speed(float speed);
 };
 
 

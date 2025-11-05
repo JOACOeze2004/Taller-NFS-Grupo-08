@@ -40,7 +40,7 @@ void ClientHandler::run() {
     } else if (action == SEND_JOIN_GAME) {
         game = monitor.join_game(player_name, game_id_to_join, this->id);
         if (!game) {
-            std::cerr << "[SERVER " << id << "] Game not found: " << game_id_to_join << std::endl;
+            std::cerr << "[SERVER] Game not found or is full " << std::endl;
             return;
         }        
         g_id = game_id_to_join;

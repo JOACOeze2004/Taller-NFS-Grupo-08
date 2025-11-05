@@ -106,5 +106,5 @@ CarDTO Car::get_state() const {
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    return CarDTO(pos.x, pos.y, speed, angle);
+    return CarDTO(pos.x, pos.y, speed, angle, 1, false); // cambiar el car id y el under bridge para que funcione
 }

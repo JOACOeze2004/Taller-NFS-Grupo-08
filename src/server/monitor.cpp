@@ -83,6 +83,9 @@ std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const 
     }
     //quizas handelear si el game esta muerto, tirar una excepcion de q la palmo la partida.
     auto game = game_i->second;
+    if (!game->can_join_to_game()){
+        return nullptr;
+    }    
     players[username] = _game_id;
     game->add_car(client_id);
     return game;

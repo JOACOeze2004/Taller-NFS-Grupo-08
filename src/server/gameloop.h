@@ -25,6 +25,7 @@ public:
     void add_car(const int client_id);
     void push_command(const ClientCommand& cmd);
     const std::string& get_game_id() const;
+    bool can_join_to_game();
 private:
     Queue<ClientCommand> cmd_queue;
     std::string game_id;
