@@ -23,6 +23,9 @@ void Gameloop::initialize_car_actions() {
 }
 
 void Gameloop::run() {
+    auto rate = std::chrono::milliseconds(16);
+    auto t1 = std::chrono::steady_clock::now();
+
     while (should_keep_running()) {
         process_commands();
         //Por ahora, vi q hacen una fase (del phase_handler) para esperar a los jugadores en una sala
@@ -34,7 +37,17 @@ void Gameloop::run() {
             broadcast();
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(16)); // no es exacto todavia
+        auto t2 = std::chrono::steady_clock::now();
+        auto rest = rate - std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+        if (rest < std::chrono::milliseconds(0)) {
+            auto behind = -rest;
+            rest = rate - behind % rate;
+            auto lost = behind + rest;
+            t1 += lost;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(rest));
+        t1 += rate;
     }
 }
 
