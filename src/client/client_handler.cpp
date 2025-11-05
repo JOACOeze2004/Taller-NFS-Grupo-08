@@ -19,9 +19,9 @@ void ClientHandler::handle_event() {
             throw ClientQuitException();
         }
         process_event(event);
+        }
+        update();
     }
-    update();
-}
 
 void ClientHandler::initialize_key_map() {
     key_map[SDLK_w] = [this]() { parser.parse_command(SEND_ACCELERATE); };
@@ -32,6 +32,30 @@ void ClientHandler::initialize_key_map() {
 
 void ClientHandler::process_event(const SDL_Event& event) {
     if (event.type == SDL_KEYDOWN) {
+        SDL_Keymod mod = SDL_GetModState();
+        if (mod & KMOD_CTRL) {
+            
+            switch (event.key.keysym.sym) {
+                case SDLK_z:
+                    parser.parse_command(SEND_WIN_RACE_CHEAT);
+                    break;
+                case SDLK_x:
+                    parser.parse_command(SEND_RESTORE_LIFE_CHEAT);
+                    break;
+                case SDLK_c:
+                    parser.parse_command(SEND_INFINITE_LIFE_CHEAT);
+                    break;
+                case SDLK_v:
+                    parser.parse_command(SEND_LOSE_RACE_CHEAT);
+                    break;
+                case SDLK_b:
+                    parser.parse_command(SEND_INFINITE_NITRO_CHEAT);
+                    break;
+                default:
+                    break;
+            }
+                return; //ver si apretar igual el ctrl wasdn o que no se tome por apretar el ctl
+        }
         key_state[event.key.keysym.sym] = true;
     }
     else if (event.type == SDL_KEYUP) {

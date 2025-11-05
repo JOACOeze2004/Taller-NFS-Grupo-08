@@ -13,15 +13,17 @@
 
 #include "server_protocol.h"
 #include "client_command.h"
+#include "gameloop.h"
 
+class Gameloop;
 
 class ClientReceiver: public Thread {
     ServerProtocol& protocol;
-    Queue<ClientCommand>& command_queue;
+    std::shared_ptr<Gameloop> game_loop;
     int reciver_id;
 
 public:
-    ClientReceiver(ServerProtocol& prot, Queue<ClientCommand>& queue, int id);
+    ClientReceiver(ServerProtocol& prot,std::shared_ptr<Gameloop> game_loop , int id);
     void run() override;
 
     ~ClientReceiver();

@@ -5,15 +5,17 @@
 #include "../common/queue.h"
 
 #include "client_protocol.h"
+#include "../common/DTO.h"
+
 
 class ClientReceiver : public Thread  {
     ClientProtocol& protocol;
-    Queue<CarDTO> queue;
+    Queue<DTO> queue;
 
 public:
     explicit ClientReceiver(ClientProtocol& protocol); // seguro tendrá el parser que actualiza el juego
     void run() override;
-    bool try_pop_car_state(CarDTO& state); // Ver si nos sirve en un futuro o lo sacamos (lo vi en el tp del CS)
+    bool try_pop_car_state(DTO& dto); // Ver si nos sirve en un futuro o lo sacamos (lo vi en el tp del CS)
 
 };
 

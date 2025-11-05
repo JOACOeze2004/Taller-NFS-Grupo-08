@@ -10,36 +10,40 @@
 #include "../common/queue.h"
 #include "../common/socket.h"
 #include "../common/thread.h"
+#include "src/common/DTO.h"
 
 #include "car_state.h"
-#include "receiver.h"
+#include "client_command.h"
 #include "sender.h"
 #include "server_protocol.h"
-#include "client_command.h"
 
+class Monitor;
+class Gameloop;
+class ClientReceiver;
 
 class ClientHandler: public Thread {
 private:
     Socket peer; 
     ServerProtocol protocol;
-
-    Queue<ClientCommand>& command_queue;
-    Queue<CarDTO> client_queue;
-    
+    Queue<DTO> client_queue;
+    Monitor& monitor;
+    std::string game_id;
     int id;
-    ClientReceiver receiver;
+    std::shared_ptr<ClientReceiver> receiver;
     ClientSender sender;
 
     std::string player_name;
     uint8_t car_id{};
     std::string map_name;
 public:
-    explicit ClientHandler(Socket&& peer, Queue<ClientCommand>& commands, int _id);
+    explicit ClientHandler(Socket&& peer,Monitor& monitor, int _id);
     void run() override;
-    void send_state(CarDTO state);
+    void send_state(DTO dto);
     void kill();
     void kill_threads();
     bool is_dead() const;
+    void set_game_id(const std::string& _game_id);
+    const std::string& get_game_id() const;
 
     ~ClientHandler();
 };

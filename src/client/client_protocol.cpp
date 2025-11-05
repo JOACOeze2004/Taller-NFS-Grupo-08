@@ -1,5 +1,6 @@
 #include "client_protocol.h"
 #include <cstring>
+#include "InvalidId.h"
 
 ClientProtocol::ClientProtocol(Socket& _socket) : protocol(_socket) {  }
 
@@ -18,6 +19,17 @@ void ClientProtocol::send_byte(const uint8_t byte) const {
 
 uint8_t ClientProtocol::receive_byte() const{
     return protocol.receive_byte();
+}
+
+void ClientProtocol::send_lobby_action(uint8_t action, const std::string& game_id) {
+    protocol.send_byte(action);
+    if (action == SEND_JOIN_GAME) {
+        uint16_t id_len = static_cast<uint16_t>(game_id.size());
+        protocol.send_big_endian_16(id_len);
+        if (id_len > 0) {
+            protocol.send_string(game_id);
+        }
+    }
 }
 
 void ClientProtocol::send_player_config(const std::string& name, uint8_t car_id,
@@ -43,6 +55,27 @@ void ClientProtocol::receive_game_init_data(std::string& map_path,
     std::memcpy(&spawn_x, &x_bytes, sizeof(float));
     std::memcpy(&spawn_y, &y_bytes, sizeof(float));
 }
+
+DTO ClientProtocol::receive_game_state() const {
+    DTO dto;
+    dto.id = protocol.receive_byte();
+    if (dto.id == 0) {
+        throw InvalidId();
+    }
+    uint16_t cars_count = protocol.receive_big_endian_16();
+
+    for (auto i = 0; i < cars_count; ++i) {
+        int car_id = protocol.receive_big_endian_16(); 
+        CarDTO car;
+        car.x = protocol.receive_float();
+        car.y = protocol.receive_float();
+        car.velocity = protocol.receive_float();
+        car.angle = protocol.receive_float();
+        dto.cars[car_id] = car;
+    }
+    return dto;
+}
+
 
 void ClientProtocol::close(){
     protocol.close_socket();

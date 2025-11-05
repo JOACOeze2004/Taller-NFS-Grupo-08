@@ -5,10 +5,14 @@
 #include <memory>
 #include <unordered_map>
 
+#include "src/common/DTO.h"
+#include "../common/constants.h"
+
 #include "car.h"
 #include "client_command.h"
 #include "client_handler.h"
 
+class ClientHandler;
 class Gameloop;
 
 class Monitor {
@@ -22,16 +26,17 @@ private:
 
     std::string generate_game_id();
     void clear_remaining_clients(const std::string& _game_id);
+    std::string get_client_game_id(int client_id);
 
 public:
     Monitor();
     void add_client(const int client_id, std::unique_ptr<ClientHandler> client);
-    void broadcast(std::map<int, Car>& cars);
+    void broadcast(DTO& dto,const std::string& gid);
     void clear_clients();
     void reap();
 
-    std::shared_ptr<Gameloop> create_game(Queue<ClientCommand>& cmd_queue);
-    std::shared_ptr<Gameloop> join_game(const std::string& user_name, const std::string& game_id);
+    std::shared_ptr<Gameloop> create_game(std::string map_name, const int client_id);
+    std::shared_ptr<Gameloop> join_game(const std::string& user_name, const std::string& game_id, const int client_id);
     Gameloop& get_game(const std::string& game_id);
     void remove_player(const std::string& username);
     void remove_game(const std::string& user_id);

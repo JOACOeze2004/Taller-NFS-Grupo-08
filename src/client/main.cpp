@@ -9,6 +9,7 @@
 #include "login/login_window.h"
 #include <QApplication>
 #include <QWidget>
+#include "final_results/final_results_windows.h"
 
 using namespace SDL2pp;
 
@@ -37,7 +38,12 @@ int main(int argc, char *argv[]) try {
 
     if (startPressed) {
         Client client(host, port);
-        client.run(playerConfig);
+        client.run(playerConfig,loginWindow->getLobbyAction(), loginWindow->getSelectedGameId());
+        auto results = new FinalResultsWindow();
+        results->setMockResults();
+        results->show();
+
+        return app.exec();
     }
 
 	return 0;

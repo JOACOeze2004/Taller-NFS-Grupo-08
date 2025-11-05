@@ -12,13 +12,17 @@
 Client::Client(const std::string& host, const std::string& port)
     : host(host), port(port), client_socket(host.c_str(), port.c_str()) {}
 
-void Client::run(const PlayerConfig& config) {
+void Client::run(const PlayerConfig& config,uint8_t lobby_action, const std::string& game_id) {
     std::cout << "[CLIENT] Connected to " << host << ":" << port << std::endl;
 
     ClientProtocol protocol(client_socket);
 
     try {
-        protocol.send_player_config(config.playerName, config.carId, config.mapName);
+        protocol.send_player_config(config.playerName, config.carId, config.mapName);        
+        protocol.send_lobby_action(lobby_action, game_id);
+        if (lobby_action == SEND_CREATE_GAME){
+            std::cout << "[CLIENT] Waiting for other player to start: " << std::endl;
+        }        
     } catch (const std::exception& e) {
         std::cerr << "[CLIENT] Error sending config: " << e.what() << std::endl;
         return;
@@ -39,22 +43,39 @@ void Client::run(const PlayerConfig& config) {
     ClientSender sender(protocol, command_queue);
     sender.start();
 
-    CarDTO state;
+    DTO dto;
     InputParser parser(sender, command_queue);
-    GraphicClient graphic_client(map_path);
+
+    while (!receiver.try_pop_car_state(dto)) {
+        SDL_Delay(10);
+    }
+
+    GraphicClient graphic_client(map_path,dto);
     ClientHandler handler(parser);
+    const Uint32 FRAME_DELAY = 1000 / 60;  // ~60 FPS
+
+
 
     while (true) {
-        while (receiver.try_pop_car_state(state)) {
-            graphic_client.update_car(state);
-        }
+        Uint32 frame_start = SDL_GetTicks();
 
+        while (receiver.try_pop_car_state(dto)) {
+            for (auto& [id, car] : dto.cars) {
+                graphic_client.update_car(id, car);
+            }
+        }
         try {
             handler.handle_event();
         } catch (ClientQuitException& e) {
             break;
         }
-        graphic_client.draw();
+
+        graphic_client.draw(dto);
+
+        Uint32 frame_time = SDL_GetTicks() - frame_start;
+        if (frame_time < FRAME_DELAY) {
+            SDL_Delay(FRAME_DELAY - frame_time);
+        }
     }
     command_queue.close();
     protocol.close();

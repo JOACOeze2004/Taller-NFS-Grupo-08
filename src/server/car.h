@@ -4,10 +4,11 @@
 #include "car_state.h"
 #include "../common/car_DTO.h"
 #include "../common/constants.h"
+#include <box2d/box2d.h>
 
-constexpr float HANDLING = 0.1f;
-constexpr float ACCELERATION = 0.5f;
-constexpr float BRAKING = 0.3f;
+constexpr float HANDLING = 150000.0f;
+constexpr float ACCELERATION = 80000.0f;
+constexpr float BRAKING = 10000.0f;
 
 class Car {
     float max_speed = MAX_SPEED;
@@ -15,13 +16,26 @@ class Car {
     float handling = HANDLING;
     float acceleration = ACCELERATION;
     float braking = BRAKING;
+    int life = MAX_LIFE;
+    int nitro = MAX_NITRO;
+    b2BodyId body_id;
 
 public:
+    explicit Car(b2WorldId world);
+    ~Car();
     void accelerate();
     void brake();
     void turn_right();
     void turn_left();
     void update_position();
+    void restore_life();
+    void activate_infinite_life();
+    void activate_infinite_nitro();
+
+    //ver como manejar estos casos seguro se manejan desde el gameloop
+    void activate_lose_race();
+    void activate_win_race();
+
 
     CarDTO get_state() const;
 };

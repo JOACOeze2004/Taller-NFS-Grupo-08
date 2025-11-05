@@ -4,6 +4,7 @@
 #pragma once
 #include <functional>
 #include <map>
+#include "world.h"
 
 #include "../common/queue.h"
 #include "../common/thread.h"
@@ -18,16 +19,22 @@ class Monitor;
 class Gameloop: public Thread {
 
 public:
-    explicit Gameloop(Queue<ClientCommand>& _cmd_queue, Monitor& _monitor);
+    explicit Gameloop(Monitor& _monitor, const std::string& game_id, std::string map_name);
     void run() override;
 
     void add_car(const int client_id);
+    void push_command(const ClientCommand& cmd);
+    const std::string& get_game_id() const;
+    bool can_join_to_game();
 private:
-    Queue<ClientCommand>& cmd_queue;
+    Queue<ClientCommand> cmd_queue;
+    std::string game_id;
     Monitor& monitor;
     std::map<int, Car> cars;
     std::map<uint8_t, std::function<void(Car& car)>> car_actions;
+    World world;
     void initialize_car_actions();
+    bool ready_to_start; 
     // Parser parser;
     // Workshop workshop; para entre carreras mejorar el auto
     // GameMap game_map; quiza que guarde todos los mapas y circuitos posibles (lo recibe por parametro)
@@ -36,7 +43,7 @@ private:
 
     void process_commands();
     void update_positions();
-    void broadcast(std::map<int, Car>& _cars) const;
+    void broadcast() const;
 };
 
 
