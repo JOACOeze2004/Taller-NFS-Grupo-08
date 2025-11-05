@@ -16,6 +16,7 @@ Car::Car(b2WorldId world){
 
     b2Polygon box = b2MakeBox(10.0f, 5.0f);
     b2ShapeDef shape_def = b2DefaultShapeDef();
+    shape_def.density = 0.0006f;
     b2ShapeId shape = b2CreatePolygonShape(body_id, &shape_def, &box);
     b2Shape_EnableContactEvents(shape, true);
     b2Shape_EnableHitEvents(shape, true);
@@ -48,7 +49,7 @@ void Car::brake() {
 void Car::turn_right() {
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    if (speed > 1.0f) {
+    if (speed > 10.0f) {
         b2Body_ApplyTorque(body_id, handling, true);
         update_position();
     }
@@ -57,7 +58,7 @@ void Car::turn_right() {
 void Car::turn_left() {
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    if (speed > 1.0f) {
+    if (speed > 10.0f) {
         b2Body_ApplyTorque(body_id, -handling, true);
         update_position();
     }
