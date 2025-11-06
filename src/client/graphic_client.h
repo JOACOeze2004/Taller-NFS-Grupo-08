@@ -29,7 +29,7 @@ class GraphicClient {
     
     private:
     void clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dto);
-    void draw_car(const CarDTO& car);
+    void draw_car(const CarDTO& car, int car_id);
     void draw_cars();
     void draw_camera();
     void draw_minimap();

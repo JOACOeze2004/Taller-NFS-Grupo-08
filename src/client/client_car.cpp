@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 #include <SDL2/SDL_image.h>
+#include <yaml-cpp/yaml.h>
+#include <iostream>
+#include <fstream>
 
 namespace {
 SDL_Texture* loadTextureFromCandidates(SDL_Renderer* renderer, const std::vector<std::string>& candidates) {
@@ -14,7 +17,7 @@ SDL_Texture* loadTextureFromCandidates(SDL_Renderer* renderer, const std::vector
 }
 }
 
-Car::Car(float x, float y, float angle, SDL_Renderer* renderer, float scale)
+Car::Car(float x, float y, float angle, SDL_Renderer* renderer, int car_id, float scale)
     : x(x), y(y), angle(angle), velocity(0.0f), render_scale(scale), renderer(renderer) {
     if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) == 0) {
     }
@@ -25,13 +28,46 @@ Car::Car(float x, float y, float angle, SDL_Renderer* renderer, float scale)
     };
 
     texture = loadTextureFromCandidates(renderer, candidates);
-    //esto se encarga de agarrar la imagen del coche, ver como manejarlo cuando haya q cambiar los coches
-    //es segun el id del coche leer el id del yaml y cargar otro sprite
+    
     if (texture) {
-        srcRect.x = 2;
-        srcRect.y = 5;
-        srcRect.w = 29;
-        srcRect.h = 22;
+        const std::vector<std::string> yamlCandidates = {
+            "../src/client/car_sprites.yaml",
+            "src/client/car_sprites.yaml",
+        };
+        
+        bool yamlLoaded = false;
+        for (const auto& yamlPath : yamlCandidates) {
+            std::ifstream file(yamlPath);
+            if (file.good()) {
+                try {
+                    YAML::Node config = YAML::LoadFile(yamlPath);
+                    
+                    if (car_id < 0 || car_id > 6) {
+                        std::cerr << "Warning: car_id " << car_id << " out of range. Using car 0." << std::endl;
+                        car_id = 0;
+                    }
+                    
+                    if (config["cars"] && config["cars"].IsSequence() && static_cast<std::size_t>(car_id) < config["cars"].size()) {
+                        YAML::Node carSprite = config["cars"][car_id]["sprite"];
+                        srcRect.x = carSprite["x"].as<int>();
+                        srcRect.y = carSprite["y"].as<int>();
+                        srcRect.w = carSprite["width"].as<int>();
+                        srcRect.h = carSprite["height"].as<int>();
+                        
+                        break
+                    }
+                } catch (const YAML::Exception& e) {
+                    std::cerr << "Error parsing YAML file " << yamlPath << ": " << e.what() << std::endl;
+                }
+            }
+        }
+        //si no agarre del yaml uso el verde defa        
+        if (!yamlLoaded) {
+            srcRect.x = 2;
+            srcRect.y = 5;
+            srcRect.w = 39;
+            srcRect.h = 23;
+        }
     } else {
         srcRect = {0, 0, 0, 0};
     }

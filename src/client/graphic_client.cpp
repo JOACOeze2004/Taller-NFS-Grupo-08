@@ -298,16 +298,16 @@ void GraphicClient::draw_cars() {
     for (const auto& [id, car] : cars) {
         if (car.x >= camera_x && car.x <= camera_x + viewport_width &&
             car.y >= camera_y && car.y <= camera_y + viewport_height) {
-            draw_car(car);
+            draw_car(car, id); //hacer car.id
         }
     }
 }
 
-void GraphicClient::draw_car(const CarDTO& car) {
+void GraphicClient::draw_car(const CarDTO& car, int car_id) {
     const float screen_x = (car.x - camera_x) * ZOOM_FACTOR;
     const float screen_y = (car.y - camera_y) * ZOOM_FACTOR;
-    
-    Car temp_car(screen_x, screen_y, car.angle, renderer, ZOOM_FACTOR);
+
+    Car temp_car(screen_x, screen_y, car.angle, renderer, car_id, ZOOM_FACTOR);
     CarDTO adjusted_car = car;
     adjusted_car.x = screen_x;
     adjusted_car.y = screen_y;

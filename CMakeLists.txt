@@ -153,7 +153,7 @@ if(TALLER_CLIENT)
     target_include_directories(taller_client PRIVATE ${libSDL2pp_SOURCE_DIR})
 
     # Link the taller_common lib target
-    target_link_libraries(taller_client taller_common SDL2_image::SDL2_image SDL2pp::SDL2pp Qt5::Widgets)
+    target_link_libraries(taller_client taller_common SDL2_image::SDL2_image SDL2pp::SDL2pp Qt5::Widgets yaml-cpp)
 endif()
 
 if(TALLER_SERVER)
