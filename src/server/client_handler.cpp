@@ -14,11 +14,9 @@ ClientHandler::ClientHandler(Socket&& peer,Monitor& monitor, int _id):
 
 void ClientHandler::run() {
     try {
+        // auto active_games = monitor.get_active_games();
+        // protocol.send_games_list(active_games);
         protocol.receive_player_config(player_name, car_id, map_name);
-        std::cout << "[SERVER " << id << "] Received config:" << std::endl;
-        std::cout << "  Player: " << player_name << std::endl;
-        std::cout << "  Car Number: " << static_cast<int>(car_id) << std::endl;
-        std::cout << "  Map: " << map_name << std::endl;
 
     } catch (const std::exception& e) {
         std::cerr << "[SERVER " << id << "] Error receiving config: " << e.what() << std::endl;
@@ -65,7 +63,6 @@ void ClientHandler::run() {
 
     try {
         protocol.send_game_init_data(map_path, spawn_x, spawn_y);
-        std::cout << "[SERVER " << id << "] Sent game init data" << std::endl;
     } catch (const std::exception& e) {
         std::cerr << "[SERVER " << id << "] Error sending init data: " << e.what() << std::endl;
         return;
@@ -95,7 +92,7 @@ void ClientHandler::kill_threads() {
     sender.join();
 }
 
-bool ClientHandler::is_dead() const { return !sender.is_alive() && !receiver->is_alive(); }
+bool ClientHandler::is_dead() const { return !receiver->is_alive(); }
 
 void ClientHandler::set_game_id(const std::string& _game_id) { game_id = _game_id; }
 

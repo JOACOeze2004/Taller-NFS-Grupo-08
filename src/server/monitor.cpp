@@ -52,7 +52,7 @@ void Monitor::clear_clients() {
 void Monitor::broadcast(DTO& dto, const std::string& gid) {
     std::unique_lock<std::mutex> lock(mutex);
     for (auto& [id, client] : clients) {
-        if (client->get_game_id() == gid) {
+        if (client->get_game_id() == gid && !client->is_dead()) {
             client->send_state(dto);
         }
     }
@@ -83,9 +83,14 @@ std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const 
     return game;
 }
 
-Gameloop& Monitor::get_game(const std::string& _game_id) {
+std::vector<std::string> Monitor::get_active_games() {
     std::unique_lock<std::mutex> lock(mutex);
-    return *(current_games.at(_game_id));
+    std::vector<std::string> active_games;
+    for(const auto& [id,game] : current_games){
+        //valdiar q este vivo el juego obvio.
+        active_games.push_back(id);
+    }
+    return active_games;
 }
 
 void Monitor::remove_player(const std::string& username){

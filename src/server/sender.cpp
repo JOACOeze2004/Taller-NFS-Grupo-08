@@ -7,9 +7,7 @@ void ClientSender::run() {
     while (should_keep_running()) {
         try {
             DTO dto = client_queue.pop();
-            if (dto.id != 0){
-                protocol.send_game_state(dto);
-            }           
+            protocol.send_game_state(dto);         
         } catch (const ClosedQueue&) {
             this->stop();
             break;
