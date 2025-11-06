@@ -21,6 +21,17 @@ uint8_t ClientProtocol::receive_byte() const{
     return protocol.receive_byte();
 }
 
+const std::vector<std::string> ClientProtocol::receive_games_list(){
+    std::vector<std::string> games;
+    uint16_t game_amount = protocol.receive_big_endian_16();
+    for (int i = 0; i < game_amount; i++){
+        uint16_t game_len = protocol.receive_big_endian_16();
+        std::string g = protocol.receive_string(game_len);
+        games.push_back(g);   
+    }
+    return games;
+}
+
 void ClientProtocol::send_lobby_action(uint8_t action, const std::string& game_id) {
     protocol.send_byte(action);
     if (action == SEND_JOIN_GAME) {

@@ -14,6 +14,18 @@ void ServerProtocol::send_car_state(const CarDTO& car){
     protocol.send_float(car.angle);
 }
 
+void ServerProtocol::send_games_list(const std::vector<std::string>& games) {
+    if (games.size() == 0){
+        return;
+    }
+    
+    protocol.send_big_endian_16(games.size());
+    for (const auto& g : games) {
+        protocol.send_big_endian_16(g.size());
+        protocol.send_string(g);
+    }
+}
+
 void ServerProtocol::send_game_init_data(const std::string& map_path,
                                    float spawn_x, float spawn_y) {
     auto path_length = static_cast<uint16_t>(map_path.size());

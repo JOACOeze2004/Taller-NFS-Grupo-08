@@ -3,7 +3,6 @@
 
 #include "../common/socket.h"
 #include "../common/protocol.h"
-#include "login/login_window.h"
 #include "../common/DTO.h"
 
 
@@ -12,6 +11,7 @@ class ClientProtocol {
         Protocol protocol;
     public:
         explicit ClientProtocol(Socket& _socket);
+        const std::vector<std::string> receive_games_list();
         void send_player_config(const std::string& name, uint8_t car_id,
                             const std::string& map_name) ;
         void receive_game_init_data(std::string& map_path,

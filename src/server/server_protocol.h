@@ -13,6 +13,8 @@ private:
 public:
     explicit ServerProtocol(Socket& socket);
 
+    void send_games_list(const std::vector<std::string>& games);
+
     void receive_player_config(std::string& name, uint8_t& car_id,
                               std::string& map_name) ;
     void send_game_init_data(const std::string& map_path,
