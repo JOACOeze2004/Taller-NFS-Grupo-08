@@ -28,6 +28,8 @@ public:
     void turn_right();
     void turn_left();
     void update_position();
+    void handle_hit(b2Vec2& normal, float& force, bool is_hitter);
+
     void restore_life();
     void activate_infinite_life();
     void activate_infinite_nitro();
