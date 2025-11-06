@@ -54,7 +54,7 @@ Car::Car(float x, float y, float angle, SDL_Renderer* renderer, int car_id, floa
                         srcRect.w = carSprite["width"].as<int>();
                         srcRect.h = carSprite["height"].as<int>();
                         
-                        break
+                        break;
                     }
                 } catch (const YAML::Exception& e) {
                     std::cerr << "Error parsing YAML file " << yamlPath << ": " << e.what() << std::endl;
