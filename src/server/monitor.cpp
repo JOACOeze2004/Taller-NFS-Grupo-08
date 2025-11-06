@@ -21,17 +21,10 @@ std::string Monitor:: get_client_game_id(int client_id){
 
 void Monitor::add_client(const int client_id, std::unique_ptr<ClientHandler> client) {
     std::unique_lock<std::mutex> lock(mutex);
-    std::string g_id = client->get_game_id();
-    std::cout << "game id: " << g_id << std::endl;
     clients[client_id] = std::move(client);
-    auto i = current_games.find(g_id);
-    if (i != current_games.end()){
-        i->second->add_car(client_id);
-    }
 }
 
 void Monitor::reap() {
-    std::unique_lock lock(mutex);
     std::vector<int> to_remove;
     for ( auto& [id, client] : clients) {
         if (client->is_dead()) {
@@ -48,7 +41,6 @@ void Monitor::reap() {
 }
 
 void Monitor::clear_clients() {
-    std::unique_lock<std::mutex> lock(mutex);
     for ( auto& [id, client] : clients) {
         std::string g_id = client->get_game_id();
         client->kill();
@@ -102,7 +94,6 @@ void Monitor::remove_player(const std::string& username){
 }
 
 void Monitor::remove_game(const std::string& _game_id){
-    std::unique_lock<std::mutex> lock(mutex);
     auto game_to_remove = current_games.find(_game_id);
     if (game_to_remove != current_games.end()) {
         auto game_loop = game_to_remove->second;
