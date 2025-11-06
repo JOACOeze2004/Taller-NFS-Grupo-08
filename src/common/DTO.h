@@ -55,7 +55,7 @@ struct Snapshot { //deberia ser una clase
     int position;
     int cars_count;
     int id;
-    std::vector<CarDTO> cars; // capaz es un map
+    std::unordered_map<int, CarDTO> cars; // capaz es un map
     enum Map map;
     enum Upgrades upgrade;
     bool upgradeable;

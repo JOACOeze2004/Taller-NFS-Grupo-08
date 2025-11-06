@@ -43,6 +43,7 @@ void Client::run(const PlayerConfig& config,uint8_t lobby_action, const std::str
     ClientSender sender(protocol, command_queue);
     sender.start();
 
+    Snapshot snapshot;
     DTO dto;
     InputParser parser(sender, command_queue);
 
@@ -50,6 +51,15 @@ void Client::run(const PlayerConfig& config,uint8_t lobby_action, const std::str
         SDL_Delay(10);
     }
 
+    /* 
+        while(!receiver.try_pop_snapshot(snapshot)) {
+            SDL_Delay(10);
+        }
+    */
+
+    /* 
+        GraphicClient graphic_client(map_path, snapshot);
+    */
     GraphicClient graphic_client(map_path,dto);
     ClientHandler handler(parser);
     const Uint32 FRAME_DELAY = 1000 / 60;  // ~60 FPS
@@ -64,6 +74,12 @@ void Client::run(const PlayerConfig& config,uint8_t lobby_action, const std::str
                 graphic_client.update_car(id, car);
             }
         }
+        
+        /* while(!receiver.try_pop_snapshot(snapshot)) {
+            // Condiciones tipo mori hacer algo, o lo que tenga que ver con juego y no con mostrar cosas
+            graphic_client.update_from_snapshot(snapshot);
+            } */
+
         try {
             handler.handle_event();
         } catch (ClientQuitException& e) {
@@ -71,6 +87,7 @@ void Client::run(const PlayerConfig& config,uint8_t lobby_action, const std::str
         }
 
         graphic_client.draw(dto);
+        /* graphic_client.draw(snapshot); */
 
         Uint32 frame_time = SDL_GetTicks() - frame_start;
         if (frame_time < FRAME_DELAY) {

@@ -26,6 +26,7 @@ Car::Car(float x, float y, float angle, SDL_Renderer* renderer, float scale)
 
     texture = loadTextureFromCandidates(renderer, candidates);
     //esto se encarga de agarrar la imagen del coche, ver como manejarlo cuando haya q cambiar los coches
+    //es segun el id del coche leer el id del yaml y cargar otro sprite
     if (texture) {
         srcRect.x = 2;
         srcRect.y = 5;
@@ -48,6 +49,7 @@ void Car::update_from_dto(const CarDTO& state) {
     y = state.y;
     angle = state.angle;
     velocity = state.velocity;
+    /* agregar vida y alguna otra informacion como tiene nitro esta abajo de puente etc */
 }
 
 void Car::render() {
@@ -105,4 +107,6 @@ void Car::render() {
     SDL_RenderDrawLine(renderer,
                       static_cast<int>(x), static_cast<int>(y),
                       static_cast<int>(front_x), static_cast<int>(front_y));
+
+    //modularizar y agregar dibujar nitro y dibujar vida
 }
