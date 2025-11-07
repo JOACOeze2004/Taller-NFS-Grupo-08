@@ -16,7 +16,6 @@ CarDTO ClientProtocol::receive_car_state() const {
     car.life = protocol.receive_float();
     car.nitro = protocol.receive_bool();
     car.remaining_nitro = protocol.receive_float();
-    std::cout << "nitro: " << car.remaining_nitro << std::endl;
     return car;
 }
 

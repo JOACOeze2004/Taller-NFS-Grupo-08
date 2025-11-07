@@ -33,9 +33,18 @@ Car::~Car() {
 void Car::accelerate() {
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    if (speed < max_speed) {
+
+    float accel = acceleration;
+    float limit = max_speed;
+
+    if (nitro_activated){
+        accel *= 3.0f;
+        limit *= 2.0f;
+    }
+    
+    if (speed < limit) {
         b2Vec2 velocity = b2Body_GetWorldVector(body_id, {1,0});
-        b2Vec2 force = {velocity.x * acceleration, velocity.y * acceleration};
+        b2Vec2 force = {velocity.x * accel, velocity.y * accel};
         b2Body_ApplyForceToCenter(body_id, force, true);
     }
     update_position();
@@ -140,16 +149,12 @@ void Car::update_nitro_usage(){
             nitro = 0;
             nitro_activated = false;
         }
-    }else if (nitro < MAX_NITRO){
+    }else{
+        nitro += NITRO_RECHARGE_RATE;        
         if (nitro >= MAX_NITRO){
             nitro = MAX_NITRO;
         }        
-        nitro += NITRO_RECHARGE_RATE;        
     }
-}
-
-int Car::get_nitro() const{
-    return nitro;
 }
 
 CarDTO Car::get_state() const {

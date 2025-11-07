@@ -42,10 +42,7 @@ public:
 
     void toggle_nitro_status();
     void update_nitro_usage();
-
-    int get_nitro() const;
-
-    
+   
 
     CarDTO get_state() const;
 };
