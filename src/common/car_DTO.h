@@ -10,6 +10,7 @@ struct CarDTO {
     bool under_bridge;
     int life;
     bool nitro;
+    float remaining_nitro;
 };
 
 #endif  // TALLER_TP_CAR_DTO_H

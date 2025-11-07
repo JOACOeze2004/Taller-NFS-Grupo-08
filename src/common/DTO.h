@@ -78,7 +78,6 @@ struct Snapshot { //deberia ser una clase
     HintCoords hint;
     enum TypeCheckpoint type_checkpoint;
     int time_ms;
-    float remaining_nitro;
     std::unordered_map<int, LobbyCarDTO> lobby_cars; // el int es el car_id. al cliente no le importa el int igual
     //std::unordered_map<int, playerDTO> players_info;
 
