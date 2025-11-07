@@ -5,6 +5,7 @@
 #include "client_car.h"
 #include <unordered_map>
 #include "../common/DTO.h"
+#include "text_renderer.h"
 
 class GraphicClient {
     SDL_Renderer* renderer;
@@ -16,13 +17,12 @@ class GraphicClient {
     float camera_x, camera_y;
     int screen_width, screen_height;
     float map_width, map_height;
+    TextRenderer* text; 
     
 
     public:
     explicit GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot);
-    /* explicit GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot); */
     void draw(const Snapshot& snapshot);
-    /* void draw(const Snapshot& snapshot); */
     /* void update_from_snapshot(snapshot); */
     void update_car(int id, const CarDTO& car_state); //este ya no se usa
     ~GraphicClient();
@@ -38,6 +38,8 @@ class GraphicClient {
     void draw_position(int position, int total_cars);
     void draw_time(int time_ms);
     void draw_speed(float speed);
+    void draw_life(int life);
+    void draw_nitro(bool nitro);
 };
 
 

@@ -4,14 +4,16 @@
 #include "client_handler.h"
 #include "client_car.h"
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <cmath>
+#include "text_renderer.h"
 
 constexpr float ZOOM_FACTOR = 2.0f;
 
 GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot)
-    : renderer(nullptr), bg_texture(nullptr), window(nullptr), 
-      player_car_id(-1), camera_x(0.0f), camera_y(0.0f), 
-      screen_width(1200), screen_height(900) {
+        : renderer(nullptr), bg_texture(nullptr), window(nullptr), 
+            player_car_id(-1), camera_x(0.0f), camera_y(0.0f), 
+            screen_width(1200), screen_height(900), text(nullptr) {
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cerr << "[CLIENT] Error inicializando SDL: " << SDL_GetError() << std::endl;
@@ -38,6 +40,18 @@ GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initia
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
         std::cerr << "Error inicializando SDL_image: " << IMG_GetError() << std::endl;
     }
+
+    if (TTF_Init() == -1) {
+        std::cerr << "[CLIENT] Error inicializando SDL_ttf: " << TTF_GetError() << std::endl;
+    } else {
+        const char* default_font_path = "../assets/fonts/DejaVuSans.ttf";
+        text = new TextRenderer();
+        if (!text->load(default_font_path, 20) || !text->ok()) {
+            std::cerr << "[CLIENT] Fuente no disponible, no se renderizará texto en pantalla." << std::endl;
+            delete text;
+            text = nullptr;
+        }
+    } //pasarlo al constructor del text render
 
     SDL_Surface* bg_surface = IMG_Load(map_path.c_str());
 
@@ -167,32 +181,53 @@ void GraphicClient::draw(const Snapshot& snapshot) {
         draw_speed(cars[player_car_id].velocity);
         draw_position(snapshot.position, snapshot.cars.size());
         draw_time(snapshot.time_ms);
+        draw_life(cars[player_car_id].life);
+        draw_nitro(cars[player_car_id].nitro);
     }
     
     SDL_RenderPresent(renderer);
 } 
 
+void GraphicClient::draw_nitro(bool nitro) {
+    if (!text) return; 
+    std::string msg = "Nitro: " + std::string(nitro ? "ON" : "OFF");
+    SDL_Color color{255, 255, 255, 255};
+    text->render(renderer, msg, 15, 95, color);
+}
+
+void GraphicClient::draw_life(int life) {
+    if (!text) return;
+    std::string msg = "Vida: " + std::to_string(life);
+    SDL_Color color{255, 255, 255, 255};
+    text->render(renderer, msg, 15, 135, color);
+}
+
 
 void GraphicClient::draw_position(int position, int total_cars) {
-    std::cout << "Position: " << position << " / " << total_cars << std::endl;
-    //mientras lo dejo asi, falta agregar sdlthings
+    if (!text) return; // si no hay fuente, evitamos crash; se podría mantener stdout
+    std::string msg = "Posición: " + std::to_string(position) + "/" + std::to_string(total_cars);
+    SDL_Color color{255, 255, 255, 255};
+    text->render(renderer, msg, 15, 45, color);
 }
 
 void GraphicClient::draw_time(int time_ms) {
+    if (!text) return;
     int total_seconds = time_ms / 1000;
     int minutes = total_seconds / 60;
     int seconds = total_seconds % 60;
     int milliseconds = time_ms % 1000;
-
-    std::cout << "Time: " << minutes << ":" 
-              << (seconds < 10 ? "0" : "") << seconds << "." 
-              << milliseconds << std::endl;
-    //mientras lo dejo asi, falta agregar sdlthings
+    char buffer[64];
+    std::snprintf(buffer, sizeof(buffer), "Tiempo: %02d:%02d.%03d", minutes, seconds, milliseconds);
+    SDL_Color color{255, 255, 255, 255};
+    text->render(renderer, buffer, 15, 70, color);
 }
 
 void GraphicClient::draw_speed(float speed) {
-    std::cout << "Speed: " << speed << " units/s" << std::endl;
-    //mientras lo dejo asi, falta agregar sdlthings seguro haya que pasar la velocidad debox2d a algo razonable
+    if (!text) return;
+    char buffer[64];
+    std::snprintf(buffer, sizeof(buffer), "Velocidad: %.1f KM/H", speed);
+    SDL_Color color{255, 255, 255, 255};
+    text->render(renderer, buffer, 15, 20, color);
 }
 
 void GraphicClient::draw_minimap() {
@@ -273,7 +308,7 @@ void GraphicClient::draw_cars() {
     for (const auto& [id, car] : cars) {
         if (car.x >= camera_x && car.x <= camera_x + viewport_width &&
             car.y >= camera_y && car.y <= camera_y + viewport_height) {
-            draw_car(car, id); //hacer car.id
+            draw_car(car, car.car_id);
         }
     }
 }
@@ -299,6 +334,13 @@ GraphicClient::~GraphicClient() {
     }
     if (window) {
         SDL_DestroyWindow(window);
+    }
+    if (text) {
+        delete text;
+        text = nullptr;
+    }
+    if (TTF_WasInit()) {
+        TTF_Quit();
     }
     IMG_Quit();
     SDL_Quit();

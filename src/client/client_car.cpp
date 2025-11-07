@@ -88,19 +88,17 @@ void Car::update_from_dto(const CarDTO& state) {
     velocity = state.velocity;
     life = state.life;
     nitro = state.nitro;
-    /* agregar vida y alguna otra informacion como tiene nitro esta abajo de puente etc */
 
 }
 
 void Car::render() {
     if (texture && srcRect.w > 0 && srcRect.h > 0) {
+        renderNitro();
         renderTexture();
+        renderLife();
     } else {
         renderFallback();
     }
-    // Render nitro y vida (debug temporal)
-    std::cout << "Render Nitro " << nitro << std::endl;
-    std::cout << "Render Life " << life << std::endl;
 }
 
 void Car::renderTexture() {
@@ -160,9 +158,38 @@ void Car::renderDirectionIndicator() {
 }
 
 void Car::renderNitro() {
-    // TODO: Implement nitro visual indicator
+    if (nitro) {
+        float car_length = (CAR_HEIGHT * render_scale) / 2.0f;
+        float indicator_distance = car_length + 12.0f; 
+        
+        SDL_Rect nitroIndicator;
+        nitroIndicator.w = 10;
+        nitroIndicator.h = 10;
+        
+        nitroIndicator.x = static_cast<int>(x - indicator_distance * cos(angle) - nitroIndicator.w / 2.0f);
+        nitroIndicator.y = static_cast<int>(y - indicator_distance * sin(angle) - nitroIndicator.h / 2.0f);
+        
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        SDL_RenderFillRect(renderer, &nitroIndicator);
+    }
 }
 
 void Car::renderLife() {
-    // TODO: Implement life bar
+        SDL_Rect lifeBarBg;
+        lifeBarBg.x = static_cast<int>(x - 25);
+        lifeBarBg.y = static_cast<int>(y - 40);
+        lifeBarBg.w = 50;
+        lifeBarBg.h = 5;
+        
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        SDL_RenderFillRect(renderer, &lifeBarBg);
+        
+        SDL_Rect lifeBarFg;
+        lifeBarFg.x = lifeBarBg.x;
+        lifeBarFg.y = lifeBarBg.y;
+        lifeBarFg.w = static_cast<int>(50 * life / 100.0f);
+        lifeBarFg.h = 5;
+        
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+        SDL_RenderFillRect(renderer, &lifeBarFg);
 }
