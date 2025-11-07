@@ -28,6 +28,7 @@ void ClientHandler::initialize_key_map() {
     key_map[SDLK_a] = [this]() { parser.parse_command(SEND_ROTATE_LEFT); };
     key_map[SDLK_s] = [this]() { parser.parse_command(SEND_BRAKE); };
     key_map[SDLK_d] = [this]() { parser.parse_command(SEND_ROTATE_RIGHT); };
+    key_map[SDLK_n] = [this]() { parser.parse_command(SEND_USE_NITRO); };
 }
 
 void ClientHandler::process_event(const SDL_Event& event) {
