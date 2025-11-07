@@ -181,12 +181,22 @@ void GraphicClient::draw(const Snapshot& snapshot) {
         draw_speed(cars[player_car_id].velocity);
         draw_position(snapshot.position, snapshot.cars.size());
         draw_time(snapshot.time_ms);
-        draw_life(cars[player_car_id].life);
         draw_nitro(cars[player_car_id].nitro);
     }
     
+    /* draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint);
+
+    draw_hint(snapshot.hint); */
+
+
     SDL_RenderPresent(renderer);
 } 
+
+/* void GraphicClient::draw_checkpoint(const Checkpoint& checkpoint, int type) {
+    SDL_Rect dst_rect = {checkpoint.x, checkpoint.y, 20, 20};
+    SDL_Color color = (type == 1) ? SDL_Color{0, 255, 0, 255} : SDL_Color{255, 0, 0, 255};
+    SDL_RenderFillRect(renderer, &dst_rect);
+} */
 
 void GraphicClient::draw_nitro(bool nitro) {
     if (!text) return; 
