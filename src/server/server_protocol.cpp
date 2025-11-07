@@ -19,6 +19,7 @@ void ServerProtocol::send_car_state(const CarDTO& car){
 
     protocol.send_float(life_percentage);
     protocol.send_bool(car.nitro);
+    protocol.send_float(car.remaining_nitro);
 }
 
 void ServerProtocol::send_lobby_car_state(const LobbyCarDTO& car) {
@@ -109,8 +110,6 @@ void ServerProtocol::send_game_state(const Snapshot& snapshot) {
     protocol.send_byte(static_cast<uint8_t>(snapshot.type_checkpoint));
     
     protocol.send_big_endian_32(snapshot.time_ms);
-    
-    protocol.send_float(snapshot.remaining_nitro);
 
     protocol.send_big_endian_16(snapshot.lobby_cars.size());
     for (const auto& [car_id, lobby_car] : snapshot.lobby_cars) {
