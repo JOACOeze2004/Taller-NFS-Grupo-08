@@ -195,13 +195,6 @@ void GraphicClient::draw_nitro(bool nitro) {
     text->render(renderer, msg, 15, 95, color);
 }
 
-void GraphicClient::draw_life(int life) {
-    if (!text) return;
-    std::string msg = "Vida: " + std::to_string(life);
-    SDL_Color color{255, 255, 255, 255};
-    text->render(renderer, msg, 15, 135, color);
-}
-
 
 void GraphicClient::draw_position(int position, int total_cars) {
     if (!text) return; // si no hay fuente, evitamos crash; se podría mantener stdout
