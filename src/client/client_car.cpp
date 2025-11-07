@@ -56,17 +56,18 @@ Car::Car(float x, float y, float angle, SDL_Renderer* renderer, int car_id, floa
                         yamlLoaded = true;
                         break;
                     }
+
                 } catch (const YAML::Exception& e) {
                     std::cerr << "Error parsing YAML file " << yamlPath << ": " << e.what() << std::endl;
                 }
             }
         }
-        //si no agarre del yaml uso el verde defa        
+        //si no agarre del yaml uso el verde defa
         if (!yamlLoaded) {
             srcRect.x = 2;
             srcRect.y = 5;
-            srcRect.w = 39;
-            srcRect.h = 23;
+            srcRect.w = 29;
+            srcRect.h = 22;
         }
     } else {
         srcRect = {0, 0, 0, 0};

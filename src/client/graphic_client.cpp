@@ -8,7 +8,7 @@
 
 constexpr float ZOOM_FACTOR = 2.0f;
 
-GraphicClient::GraphicClient(const std::string& map_path, const DTO& initial_dto)
+GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot)
     : renderer(nullptr), bg_texture(nullptr), window(nullptr), 
       player_car_id(-1), camera_x(0.0f), camera_y(0.0f), 
       screen_width(1200), screen_height(900) {
@@ -55,16 +55,16 @@ GraphicClient::GraphicClient(const std::string& map_path, const DTO& initial_dto
         std::cerr << "[CLIENT] Error creando textura: " << SDL_GetError() << std::endl;
     }
 
-    set_player_car(initial_dto.id);
+    set_player_car(initial_snapshot.id);
 
-    for (const auto& [id, car_state] : initial_dto.cars) {
+    for (const auto& [id, car_state] : initial_snapshot.cars) {
         update_car(id, car_state);
     }
-    set_player_car(initial_dto.id);
+    set_player_car(initial_snapshot.id);
 
     update_camera();
     
-    draw(initial_dto);
+    draw(initial_snapshot);
 }
 
 void GraphicClient::set_player_car(int id) { 
@@ -150,11 +150,11 @@ void GraphicClient::clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dt
     }    
 }
 
-void GraphicClient::draw(const DTO& dto) {
+void GraphicClient::draw(const Snapshot& snapshot) {
     
     update_camera();
 
-    clear_cars(dto.cars);
+    clear_cars(snapshot.cars);
 
     draw_camera();
 
@@ -162,9 +162,9 @@ void GraphicClient::draw(const DTO& dto) {
     
     draw_minimap();
 
-    /* draw_position(dto.position, dto.cars.size());
+    /* draw_position(snapshot.position, snapshot.cars.size());
 
-    draw_time(dto.time_ms);
+    draw_time(snapshot.time_ms);
 
     if (player_car_id >= 0 && cars.find(player_car_id) != cars.end()) {
         draw_speed(cars[player_car_id].velocity);

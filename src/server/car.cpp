@@ -14,6 +14,8 @@ Car::Car(b2WorldId world){
     b2Body_EnableContactEvents(body_id, true);
     b2Body_EnableHitEvents(body_id, true);
 
+    b2Body_SetUserData(body_id, this);
+
     b2Polygon box = b2MakeBox(10.0f, 5.0f);
     b2ShapeDef shape_def = b2DefaultShapeDef();
     shape_def.density = 0.0006f;
@@ -73,7 +75,7 @@ void Car::restore_life() {
 }
 
 void Car::activate_infinite_life() {
-    life = MAX_LIFE; //hacer un valor muy grande o alguno que sepamos representa la vida infinita
+    life = MAX_LIFE + 1;
 }
 
 void Car::activate_lose_race() {
@@ -101,11 +103,33 @@ void Car::update_position() {
 
 }
 
+void Car::handle_hit(b2Vec2& normal, float& force, bool is_hitter) {
+    if (life > MAX_LIFE) {
+        b2Vec2 impulse = {normal.x * force * 0.1f, normal.y * force * 0.1f};
+        b2Body_ApplyForceToCenter(body_id, impulse, true);
+        return;
+    }
+
+    if (is_hitter) {
+        life -= static_cast<int>(force * 0.1f);
+    }
+    else {
+        life -= static_cast<int>(force * 0.5f);
+    }
+
+    if (life < 0) {
+        life = 0; // matarlo
+    }
+
+    b2Vec2 impulse = {normal.x * force * 0.1f, normal.y * force * 0.1f};
+    b2Body_ApplyForceToCenter(body_id, impulse, true);
+}
+
 CarDTO Car::get_state() const {
     b2Vec2 pos = b2Body_GetPosition(body_id);
     b2Rot rot = b2Body_GetRotation(body_id);
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    return CarDTO(pos.x, pos.y, speed, angle, 1, false); // cambiar el car id y el under bridge para que funcione
+    return CarDTO(pos.x, pos.y, speed, angle, 1, false, life, nitro); // cambiar el car id y el under bridge para que funcione
 }

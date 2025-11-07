@@ -15,13 +15,13 @@ void ClientHandler::handle_event() {
         if (event.type == SDL_QUIT) {
             throw ClientQuitException();
         }
+        process_event(event);
         if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_q){
             throw ClientQuitException();
         }
-        process_event(event);
-        }
-        update();
     }
+    update();
+}
 
 void ClientHandler::initialize_key_map() {
     key_map[SDLK_w] = [this]() { parser.parse_command(SEND_ACCELERATE); };
@@ -50,6 +50,9 @@ void ClientHandler::process_event(const SDL_Event& event) {
                     break;
                 case SDLK_b:
                     parser.parse_command(SEND_INFINITE_NITRO_CHEAT);
+                    break;
+                case SDLK_q:
+                    parser.parse_command(SEND_DISCONNECT);
                     break;
                 default:
                     break;

@@ -33,6 +33,9 @@ public:
     void send_float(const float value) const;
     float receive_float() const;
 
+    void send_bool(const bool value) const;
+    bool receive_bool() const;
+
     void close_socket();
 private:
     Socket& socket;

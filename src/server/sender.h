@@ -16,10 +16,10 @@
 
 class ClientSender: public Thread {
     ServerProtocol& protocol;
-    Queue<DTO>& client_queue;
+    Queue<Snapshot>& client_queue;
 
 public:
-    ClientSender(ServerProtocol& protocol, Queue<DTO>& queue);
+    ClientSender(ServerProtocol& protocol, Queue<Snapshot>& queue);
     void run() override;
 
     ~ClientSender();

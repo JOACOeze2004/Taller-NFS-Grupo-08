@@ -7,8 +7,8 @@ ClientReceiver::ClientReceiver(ClientProtocol& protocol) : protocol(protocol) {}
 void ClientReceiver::run(){
     while (this->should_keep_running()) {
         try {
-            DTO dto = protocol.receive_game_state();
-            queue.push(dto);
+            Snapshot snapshot = protocol.receive_game_state();
+            queue.push(snapshot);
         }
         catch (const InvalidId& e) {
 
@@ -20,6 +20,6 @@ void ClientReceiver::run(){
     }    
 }
 
-bool ClientReceiver::try_pop_car_state(DTO& dto) {
-    return queue.try_pop(dto);
+bool ClientReceiver::try_pop_car_state(Snapshot& snapshot) {
+    return queue.try_pop(snapshot);
 }

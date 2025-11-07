@@ -10,12 +10,12 @@
 
 class ClientReceiver : public Thread  {
     ClientProtocol& protocol;
-    Queue<DTO> queue;
+    Queue<Snapshot> queue;
 
 public:
     explicit ClientReceiver(ClientProtocol& protocol); // seguro tendrá el parser que actualiza el juego
     void run() override;
-    bool try_pop_car_state(DTO& dto); // Ver si nos sirve en un futuro o lo sacamos (lo vi en el tp del CS)
+    bool try_pop_car_state(Snapshot& snapshot); // Ver si nos sirve en un futuro o lo sacamos (lo vi en el tp del CS)
 
 };
 

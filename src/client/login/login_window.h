@@ -6,6 +6,7 @@
 #include <QLineEdit>
 #include <QPainter>
 #include <QPushButton>
+#include <optional>
 #include "../../common/constants.h"
 #include <iostream> 
 
@@ -28,7 +29,11 @@ public:
     void player_name(QLabel*& nameLabel);
     void car_sellec(QLabel*& carLabel);
     void map_sellec(QLabel*& mapLabel);
+    void game_selector(QLabel*& gameLabel);
+    void updateGameList(const std::vector<std::string>& gameList);
+
     explicit LoginWindow(QWidget *parent = nullptr);
+
     ~LoginWindow() override;
 
     uint8_t getLobbyAction() const;
@@ -48,6 +53,8 @@ private:
     QLineEdit* nameInput;
     QComboBox* carSelector;
     QComboBox* mapSelector;
+    QComboBox* gameSelector;
+    QLabel* gameLabel;
 
     QPushButton *createGameButton;
     QPushButton *joinGameButton;

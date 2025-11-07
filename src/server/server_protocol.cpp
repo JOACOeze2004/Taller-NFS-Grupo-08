@@ -14,6 +14,27 @@ void ServerProtocol::send_car_state(const CarDTO& car){
     protocol.send_float(car.angle);
 }
 
+void ServerProtocol::send_lobby_car_state(const LobbyCarDTO& car) {
+    protocol.send_big_endian_16(car.car_id);
+    protocol.send_float(car.acceleration);
+    protocol.send_float(car.brake);
+    protocol.send_float(car.handling);
+    protocol.send_float(car.life);
+    protocol.send_float(car.mass);
+}
+
+void ServerProtocol::send_games_list(const std::vector<std::string>& games) {
+    if (games.size() == 0){
+        return;
+    }
+    
+    protocol.send_big_endian_16(games.size());
+    for (const auto& g : games) {
+        protocol.send_big_endian_16(g.size());
+        protocol.send_string(g);
+    }
+}
+
 void ServerProtocol::send_game_init_data(const std::string& map_path,
                                    float spawn_x, float spawn_y) {
     auto path_length = static_cast<uint16_t>(map_path.size());
@@ -51,25 +72,43 @@ void ServerProtocol::receive_lobby_action(uint8_t& action, std::string& game_id)
     }
 }
 
-void ServerProtocol::send_game_state(const DTO& dto) {
-    protocol.send_byte(static_cast<uint8_t>(dto.id));    
-    protocol.send_big_endian_16(dto.cars.size());
+void ServerProtocol::send_game_state(const Snapshot& snapshot) {
+    protocol.send_byte(static_cast<uint8_t>(snapshot.id));    
+    protocol.send_big_endian_16(snapshot.cars.size());
     
-    for (const auto& [car_id, car] : dto.cars) {
+    for (const auto& [car_id, car] : snapshot.cars) {
         protocol.send_big_endian_16(car_id);
         send_car_state(car); 
     }
 
-    // protocol.send_byte(static_cast<uint8_t>(snap.state));
-    // protocol.send_big_endian_16(snap.cars_count);
-    // protocol.send_byte(static_cast<uint8_t>(snap.map));
-    // protocol.send_byte(static_cast<uint8_t>(snap.upgrade));
-    // protocol.send_bool(snap.upgradeable);
-    // protocol.send_byte(static_cast<uint8_t>(snap.collision));
-    // protocol.send_bool(snap.under_bridge);
-    // protocol.send_float(snap.checkpoint.x);
-    // protocol.send_float(snap.checkpoint.y);
-    // protocol.send_byte(static_cast<uint8_t>(snap.type_checkpoint));
+    protocol.send_byte(static_cast<uint8_t>(snapshot.state));
+
+    protocol.send_byte(static_cast<uint8_t>(snapshot.position));
+
+    protocol.send_byte(static_cast<uint8_t>(snapshot.map));
+
+    protocol.send_byte(static_cast<uint8_t>(snapshot.upgrade));
+    protocol.send_bool(snapshot.upgradeable);
+
+    protocol.send_byte(static_cast<uint8_t>(snapshot.collision));
+    
+    protocol.send_float(snapshot.checkpoint.x);
+    protocol.send_float(snapshot.checkpoint.y);
+
+    protocol.send_float(snapshot.hint.x);
+    protocol.send_float(snapshot.hint.y);
+    protocol.send_float(snapshot.hint.angle);
+
+    protocol.send_byte(static_cast<uint8_t>(snapshot.type_checkpoint));
+    
+    protocol.send_big_endian_16(snapshot.time_ms);
+    
+    protocol.send_float(snapshot.remaining_nitro);
+
+    protocol.send_big_endian_16(snapshot.lobby_cars.size());
+    for (const auto& [car_id, lobby_car] : snapshot.lobby_cars) {
+        send_lobby_car_state(lobby_car); 
+    }
 }
 
 void ServerProtocol::close(){
