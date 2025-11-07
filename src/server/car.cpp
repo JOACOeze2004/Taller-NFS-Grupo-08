@@ -121,8 +121,6 @@ void Car::handle_hit(b2Vec2& normal, float& force, bool is_hitter) {
         life = 0; // matarlo
     }
 
-    std::cout << "life is " << life << std::endl;
-
     b2Vec2 impulse = {normal.x * force * 0.1f, normal.y * force * 0.1f};
     b2Body_ApplyForceToCenter(body_id, impulse, true);
 }
@@ -133,5 +131,5 @@ CarDTO Car::get_state() const {
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    return CarDTO(pos.x, pos.y, speed, angle, 1, false); // cambiar el car id y el under bridge para que funcione
+    return CarDTO(pos.x, pos.y, speed, angle, 1, false, life, nitro); // cambiar el car id y el under bridge para que funcione
 }

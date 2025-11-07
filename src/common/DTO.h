@@ -3,11 +3,19 @@
 
 #include "car_DTO.h"
 #include <unordered_map>
-#include <vector>
 
 struct DTO {
     int id;
     std::unordered_map<int, CarDTO> cars;
+};
+
+struct LobbyCarDTO {
+    int car_id;
+    float acceleration;
+    float brake;
+    float handling;
+    float life;
+    float mass;
 };
 
 enum StateRunning {
@@ -44,6 +52,12 @@ struct CheckpointCoords{
     float y;
 };
 
+struct HintCoords{
+    float x;
+    float y;
+    float angle;
+};
+
 enum TypeCheckpoint{
     REGULAR,
     FINAL,
@@ -55,17 +69,25 @@ struct Snapshot { //deberia ser una clase
     int position;
     int cars_count;
     int id;
-    std::unordered_map<int, CarDTO> cars; // capaz es un map
+    std::unordered_map<int, CarDTO> cars;
     enum Map map;
     enum Upgrades upgrade;
     bool upgradeable;
     enum CollisionType collision;
     CheckpointCoords checkpoint;
+    HintCoords hint;
     enum TypeCheckpoint type_checkpoint;
     int time_ms;
-    //ver como manejar el tema de coches q ya no tienen que dibujarse
+    float remaining_nitro;
+    std::unordered_map<int, LobbyCarDTO> lobby_cars; // el int es el car_id. al cliente no le importa el int igual
+    //std::unordered_map<int, playerDTO> players_info;
+
 };
 
-
+struct playerDTO {
+    std::string name;
+    float time;
+    int position;
+};
 
 #endif  // TALLER_TP_DTO_H

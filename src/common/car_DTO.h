@@ -8,6 +8,8 @@ struct CarDTO {
     float angle;
     int car_id;
     bool under_bridge;
+    int life;
+    bool nitro;
 };
 
 #endif  // TALLER_TP_CAR_DTO_H
