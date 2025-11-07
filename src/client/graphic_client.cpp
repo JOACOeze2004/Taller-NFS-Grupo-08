@@ -162,41 +162,16 @@ void GraphicClient::draw(const Snapshot& snapshot) {
     
     draw_minimap();
 
-    /* draw_position(snapshot.position, snapshot.cars.size());
-
-    draw_time(snapshot.time_ms);
-
+    
     if (player_car_id >= 0 && cars.find(player_car_id) != cars.end()) {
         draw_speed(cars[player_car_id].velocity);
-    } */
-    
-    SDL_RenderPresent(renderer);
-}
-
-/* 
-void GraphicClient::draw(const Snapshot& snapshot) {
-    
-    update_camera();
-
-    clear_cars(snapshot.cars);
-
-    draw_camera();
-
-    draw_cars();
-    
-    draw_minimap();
-
-    draw_position(snapshot.position, snapshot.cars.size());
-
-    draw_time(snapshot.time_ms);
-
-    if (player_car_id >= 0 && cars.find(player_car_id) != cars.end()) {
-        draw_speed(cars[player_car_id].velocity);
+        draw_position(snapshot.position, snapshot.cars.size());
+        draw_time(snapshot.time_ms);
     }
     
     SDL_RenderPresent(renderer);
 } 
-*/
+
 
 void GraphicClient::draw_position(int position, int total_cars) {
     std::cout << "Position: " << position << " / " << total_cars << std::endl;

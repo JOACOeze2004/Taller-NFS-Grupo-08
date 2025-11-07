@@ -22,6 +22,8 @@ private:
     float y;
     float angle;
     float velocity;
+    float nitro;
+    int life;
     float render_scale;  
     
     SDL_Renderer* renderer;

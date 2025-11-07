@@ -86,8 +86,8 @@ void Car::update_from_dto(const CarDTO& state) {
     y = state.y;
     angle = state.angle;
     velocity = state.velocity;
-    /* life = state.life;
-    nitro = state.nitro; */
+    life = state.life;
+    nitro = state.nitro;
     /* agregar vida y alguna otra informacion como tiene nitro esta abajo de puente etc */
 
 }
@@ -98,7 +98,9 @@ void Car::render() {
     } else {
         renderFallback();
     }
-    // TODO: Call renderNitro() and renderLife() when implemented
+    // Render nitro y vida (debug temporal)
+    std::cout << "Render Nitro " << nitro << std::endl;
+    std::cout << "Render Life " << life << std::endl;
 }
 
 void Car::renderTexture() {
