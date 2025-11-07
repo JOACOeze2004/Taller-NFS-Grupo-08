@@ -12,6 +12,13 @@ void ServerProtocol::send_car_state(const CarDTO& car){
     protocol.send_float(car.y);
     protocol.send_float(car.velocity);
     protocol.send_float(car.angle);
+
+    //protocol.send_bool(car.under_bridge); VER SI QUEDA O SE VA
+
+    float life_percentage = (static_cast<float>(car.life) * 100.0f) / static_cast<float>(MAX_LIFE);
+
+    protocol.send_float(life_percentage);
+    protocol.send_bool(car.nitro);
 }
 
 void ServerProtocol::send_lobby_car_state(const LobbyCarDTO& car) {

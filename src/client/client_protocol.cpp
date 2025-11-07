@@ -10,6 +10,12 @@ CarDTO ClientProtocol::receive_car_state() const {
     car.y = protocol.receive_float();
     car.velocity = protocol.receive_float();
     car.angle = protocol.receive_float();
+
+    //protocol.receive_bool(car.under_bridge); VER SI QUEDA O SE VA
+
+    car.life = protocol.receive_float();
+    std::cout << "vida: " << car.life << "%" << std::endl;
+    car.nitro = protocol.receive_bool();
     return car;
 }
 
