@@ -53,8 +53,8 @@ Car::Car(float x, float y, float angle, SDL_Renderer* renderer, int car_id, floa
                         srcRect.y = carSprite["y"].as<int>();
                         srcRect.w = carSprite["width"].as<int>();
                         srcRect.h = carSprite["height"].as<int>();
-                        
-                        break
+                        yamlLoaded = true;
+                        break;
                     }
                 } catch (const YAML::Exception& e) {
                     std::cerr << "Error parsing YAML file " << yamlPath << ": " << e.what() << std::endl;
@@ -85,29 +85,44 @@ void Car::update_from_dto(const CarDTO& state) {
     y = state.y;
     angle = state.angle;
     velocity = state.velocity;
+    /* life = state.life;
+    nitro = state.nitro; */
     /* agregar vida y alguna otra informacion como tiene nitro esta abajo de puente etc */
+
 }
 
 void Car::render() {
     if (texture && srcRect.w > 0 && srcRect.h > 0) {
-        SDL_Rect dstRect;
-        dstRect.w = static_cast<int>(CAR_WIDTH * render_scale);
-        dstRect.h = static_cast<int>(CAR_HEIGHT * render_scale);
-        dstRect.x = static_cast<int>(x - dstRect.w / 2.0f);
-        dstRect.y = static_cast<int>(y - dstRect.h / 2.0f);
-
-        const double angleDeg = angle * 180.0 / M_PI;
-        SDL_Point center{dstRect.w / 2, dstRect.h / 2};
-
-        SDL_RenderCopyEx(renderer, texture, &srcRect, &dstRect, angleDeg, &center, SDL_FLIP_NONE);
-        return;
+        renderTexture();
+    } else {
+        renderFallback();
     }
+    // TODO: Call renderNitro() and renderLife() when implemented
+}
 
+void Car::renderTexture() {
+    SDL_Rect dstRect;
+    dstRect.w = static_cast<int>(CAR_WIDTH * render_scale);
+    dstRect.h = static_cast<int>(CAR_HEIGHT * render_scale);
+    dstRect.x = static_cast<int>(x - dstRect.w / 2.0f);
+    dstRect.y = static_cast<int>(y - dstRect.h / 2.0f);
+
+    const double angleDeg = angle * 180.0 / M_PI;
+    SDL_Point center{dstRect.w / 2, dstRect.h / 2};
+
+    SDL_RenderCopyEx(renderer, texture, &srcRect, &dstRect, angleDeg, &center, SDL_FLIP_NONE);
+}
+
+void Car::renderFallback() {
+    renderCarOutline();
+    renderDirectionIndicator();
+}
+
+void Car::renderCarOutline() {
     float half_width = (CAR_WIDTH * render_scale) / 2.0f;
     float half_height = (CAR_HEIGHT * render_scale) / 2.0f;
 
     SDL_Point corners[5];
-
     float local_corners[4][2] = {
         {-half_width, -half_height},
         { half_width, -half_height},
@@ -118,31 +133,33 @@ void Car::render() {
     for (int i = 0; i < 4; i++) {
         float lx = local_corners[i][0];
         float ly = local_corners[i][1];
-
         float rotated_x = lx * cos(angle) - ly * sin(angle);
         float rotated_y = lx * sin(angle) + ly * cos(angle);
-
         corners[i].x = static_cast<int>(x + rotated_x);
         corners[i].y = static_cast<int>(y + rotated_y);
     }
-
     corners[4] = corners[0];
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-
     for (int i = 0; i < 4; i++) {
-        SDL_RenderDrawLine(renderer,
-                          corners[i].x, corners[i].y,
-                          corners[i+1].x, corners[i+1].y);
+        SDL_RenderDrawLine(renderer, corners[i].x, corners[i].y, corners[i+1].x, corners[i+1].y);
     }
+}
 
+void Car::renderDirectionIndicator() {
+    float half_width = (CAR_WIDTH * render_scale) / 2.0f;
     float front_x = x + half_width * 1.5f * cos(angle);
     float front_y = y + half_width * 1.5f * sin(angle);
 
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderDrawLine(renderer,
-                      static_cast<int>(x), static_cast<int>(y),
+    SDL_RenderDrawLine(renderer, static_cast<int>(x), static_cast<int>(y),
                       static_cast<int>(front_x), static_cast<int>(front_y));
+}
 
-    //modularizar y agregar dibujar nitro y dibujar vida
+void Car::renderNitro() {
+    // TODO: Implement nitro visual indicator
+}
+
+void Car::renderLife() {
+    // TODO: Implement life bar
 }

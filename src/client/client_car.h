@@ -29,6 +29,12 @@ private:
     SDL_Rect srcRect{0, 0, 0, 0};   
     static constexpr float CAR_WIDTH = 20.0f;
     static constexpr float CAR_HEIGHT = 10.0f;
+    void renderTexture();   
+    void renderFallback();
+    void renderCarOutline();
+    void renderDirectionIndicator();
+    void renderNitro();
+    void renderLife();
 };
 
 #endif // CAR_H
