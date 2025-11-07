@@ -49,11 +49,11 @@ void Monitor::clear_clients() {
     clients.clear();
 }
 
-void Monitor::broadcast(DTO& dto, const std::string& gid) {
+void Monitor::broadcast(Snapshot& snapshot, const std::string& gid) {
     std::unique_lock<std::mutex> lock(mutex);
     for (auto& [id, client] : clients) {
         if (client->get_game_id() == gid && !client->is_dead()) {
-            client->send_state(dto);
+            client->send_state(snapshot);
         }
     }
 }

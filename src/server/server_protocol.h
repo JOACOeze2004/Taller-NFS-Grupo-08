@@ -10,6 +10,9 @@
 class ServerProtocol {
 private:
     Protocol protocol;
+    
+    void send_car_state(const CarDTO& car);
+    void send_lobby_car_state(const LobbyCarDTO& car);
 public:
     explicit ServerProtocol(Socket& socket);
 
@@ -21,10 +24,9 @@ public:
                             float spawn_x, float spawn_y) ;
 
     void receive_lobby_action(uint8_t& action, std::string& game_id);
-    uint8_t receive_standar_command() const; //a prioiri para el movimiento
-    void send_car_state(const CarDTO& car);
+    uint8_t receive_standar_command() const;
 
-    void send_game_state(const DTO& dto);
+    void send_game_state(const Snapshot& snapshot);
 
     void close();
 

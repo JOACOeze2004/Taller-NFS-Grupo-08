@@ -25,7 +25,7 @@ class ClientHandler: public Thread {
 private:
     Socket peer; 
     ServerProtocol protocol;
-    Queue<DTO> client_queue;
+    Queue<Snapshot  > client_queue;
     Monitor& monitor;
     std::string game_id;
     int id;
@@ -38,7 +38,7 @@ private:
 public:
     explicit ClientHandler(Socket&& peer,Monitor& monitor, int _id);
     void run() override;
-    void send_state(DTO dto);
+    void send_state(Snapshot snapshot);
     void kill();
     void kill_threads();
     bool is_dead() const;

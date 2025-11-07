@@ -65,11 +65,11 @@ enum TypeCheckpoint{
 };
 
 struct Snapshot { //deberia ser una clase
+    int id;
+    std::unordered_map<int, CarDTO> cars;
     enum StateRunning state;
     int position;
     int cars_count;
-    int id;
-    std::unordered_map<int, CarDTO> cars;
     enum Map map;
     enum Upgrades upgrade;
     bool upgradeable;

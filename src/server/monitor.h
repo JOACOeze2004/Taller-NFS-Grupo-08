@@ -31,7 +31,7 @@ private:
 public:
     Monitor();
     void add_client(const int client_id, std::unique_ptr<ClientHandler> client);
-    void broadcast(DTO& dto,const std::string& gid);
+    void broadcast(Snapshot& snapshot,const std::string& gid);
     void clear_clients();
     void reap();
 

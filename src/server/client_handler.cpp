@@ -73,9 +73,9 @@ void ClientHandler::run() {
     sender.start();
 }
 
-void ClientHandler::send_state(DTO dto) {
-    dto.id = id;
-    client_queue.try_push(dto);
+void ClientHandler::send_state(Snapshot snapshot) {
+    snapshot.id = id;
+    client_queue.try_push(snapshot);
 }
 
 void ClientHandler::kill() {

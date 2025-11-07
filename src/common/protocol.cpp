@@ -77,6 +77,15 @@ float Protocol::receive_float() const {
     return value;
 }
 
+void Protocol::send_bool(const bool value) const{
+    this->send_byte(value ? 1 : 0);
+}
+
+bool Protocol::receive_bool() const{
+    uint8_t byte = this->receive_byte();
+    return byte != 0;
+}
+
 void Protocol::close_socket(){
     try {
         socket.shutdown(SHUT_RDWR);

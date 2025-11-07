@@ -19,9 +19,9 @@ class GraphicClient {
     
 
     public:
-    explicit GraphicClient(const std::string& map_path, const DTO& initial_dto);
+    explicit GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot);
     /* explicit GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot); */
-    void draw(const DTO& dto);
+    void draw(const Snapshot& snapshot);
     /* void draw(const Snapshot& snapshot); */
     /* void update_from_snapshot(snapshot); */
     void update_car(int id, const CarDTO& car_state); //este ya no se usa

@@ -9,6 +9,10 @@
 class ClientProtocol {
     private:
         Protocol protocol;
+
+        CarDTO receive_car_state() const;
+        LobbyCarDTO receive_lobby_car_state() const;
+
     public:
         explicit ClientProtocol(Socket& _socket);
         const std::vector<std::string> receive_games_list();
@@ -18,10 +22,9 @@ class ClientProtocol {
                                    float& spawn_x, float& spawn_y) ;
         void send_lobby_action(uint8_t action, const std::string& game_id);
 
-        CarDTO receive_car_state() const;
         void send_byte(const uint8_t byte) const;
         uint8_t receive_byte() const;
-        DTO receive_game_state() const;
+        Snapshot receive_game_state() const;
         void close();
 };
 

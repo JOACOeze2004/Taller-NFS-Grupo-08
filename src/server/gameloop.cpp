@@ -97,7 +97,7 @@ void Gameloop::broadcast() const {
     for  (auto& [id, car] : cars) {
         carsDTO.emplace(id, car.get_state());
     }
-    DTO dto;
+    Snapshot dto; // falta llenarlo igual
     dto.cars = std::move(carsDTO);
     monitor.broadcast(dto,this->game_id);
 }
