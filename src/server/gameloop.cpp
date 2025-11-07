@@ -14,6 +14,7 @@ void Gameloop::initialize_car_actions() {
     car_actions[SEND_ROTATE_RIGHT] = [](Car& car) { car.turn_right(); };
     car_actions[SEND_ROTATE_LEFT] = [](Car& car) { car.turn_left(); };
     car_actions[SEND_BRAKE] = [](Car& car) { car.brake(); };
+    car_actions[SEND_USE_NITRO] = [](Car& car) { car.toggle_nitro_status(); };
 
     car_actions[SEND_WIN_RACE_CHEAT] = [](Car& car) { car.activate_win_race(); };
     car_actions[SEND_RESTORE_LIFE_CHEAT] = [](Car& car) { car.restore_life(); };
@@ -35,6 +36,9 @@ void Gameloop::run() {
         }
         if (ready_to_start){
             update_positions();
+            for (auto& [id, car] : cars) {
+                car.update_nitro_usage();
+            }
             broadcast();
             if (get_time_remaining_ms() <= 0){
                 //deberiamos cambiar de fase carrera a mejora el auto y vovler a empezar otra carrera, pero x ahora, q reinicie el reloj.

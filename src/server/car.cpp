@@ -84,6 +84,7 @@ void Car::activate_lose_race() {
 
 void Car::activate_infinite_nitro() {
     nitro = MAX_NITRO; //hacer un valor muy grande o alguno que sepamos representa el nitro infinito
+    nitro_consuption = 0;
 }
 
 void Car::update_position() {
@@ -125,11 +126,37 @@ void Car::handle_hit(b2Vec2& normal, float& force, bool is_hitter) {
     b2Body_ApplyForceToCenter(body_id, impulse, true);
 }
 
+void Car::toggle_nitro_status(){
+    if (nitro <= 0 && !nitro_activated){
+        return;
+    }
+    nitro_activated = !nitro_activated; 
+}
+
+void Car::update_nitro_usage(){
+    if (nitro_activated){
+        nitro -= nitro_consuption;
+        if (nitro <= 0){
+            nitro = 0;
+            nitro_activated = false;
+        }
+    }else if (nitro < MAX_NITRO){
+        if (nitro >= MAX_NITRO){
+            nitro = MAX_NITRO;
+        }        
+        nitro += NITRO_RECHARGE_RATE;        
+    }
+}
+
+int Car::get_nitro() const{
+    return nitro;
+}
+
 CarDTO Car::get_state() const {
     b2Vec2 pos = b2Body_GetPosition(body_id);
     b2Rot rot = b2Body_GetRotation(body_id);
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    return CarDTO(pos.x, pos.y, speed, angle, 1, false, life, nitro); // cambiar el car id y el under bridge para que funcione
+    return CarDTO(pos.x, pos.y, speed, angle, 1, false, life, this->nitro_activated, this->nitro);  //cambiar el car id y el under bridge para que funcione
 }

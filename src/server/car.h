@@ -19,6 +19,8 @@ class Car {
     int life = MAX_LIFE;
     int nitro = MAX_NITRO;
     b2BodyId body_id;
+    bool nitro_activated = false;
+    int nitro_consuption = NITRO_CONSUMPTION;
 
 public:
     explicit Car(b2WorldId world);
@@ -38,6 +40,12 @@ public:
     void activate_lose_race();
     void activate_win_race();
 
+    void toggle_nitro_status();
+    void update_nitro_usage();
+
+    int get_nitro() const;
+
+    
 
     CarDTO get_state() const;
 };
