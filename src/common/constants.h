@@ -16,6 +16,7 @@
 #define MAX_SPEED 10000
 #define MAX_LIFE 1000
 #define MAX_NITRO 500
+#define MAX_TIME_PER_RACE 600000 // en ms creo
 
 //MENU INITIAL COMMANDS
 #define SEND_DISCONNECT 0x00

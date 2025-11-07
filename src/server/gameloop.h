@@ -26,6 +26,8 @@ public:
     void push_command(const ClientCommand& cmd);
     const std::string& get_game_id() const;
     bool can_join_to_game();
+
+    int get_time_remaining_ms() const;
 private:
     Queue<ClientCommand> cmd_queue;
     std::string game_id;
@@ -35,6 +37,7 @@ private:
     World world;
     void initialize_car_actions();
     bool ready_to_start; 
+    std::chrono::steady_clock::time_point start_time;
     // Parser parser;
     // Workshop workshop; para entre carreras mejorar el auto
     // GameMap game_map; quiza que guarde todos los mapas y circuitos posibles (lo recibe por parametro)

@@ -29,12 +29,17 @@ void Gameloop::run() {
     while (should_keep_running()) {
         process_commands();
         //Por ahora, vi q hacen una fase (del phase_handler) para esperar a los jugadores en una sala
-        if (cars.size() == MIN_PLAYERS_TO_START){
+        if (!this->ready_to_start && cars.size() == MIN_PLAYERS_TO_START){
             ready_to_start = true;
+            start_time = std::chrono::steady_clock::now();
         }
         if (ready_to_start){
             update_positions();
             broadcast();
+            if (get_time_remaining_ms() <= 0){
+                //deberiamos cambiar de fase carrera a mejora el auto y vovler a empezar otra carrera, pero x ahora, q reinicie el reloj.
+                start_time = std::chrono::steady_clock::now();
+            }
         }
 
         auto t2 = std::chrono::steady_clock::now();
@@ -49,6 +54,15 @@ void Gameloop::run() {
         std::this_thread::sleep_for(std::chrono::milliseconds(rest));
         t1 += rate;
     }
+}
+
+int Gameloop::get_time_remaining_ms() const {
+    if (!this->ready_to_start) {
+        return MAX_TIME_PER_RACE;
+    }
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count();
+    return std::max(0, MAX_TIME_PER_RACE - static_cast<int>(elapsed));
 }
 
 void Gameloop::process_commands() {
@@ -99,6 +113,7 @@ void Gameloop::broadcast() const {
     }
     Snapshot dto; // falta llenarlo igual
     dto.cars = std::move(carsDTO);
+    dto.time_ms = get_time_remaining_ms();
     monitor.broadcast(dto,this->game_id);
 }
 

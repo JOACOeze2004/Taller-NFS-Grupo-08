@@ -108,7 +108,7 @@ void ServerProtocol::send_game_state(const Snapshot& snapshot) {
 
     protocol.send_byte(static_cast<uint8_t>(snapshot.type_checkpoint));
     
-    protocol.send_big_endian_16(snapshot.time_ms);
+    protocol.send_big_endian_32(snapshot.time_ms);
     
     protocol.send_float(snapshot.remaining_nitro);
 

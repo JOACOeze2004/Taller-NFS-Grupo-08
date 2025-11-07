@@ -14,7 +14,6 @@ CarDTO ClientProtocol::receive_car_state() const {
     //protocol.receive_bool(car.under_bridge); VER SI QUEDA O SE VA
 
     car.life = protocol.receive_float();
-    std::cout << "vida: " << car.life << "%" << std::endl;
     car.nitro = protocol.receive_bool();
     return car;
 }
@@ -114,7 +113,7 @@ Snapshot ClientProtocol::receive_game_state() const {
     snapshot.hint.y = protocol.receive_float();
     snapshot.hint.angle = protocol.receive_float();
     snapshot.type_checkpoint = static_cast<TypeCheckpoint>(protocol.receive_byte());
-    snapshot.time_ms = protocol.receive_big_endian_16();
+    snapshot.time_ms = protocol.receive_big_endian_32();
     snapshot.remaining_nitro = protocol.receive_float();
     
     uint16_t lobby_count = protocol.receive_big_endian_16();
