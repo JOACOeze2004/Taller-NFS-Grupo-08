@@ -7,7 +7,7 @@
 #include <box2d/box2d.h>
 
 constexpr float MASS = 20.f;
-constexpr float HANDLING = 180.0f - MASS;
+constexpr float HANDLING = 80.0f + MASS;
 constexpr float ACCELERATION = 80.0f - MASS;
 constexpr float BRAKING = 20.0f - MASS/2;
 

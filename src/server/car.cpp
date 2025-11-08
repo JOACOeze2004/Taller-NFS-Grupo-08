@@ -137,10 +137,10 @@ void Car::handle_hit(b2Vec2& normal, float& force, bool is_hitter) {
 }
 
 void Car::toggle_nitro_status(){
-    if (nitro <= 0 && !nitro_activated){
+    if (nitro < MAX_NITRO && !nitro_activated){
         return;
     }
-    nitro_activated = !nitro_activated; 
+    nitro_activated = true;
 }
 
 void Car::update_nitro_usage(){
