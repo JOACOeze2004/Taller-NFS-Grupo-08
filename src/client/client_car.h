@@ -28,6 +28,7 @@ private:
     
     SDL_Renderer* renderer;
     SDL_Texture* texture = nullptr; 
+    SDL_Texture* nitro_texture = nullptr;
     SDL_Rect srcRect{0, 0, 0, 0};   
     static constexpr float CAR_WIDTH = 20.0f;
     static constexpr float CAR_HEIGHT = 10.0f;

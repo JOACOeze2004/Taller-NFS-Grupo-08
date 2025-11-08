@@ -27,8 +27,16 @@ Car::Car(float x, float y, float angle, SDL_Renderer* renderer, int car_id, floa
         "assets/need-for-speed/cars/Cars_without_bg.png",
     };
 
+    const std::string path_nitro = "../assets/need-for-speed/sprits/nitro-fire.png";
+
+    nitro_texture = IMG_LoadTexture(renderer, path_nitro.c_str());
+
     texture = loadTextureFromCandidates(renderer, candidates);
     
+    if(!nitro_texture) {
+        std::cerr << "Warning: Could not load nitro texture from " << path_nitro << ": " << IMG_GetError() << std::endl;
+    }
+
     if (texture) {
         const std::vector<std::string> yamlCandidates = {
             "../src/client/car_sprites.yaml",
@@ -163,14 +171,37 @@ void Car::renderNitro() {
         float indicator_distance = car_length + 12.0f; 
         
         SDL_Rect nitroIndicator;
+        
         nitroIndicator.w = 10;
         nitroIndicator.h = 10;
+        
         
         nitroIndicator.x = static_cast<int>(x - indicator_distance * cos(angle) - nitroIndicator.w / 2.0f);
         nitroIndicator.y = static_cast<int>(y - indicator_distance * sin(angle) - nitroIndicator.h / 2.0f);
         
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &nitroIndicator);
+        if (nitro_texture) {
+            SDL_Rect nitroSrcRect;
+            indicator_distance = car_length + 20.0f;
+
+            nitroIndicator.w = 30;
+            nitroIndicator.h = 25;
+
+            nitroSrcRect.x = 38;
+            nitroSrcRect.y = 105;
+            nitroSrcRect.w = 440;
+            nitroSrcRect.h = 120;
+
+            nitroIndicator.x = static_cast<int>(x - indicator_distance * cos(angle) - nitroIndicator.w / 2.0f);
+            nitroIndicator.y = static_cast<int>(y - indicator_distance * sin(angle) - nitroIndicator.h / 2.0f);
+        
+            
+            const double angleDeg = angle * 180.0 / M_PI + 180.0;
+            SDL_Point center{nitroIndicator.w / 2, nitroIndicator.h / 2};
+            SDL_RenderCopyEx(renderer, nitro_texture, &nitroSrcRect, &nitroIndicator, angleDeg, &center, SDL_FLIP_NONE);
+        } else {
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &nitroIndicator);
+        }
     }
 }
 
