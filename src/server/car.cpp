@@ -3,7 +3,7 @@
 #include <cmath>
 #include <iostream>
 
-Car::Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking) : mass(_mass), handling(_handling + mass), acceleration(_acceleration - mass), braking(_braking - mass/2){
+Car::Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking, int _car_id) : mass(_mass), handling(_handling + mass), acceleration(_acceleration - mass), braking(_braking - mass/2), car_id(_car_id){
     b2BodyDef body = b2DefaultBodyDef();
     body.type = b2_dynamicBody;
     body.linearDamping = 2.0f;
@@ -46,49 +46,46 @@ void Car::accelerate() {
         b2Vec2 force = {velocity.x * accel, velocity.y * accel};
         b2Body_ApplyForceToCenter(body_id, force, true);
     }
-    update_position();
+    apply_friction();
 }
 
 void Car::brake() {
     b2Vec2 vel = b2Body_GetWorldVector(body_id, {1,0});
     b2Vec2 brake = {-vel.x * braking, -vel.y * braking};
     b2Body_ApplyForceToCenter(body_id, brake, true);
-    update_position();
+    apply_friction();
 }
 
 void Car::turn_right() {
-    b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
-    float speed = b2Length(vel);
+    float torque  = calculate_torque();
 
-    if (speed > 50.0f) {
-        b2Body_ApplyTorque(body_id, handling, true);
-        update_position();
-    }
-    else if (speed > 25.0f) {
-        b2Body_ApplyTorque(body_id, handling*0.7, true);
-        update_position();
-    }
-    else if (speed > 10.0f) {
-        b2Body_ApplyTorque(body_id, handling*0.4, true);
-        update_position();
-    }
+    b2Body_ApplyTorque(body_id, torque, true);
+    apply_friction();
 }
 
 void Car::turn_left() {
+    float torque  = calculate_torque();
+
+    b2Body_ApplyTorque(body_id, -torque, true);
+    apply_friction();
+}
+
+float Car::calculate_torque() const {
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
+    float torque  = 0;
+
     if (speed > 50.0f) {
-        b2Body_ApplyTorque(body_id, -handling, true);
-        update_position();
+        torque = handling;
     }
     else if (speed > 25.0f) {
-        b2Body_ApplyTorque(body_id, -handling*0.7, true);
-        update_position();
+        torque = handling * 0.7f;
     }
     else if (speed > 10.0f) {
-        b2Body_ApplyTorque(body_id, -handling*0.4, true);
-        update_position();
+        torque = handling * 0.4f;
     }
+
+    return torque;
 }
 
 void Car::activate_win_race() {
@@ -120,7 +117,7 @@ void Car::activate_infinite_nitro() {
     }
 }
 
-void Car::update_position() {
+void Car::apply_friction() {
     b2Vec2 right = b2Body_GetWorldVector(body_id, {0,1});
 
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
@@ -136,9 +133,10 @@ void Car::update_position() {
 }
 
 void Car::handle_hit(b2Vec2& normal, float& force, bool is_hitter) {
+    b2Vec2 impulse = {normal.x * force / MASS, normal.y * force / MASS};
+    b2Body_ApplyForceToCenter(body_id, impulse, true);
+
     if (life > MAX_LIFE) {
-        b2Vec2 impulse = {normal.x * force * 0.1f, normal.y * force * 0.1f};
-        b2Body_ApplyForceToCenter(body_id, impulse, true);
         return;
     }
 
@@ -156,9 +154,6 @@ void Car::handle_hit(b2Vec2& normal, float& force, bool is_hitter) {
     if (life < 0) {
         life = 0; // matarlo
     }
-
-    b2Vec2 impulse = {normal.x * force * 0.1f, normal.y * force * 0.1f};
-    b2Body_ApplyForceToCenter(body_id, impulse, true);
 }
 
 void Car::toggle_nitro_status(){
@@ -193,5 +188,5 @@ CarDTO Car::get_state() const {
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    return CarDTO(pos.x, pos.y, speed, angle, 1, false, life, this->nitro_activated, this->nitro);  //cambiar el car id y el under bridge para que funcione
+    return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro);  //cambiar el car id y el under bridge para que funcione
 }

@@ -107,7 +107,7 @@ void Gameloop::add_car(const int client_id, const int car_id) {
 
     cars.emplace(std::piecewise_construct,
     std::forward_as_tuple(client_id),
-    std::forward_as_tuple(world.get_id(), car.mass, car.handling, car.acceleration, car.braking));
+    std::forward_as_tuple(world.get_id(), car.mass, car.handling, car.acceleration, car.braking, car_id));
 }
 
 void Gameloop::push_command(const ClientCommand& cmd){

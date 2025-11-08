@@ -18,6 +18,7 @@ class Car {
     float handling = HANDLING;
     float acceleration = ACCELERATION;
     float braking = BRAKING;
+    int car_id;
     int life = MAX_LIFE;
     int nitro = MAX_NITRO;
     b2BodyId body_id;
@@ -25,13 +26,13 @@ class Car {
     int nitro_consuption = NITRO_CONSUMPTION;
 
 public:
-    explicit Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking);
+    explicit Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking, int _car_id);
     ~Car();
     void accelerate();
     void brake();
     void turn_right();
     void turn_left();
-    void update_position();
+    void apply_friction();
     void handle_hit(b2Vec2& normal, float& force, bool is_hitter);
 
     void restore_life();
@@ -45,14 +46,10 @@ public:
     void toggle_nitro_status();
     void update_nitro_usage();
 
-    Car(const Car&) = delete;
-    Car& operator=(const Car&) = delete;
-
-    Car(Car&&) noexcept = default;
-    Car& operator=(Car&&) noexcept = default;
-   
-
     CarDTO get_state() const;
+
+private:
+    float calculate_torque() const;
 };
 
 
