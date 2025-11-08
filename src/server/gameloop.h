@@ -38,6 +38,7 @@ private:
     void initialize_car_actions();
     bool ready_to_start; 
     std::chrono::steady_clock::time_point start_time;
+    Map current_map;
     // Parser parser;
     // Workshop workshop; para entre carreras mejorar el auto
     // GameMap game_map; quiza que guarde todos los mapas y circuitos posibles (lo recibe por parametro)

@@ -7,6 +7,14 @@ Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_nam
         cmd_queue(),game_id(gid), monitor(_monitor), ready_to_start(false) {
     initialize_car_actions();
     world.generate_map(map_name);
+
+    if (map_name == "San Andreas") {
+        current_map = SAN_ANDREAS;
+    } else if (map_name == "Vice City") {
+        current_map = VICE_CITY;
+    } else {
+        current_map = LIBERTY_CITY;
+    }
 }
 
 void Gameloop::initialize_car_actions() {
@@ -115,9 +123,20 @@ void Gameloop::broadcast() const {
     for  (auto& [id, car] : cars) {
         carsDTO.emplace(id, car.get_state());
     }
-    Snapshot dto; // falta llenarlo igual
+    Snapshot dto; 
     dto.cars = std::move(carsDTO);
+    dto.state = IN_GAME;
+    dto.position = 1;   //cambiar Lo q este estatico a dinamico cuando se tenga (posicion, mejoras, checkpoints, etc) 
+    dto.cars_count = cars.size();
+    dto.map = current_map;
+    dto.upgrade = NONE_UPGRADE;
+    dto.upgradeable = false;
+    dto.collision = NONE_COLLISION;
+    dto.checkpoint = {0.0f, 0.0f};
+    dto.hint = {0.0f, 0.0f, 0.0f};
+    dto.type_checkpoint = REGULAR;
     dto.time_ms = get_time_remaining_ms();
+    
     monitor.broadcast(dto,this->game_id);
 }
 
