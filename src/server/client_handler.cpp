@@ -10,6 +10,7 @@ ClientHandler::ClientHandler(Socket&& peer,Monitor& monitor, int _id):
         monitor(monitor),
         game_id(""),
         id(_id),
+        receiver(nullptr),
         sender(protocol, client_queue) {} 
 
 void ClientHandler::run() {
@@ -48,6 +49,7 @@ void ClientHandler::run() {
         std::cerr << "[SERVER " << id << "] Invalid lobby action: " << static_cast<int>(action) << std::endl;
         return;
     }
+    
 
     std::string map_path;
     if (map_name == "Liberty City") {
@@ -81,9 +83,9 @@ void ClientHandler::send_state(Snapshot snapshot) {
 void ClientHandler::kill() {
     stop();
 
-    client_queue.close();
     receiver->stop();
     sender.stop();
+    client_queue.close();
     kill_threads();
 }
 
@@ -92,7 +94,12 @@ void ClientHandler::kill_threads() {
     sender.join();
 }
 
-bool ClientHandler::is_dead() const { return !receiver->is_alive(); }
+bool ClientHandler::is_dead() const { 
+    if (!receiver) {
+        return false;
+    }
+    return !receiver->is_alive(); 
+}
 
 void ClientHandler::set_game_id(const std::string& _game_id) { game_id = _game_id; }
 

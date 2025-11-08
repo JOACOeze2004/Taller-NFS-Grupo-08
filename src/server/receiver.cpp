@@ -12,6 +12,7 @@ void ClientReceiver::run() {
             client_command.cmd_struct.cmd = request;
             game_loop->push_command(client_command);
             if (request == 0) {
+                this->stop();
                 break;
             }
         } catch (const std::exception& e) {

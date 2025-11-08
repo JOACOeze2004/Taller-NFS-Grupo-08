@@ -25,6 +25,7 @@ void Monitor::add_client(const int client_id, std::unique_ptr<ClientHandler> cli
 }
 
 void Monitor::reap() {
+    std::unique_lock<std::mutex> lock(mutex);
     std::vector<int> to_remove;
     for ( auto& [id, client] : clients) {
         if (client->is_dead()) {
@@ -41,6 +42,7 @@ void Monitor::reap() {
 }
 
 void Monitor::clear_clients() {
+    std::unique_lock<std::mutex> lock(mutex);
     for ( auto& [id, client] : clients) {
         std::string g_id = client->get_game_id();
         client->kill();

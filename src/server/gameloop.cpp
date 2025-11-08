@@ -80,8 +80,7 @@ int Gameloop::get_time_remaining_ms() const {
 void Gameloop::process_commands() {
     ClientCommand client_command{};
     while (cmd_queue.try_pop(client_command)) {
-
-        if (client_command.cmd_struct.cmd == 0) {
+        if (client_command.cmd_struct.cmd == SEND_DISCONNECT) {            
             cars.erase(client_command.id);
             continue;
         }
@@ -136,6 +135,7 @@ void Gameloop::broadcast() const {
     dto.hint = {0.0f, 0.0f, 0.0f};
     dto.type_checkpoint = REGULAR;
     dto.time_ms = get_time_remaining_ms();
+    dto.lobby_cars = {};
     
     monitor.broadcast(dto,this->game_id);
 }
