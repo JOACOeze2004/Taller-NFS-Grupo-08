@@ -86,7 +86,10 @@ void GraphicClient::set_player_car(int id) {
 }
 
 void GraphicClient::update_car(int id, const CarDTO& car_state) {
-    cars[id] = car_state; 
+    cars[id] = car_state;
+    if (car_objects.find(id) == car_objects.end()) {
+        car_objects[id] = std::make_unique<Car>(0.0f, 0.0f, 0.0f, renderer, id, ZOOM_FACTOR);
+    }
 }
 
 void GraphicClient::update_camera() {
@@ -157,7 +160,9 @@ void GraphicClient::draw_camera(){
 void GraphicClient::clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dto) {
     for (auto it = cars.begin(); it != cars.end(); ) {
         if (cars_in_dto.find(it->first) == cars_in_dto.end()) {
+            int removed_id = it->first;
             it = cars.erase(it);
+            car_objects.erase(removed_id);
         } else {
             ++it;
         }
@@ -308,24 +313,37 @@ void GraphicClient::draw_cars() {
     const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
     const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
 
-    for (const auto& [id, car] : cars) {
-        if (car.x >= camera_x && car.x <= camera_x + viewport_width &&
-            car.y >= camera_y && car.y <= camera_y + viewport_height) {
-            draw_car(car, car.car_id);
+    for (const auto& [id, car_dto_world] : cars) {
+        if (car_dto_world.x >= camera_x && car_dto_world.x <= camera_x + viewport_width &&
+            car_dto_world.y >= camera_y && car_dto_world.y <= camera_y + viewport_height) {
+            
+            CarDTO adjusted = car_dto_world;
+            adjusted.x = (car_dto_world.x - camera_x) * ZOOM_FACTOR;
+            adjusted.y = (car_dto_world.y - camera_y) * ZOOM_FACTOR;
+
+            auto it = car_objects.find(id);
+            if (it == car_objects.end()) {
+                car_objects[id] = std::make_unique<Car>(adjusted.x, adjusted.y, adjusted.angle, renderer, id, ZOOM_FACTOR);
+                it = car_objects.find(id);
+            }
+            Car* car_obj = it->second.get();
+            car_obj->update_from_dto(adjusted);
+            car_obj->render();
         }
     }
 }
 
 void GraphicClient::draw_car(const CarDTO& car, int car_id) {
-    const float screen_x = (car.x - camera_x) * ZOOM_FACTOR;
-    const float screen_y = (car.y - camera_y) * ZOOM_FACTOR;
-
-    Car temp_car(screen_x, screen_y, car.angle, renderer, car_id, ZOOM_FACTOR);
     CarDTO adjusted_car = car;
-    adjusted_car.x = screen_x;
-    adjusted_car.y = screen_y;
-    temp_car.update_from_dto(adjusted_car);
-    temp_car.render();  //aca tengo que cambiar la implementacion para no usar un aux
+    adjusted_car.x = (car.x - camera_x) * ZOOM_FACTOR;
+    adjusted_car.y = (car.y - camera_y) * ZOOM_FACTOR;
+    auto it = car_objects.find(car_id);
+    if (it == car_objects.end()) {
+        car_objects[car_id] = std::make_unique<Car>(adjusted_car.x, adjusted_car.y, adjusted_car.angle, renderer, car_id, ZOOM_FACTOR);
+        it = car_objects.find(car_id);
+    }
+    it->second->update_from_dto(adjusted_car);
+    it->second->render();
 }
 
 GraphicClient::~GraphicClient() {

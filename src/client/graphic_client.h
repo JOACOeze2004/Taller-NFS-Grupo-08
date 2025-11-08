@@ -4,6 +4,7 @@
 #include <string>
 #include "client_car.h"
 #include <unordered_map>
+#include <memory>
 #include "../common/DTO.h"
 #include "text_renderer.h"
 
@@ -11,7 +12,8 @@ class GraphicClient {
     SDL_Renderer* renderer;
     SDL_Texture* bg_texture;
     SDL_Window* window;
-    std::unordered_map<int, CarDTO> cars; 
+    std::unordered_map<int, CarDTO> cars;
+    std::unordered_map<int, std::unique_ptr<Car>> car_objects;
 
     int player_car_id;
     float camera_x, camera_y;
