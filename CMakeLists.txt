@@ -59,6 +59,7 @@ include_directories(src/libs/box2d/include)
 # sudo apt-get install qt5-qmake qtbase5-dev
 # sudo apt-get install libsdl2-image-dev
 # sudo apt install libyaml-cpp-dev
+# sudo apt install libsdl2-ttf-dev
 
 # Install libSDL2 and libSDL2pp (for client or editor)
 # HEY!! TODO XXX: add more dependendies (either for client, server or editor)

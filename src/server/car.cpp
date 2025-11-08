@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <iostream>
-#include <ostream>
 
 Car::Car(b2WorldId world){
     b2BodyDef body = b2DefaultBodyDef();
@@ -97,12 +96,10 @@ void Car::activate_infinite_nitro() {
 }
 
 void Car::update_position() {
-    //b2Vec2 forward = b2Body_GetWorldVector(body_id, {1,0});
     b2Vec2 right = b2Body_GetWorldVector(body_id, {0,1});
 
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
 
-    //float forward_speed = b2Dot(forward, vel); es de friccion lineal pero no se si box2d ya se encarga
     float lateral_speed = b2Dot(right, vel);
 
     b2Vec2 lateral_impulse = {
@@ -120,11 +117,15 @@ void Car::handle_hit(b2Vec2& normal, float& force, bool is_hitter) {
         return;
     }
 
+    b2Vec2 forward = b2Body_GetWorldVector(body_id, {1.0f, 0.0f});
+    float angle_impact = fabs(b2Dot(normal, forward));
+    float angle_factor = 0.3f + 0.7f * angle_impact;
+
     if (is_hitter) {
-        life -= static_cast<int>(force * 0.1f);
+        life -= static_cast<int>((force / (MASS*0.2)) * angle_factor);
     }
     else {
-        life -= static_cast<int>(force * 0.5f);
+        life -= static_cast<int>((force / (MASS * 0.1f)) * angle_factor);
     }
 
     if (life < 0) {

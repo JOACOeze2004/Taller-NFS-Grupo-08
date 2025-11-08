@@ -6,9 +6,10 @@
 #include "../common/constants.h"
 #include <box2d/box2d.h>
 
-constexpr float HANDLING = 180.0f;
-constexpr float ACCELERATION = 80.0f;
-constexpr float BRAKING = 20.0f;
+constexpr float MASS = 20.f;
+constexpr float HANDLING = 180.0f - MASS;
+constexpr float ACCELERATION = 80.0f - MASS;
+constexpr float BRAKING = 20.0f - MASS/2;
 
 class Car {
     float max_speed = MAX_SPEED;
