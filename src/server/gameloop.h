@@ -22,7 +22,7 @@ public:
     explicit Gameloop(Monitor& _monitor, const std::string& game_id, std::string map_name);
     void run() override;
 
-    void add_car(const int client_id);
+    void add_car(const int client_id, const int car_id);
     void push_command(const ClientCommand& cmd);
     const std::string& get_game_id() const;
     bool can_join_to_game();
@@ -39,7 +39,7 @@ private:
     bool ready_to_start; 
     std::chrono::steady_clock::time_point start_time;
     Map current_map;
-    // Parser parser;
+    ParserYaml parser;
     // Workshop workshop; para entre carreras mejorar el auto
     // GameMap game_map; quiza que guarde todos los mapas y circuitos posibles (lo recibe por parametro)
 

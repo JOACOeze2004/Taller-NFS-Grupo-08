@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 
+#include <yaml-cpp/node/node.h>
+#include "CarStats.h"
+
 struct StaticBody {
     int id;
     float x;
@@ -12,8 +15,11 @@ struct StaticBody {
 };
 
 class ParserYaml {
+    YAML::Node cars_file;
 public:
+    explicit ParserYaml();
     std::vector<StaticBody> parse_map(std::string& map_name);
+    CarStats parse_car(const int car_id);
 };
 
 

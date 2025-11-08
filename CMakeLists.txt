@@ -184,7 +184,8 @@ if(TALLER_SERVER)
             src/server/world.cpp
             src/server/world.h
             src/server/parser_yaml.cpp
-            src/server/parser_yaml.h)
+            src/server/parser_yaml.h
+            src/server/CarStats.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)

@@ -30,13 +30,13 @@ void ClientHandler::run() {
     std::string g_id;
     
     if (action == SEND_CREATE_GAME) {
-        game = monitor.create_game(map_name,this->id);
+        game = monitor.create_game(map_name,this->id, car_id);
         g_id = monitor.get_last_created_game_id();
         set_game_id(g_id);
         game->start();
 
     } else if (action == SEND_JOIN_GAME) {
-        game = monitor.join_game(player_name, game_id_to_join, this->id);
+        game = monitor.join_game(player_name, game_id_to_join, this->id, car_id);
         if (!game) {
             std::cerr << "[SERVER] Game not found or is full " << std::endl;
             return;

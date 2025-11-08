@@ -58,16 +58,16 @@ void Monitor::broadcast(Snapshot& snapshot, const std::string& gid) {
     }
 }
 
-std::shared_ptr<Gameloop> Monitor::create_game(std::string map_name, const int client_id) {
+std::shared_ptr<Gameloop> Monitor::create_game(std::string map_name, const int client_id, const int car_id) {
     std::unique_lock<std::mutex> lock(mutex);
     std::string id = generate_game_id();
     auto game_loop = std::make_shared<Gameloop>(*this, id, map_name);
     current_games[id] = game_loop;
-    game_loop->add_car(client_id);
+    game_loop->add_car(client_id, car_id);
     return game_loop;
 }
 
-std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const std::string& _game_id, const int client_id) {
+std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const std::string& _game_id, const int client_id, const int car_id) {
     std::unique_lock<std::mutex> lock(mutex);
     auto game_i = current_games.find(_game_id);
     if (game_i == current_games.end()){
@@ -79,7 +79,7 @@ std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const 
         return nullptr;
     }    
     players[username] = _game_id;
-    game->add_car(client_id);
+    game->add_car(client_id, car_id);
     return game;
 }
 

@@ -1,5 +1,10 @@
 #include "parser_yaml.h"
+
 #include <yaml-cpp/yaml.h>
+
+#include "CarStats.h"
+
+ParserYaml::ParserYaml() : cars_file(YAML::LoadFile("../src/server/car_states.yaml")) {}
 
 std::vector<StaticBody> ParserYaml::parse_map(std::string& map_name) {
     YAML::Node map;
@@ -31,4 +36,14 @@ std::vector<StaticBody> ParserYaml::parse_map(std::string& map_name) {
     }
 
     return boxes;
+}
+
+CarStats ParserYaml::parse_car(const int car_id) {
+    auto id = cars_file["cars_stats"][car_id];
+    const auto mass = id["mass"].as<float>();
+    const auto handling = id["handling"].as<float>();
+    const auto acceleration = id["acceleration"].as<float>();
+    const auto braking = id["braking"].as<float>();
+    CarStats car_stats = {mass, handling, acceleration, braking};
+    return car_stats;
 }
