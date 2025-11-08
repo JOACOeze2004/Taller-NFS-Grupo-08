@@ -3,7 +3,7 @@
 #include <cmath>
 #include <iostream>
 
-Car::Car(b2WorldId world){
+Car::Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking) : mass(_mass), handling(_handling + mass), acceleration(_acceleration - mass), braking(_braking - mass/2){
     b2BodyDef body = b2DefaultBodyDef();
     body.type = b2_dynamicBody;
     body.linearDamping = 2.0f;
@@ -59,8 +59,17 @@ void Car::brake() {
 void Car::turn_right() {
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    if (speed > 10.0f) {
+
+    if (speed > 50.0f) {
         b2Body_ApplyTorque(body_id, handling, true);
+        update_position();
+    }
+    else if (speed > 25.0f) {
+        b2Body_ApplyTorque(body_id, handling*0.7, true);
+        update_position();
+    }
+    else if (speed > 10.0f) {
+        b2Body_ApplyTorque(body_id, handling*0.4, true);
         update_position();
     }
 }
@@ -68,8 +77,16 @@ void Car::turn_right() {
 void Car::turn_left() {
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    if (speed > 10.0f) {
+    if (speed > 50.0f) {
         b2Body_ApplyTorque(body_id, -handling, true);
+        update_position();
+    }
+    else if (speed > 25.0f) {
+        b2Body_ApplyTorque(body_id, -handling*0.7, true);
+        update_position();
+    }
+    else if (speed > 10.0f) {
+        b2Body_ApplyTorque(body_id, -handling*0.4, true);
         update_position();
     }
 }

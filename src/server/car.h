@@ -14,6 +14,7 @@ constexpr float BRAKING = 20.0f - MASS/2;
 class Car {
     float max_speed = MAX_SPEED;
     CarState state;
+    float mass;
     float handling = HANDLING;
     float acceleration = ACCELERATION;
     float braking = BRAKING;
@@ -24,7 +25,7 @@ class Car {
     int nitro_consuption = NITRO_CONSUMPTION;
 
 public:
-    explicit Car(b2WorldId world);
+    explicit Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking);
     ~Car();
     void accelerate();
     void brake();
@@ -43,6 +44,12 @@ public:
 
     void toggle_nitro_status();
     void update_nitro_usage();
+
+    Car(const Car&) = delete;
+    Car& operator=(const Car&) = delete;
+
+    Car(Car&&) noexcept = default;
+    Car& operator=(Car&&) noexcept = default;
    
 
     CarDTO get_state() const;
