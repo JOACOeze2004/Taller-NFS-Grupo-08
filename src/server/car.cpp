@@ -83,7 +83,11 @@ void Car::restore_life() {
 }
 
 void Car::activate_infinite_life() {
-    life = MAX_LIFE + 1;
+    if (life >= MAX_LIFE + 1)
+        life = MAX_LIFE;
+    else {
+        life = MAX_LIFE + 1;
+    }
 }
 
 void Car::activate_lose_race() {
@@ -91,8 +95,12 @@ void Car::activate_lose_race() {
 }
 
 void Car::activate_infinite_nitro() {
-    nitro = MAX_NITRO; //hacer un valor muy grande o alguno que sepamos representa el nitro infinito
-    nitro_consuption = 0;
+    if (nitro >= MAX_NITRO+1) {
+        nitro = MAX_NITRO;
+    }
+    else {
+        nitro = MAX_NITRO + 1;
+    }
 }
 
 void Car::update_position() {
@@ -144,6 +152,10 @@ void Car::toggle_nitro_status(){
 }
 
 void Car::update_nitro_usage(){
+    if (nitro > MAX_NITRO) {
+        return;
+    }
+
     if (nitro_activated){
         nitro -= nitro_consuption;
         if (nitro <= 0){
