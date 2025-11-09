@@ -11,11 +11,9 @@ public:
     explicit EditorToolbar(QWidget* parent = nullptr);
 
     void setCheckpointMode(bool active);
-    void setHintMode(bool active);
 
     signals:
         void checkpointModeRequested();
-        void hintModeRequested();
         void undoRequested();
         void clearRequested();
         void saveRequested();
@@ -26,7 +24,6 @@ public:
 
 private:
     QPushButton* btnCheckpoint;
-    QPushButton* btnHint;
     QPushButton* btnUndo;
     QPushButton* btnClear;
     QPushButton* btnSave;
