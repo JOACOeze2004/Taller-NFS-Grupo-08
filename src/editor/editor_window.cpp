@@ -1,15 +1,17 @@
 #include "editor_window.h"
 #include "track_file_manager.h"
+#include "hint_generator.h"
 
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QPainter>
 #include <QPen>
 #include <QStatusBar>
-#include <utility>
 
-EditorWindow::EditorWindow(QString  cityName, QWidget* parent)
-    : QMainWindow(parent), scene(nullptr), view(nullptr), currentCity(std::move(cityName)), mapRenderer(nullptr), checkpointManager(nullptr), hintManager(nullptr), toolbar(nullptr), inputHandler(nullptr)
+EditorWindow::EditorWindow(const QString& cityName, QWidget* parent)
+    : QMainWindow(parent), scene(nullptr), view(nullptr), currentCity(cityName),
+      mapRenderer(nullptr), checkpointManager(nullptr), hintManager(nullptr),
+      toolbar(nullptr), inputHandler(nullptr)
 {
     setWindowTitle(QString("Need for Speed - Editor: %1").arg(getCityDisplayName()));
     resize(1200, 800);
@@ -19,7 +21,7 @@ EditorWindow::EditorWindow(QString  cityName, QWidget* parent)
     setupToolbar();
     setupConnections();
 
-    updateStatusMessage("Selecciona una herramienta para comenzar");
+    updateStatusMessage("Coloca al menos 2 checkpoints para crear un recorrido");
 }
 
 void EditorWindow::setupScene() {
@@ -54,7 +56,6 @@ void EditorWindow::setupConnections() {
     inputHandler = new EditorInputHandler(view, scene, checkpointManager, hintManager, this);
 
     connect(toolbar, &EditorToolbar::checkpointModeRequested, this, &EditorWindow::onCheckpointModeRequested);
-    connect(toolbar, &EditorToolbar::hintModeRequested, this, &EditorWindow::onHintModeRequested);
     connect(toolbar, &EditorToolbar::undoRequested, this, &EditorWindow::onUndoRequested);
     connect(toolbar, &EditorToolbar::clearRequested, this, &EditorWindow::onClearRequested);
     connect(toolbar, &EditorToolbar::saveRequested, this, &EditorWindow::onSaveRequested);
@@ -64,15 +65,15 @@ void EditorWindow::setupConnections() {
     connect(toolbar, &EditorToolbar::resetZoomRequested, this, &EditorWindow::onResetZoom);
 
     connect(inputHandler, &EditorInputHandler::checkpointAdded, this, &EditorWindow::onCheckpointAdded);
-    connect(inputHandler, &EditorInputHandler::hintAdded, this, &EditorWindow::onHintAdded);
+    connect(inputHandler, &EditorInputHandler::checkpointRemoved, this, &EditorWindow::onCheckpointRemoved);
+    connect(inputHandler, &EditorInputHandler::checkpointMoved, this, &EditorWindow::onCheckpointMoved);
     connect(inputHandler, &EditorInputHandler::modeCancelled, this, &EditorWindow::onModeCancelled);
-    connect(inputHandler, &EditorInputHandler::hintDragUpdated, this, &EditorWindow::onHintDragUpdated);
 }
 
-void EditorWindow::drawGrid() const {
-    const QPen gridPen(QColor(200, 200, 200, 100), 1, Qt::DotLine);
-    constexpr int gridSize = 50;
-    const QRectF bounds = scene->sceneRect();
+void EditorWindow::drawGrid() {
+    QPen gridPen(QColor(200, 200, 200, 100), 1, Qt::DotLine);
+    int gridSize = 50;
+    QRectF bounds = scene->sceneRect();
 
     for (int x = 0; x <= bounds.width(); x += gridSize) {
         QGraphicsLineItem* line = scene->addLine(x, 0, x, bounds.height(), gridPen);
@@ -92,49 +93,41 @@ QString EditorWindow::getCityDisplayName() const {
     return currentCity;
 }
 
-void EditorWindow::updateStatusMessage(const QString& message) const {
+void EditorWindow::updateStatusMessage(const QString& message) {
     statusBar()->showMessage(QString("%1 - %2").arg(getCityDisplayName(), message));
 }
 
-void EditorWindow::onCheckpointModeRequested() const {
+void EditorWindow::onCheckpointModeRequested() {
     inputHandler->setMode(EditorInputHandler::EditMode::CHECKPOINT);
     toolbar->setCheckpointMode(true);
-    updateStatusMessage("Modo Checkpoint - Click para colocar");
+    updateStatusMessage("Modo Checkpoint - Click en zona válida para colocar");
 }
 
-void EditorWindow::onHintModeRequested() const {
-    inputHandler->setMode(EditorInputHandler::EditMode::HINT);
-    toolbar->setHintMode(true);
-    updateStatusMessage("Modo Hint - Click y arrastra para dirección");
-}
+void EditorWindow::onUndoRequested() {
+    if (checkpointManager->count() > 0) {
+        auto checkpoints = checkpointManager->getCheckpoints();
+        if (!checkpoints.empty()) {
+            checkpointManager->removeCheckpoint(checkpoints.back().circle);
+            updateStatusMessage(QString("Checkpoint eliminado (quedan %1)").arg(checkpointManager->count()));
 
-void EditorWindow::onUndoRequested() const {
-
-    if (const auto mode = inputHandler->getMode();
-        mode == EditorInputHandler::EditMode::CHECKPOINT && checkpointManager->count() > 0) {
-        checkpointManager->removeLastCheckpoint();
-        updateStatusMessage(QString("Checkpoint eliminado (quedan %1)").arg(checkpointManager->count()));
-    } else if (mode == EditorInputHandler::EditMode::HINT && hintManager->count() > 0) {
-        hintManager->removeLastHint();
-        updateStatusMessage(QString("Hint eliminado (quedan %1)").arg(hintManager->count()));
-    } else if (hintManager->count() > 0) {
-        hintManager->removeLastHint();
-        updateStatusMessage(QString("Hint eliminado (quedan %1)").arg(hintManager->count()));
-    } else if (checkpointManager->count() > 0) {
-        checkpointManager->removeLastCheckpoint();
-        updateStatusMessage(QString("Checkpoint eliminado (quedan %1)").arg(checkpointManager->count()));
+            if (checkpointManager->hasMinimumCheckpoints()) {
+                onGenerateHints();
+            } else {
+                hintManager->clear();
+            }
+        }
     } else {
-        updateStatusMessage("No hay nada que deshacer");
+        updateStatusMessage("No hay checkpoints que deshacer");
     }
 }
 
 void EditorWindow::onClearRequested() {
-    if (checkpointManager->count() == 0 && hintManager->count() == 0) {
+    if (checkpointManager->count() == 0) {
         updateStatusMessage("No hay nada que limpiar");
         return;
     }
 
-    const auto reply = QMessageBox::question(this, "Limpiar Mapa",
+    auto reply = QMessageBox::question(this, "Limpiar Mapa",
         "¿Seguro que quieres eliminar todos los checkpoints y hints?",
         QMessageBox::Yes | QMessageBox::No);
 
@@ -143,15 +136,15 @@ void EditorWindow::onClearRequested() {
         hintManager->clear();
         inputHandler->setMode(EditorInputHandler::EditMode::NONE);
         toolbar->setCheckpointMode(false);
-        toolbar->setHintMode(false);
         updateStatusMessage("Mapa limpiado");
     }
 }
 
 void EditorWindow::onSaveRequested() {
-    if (RaceTrackData data = collectTrackData();
-        TrackFileManager::saveTrackWithDialog(this, data, currentCity)) {
-        updateStatusMessage(QString("Recorrido '%1' guardada").arg(data.trackName));
+
+    RaceTrackData data = collectTrackData();
+    if (TrackFileManager::saveTrackWithDialog(this, data, currentCity)) {
+        updateStatusMessage(QString("Recorrido '%1' guardado").arg(data.trackName));
     }
 }
 
@@ -160,9 +153,10 @@ void EditorWindow::onLoadRequested() {
         return;
     }
 
+    RaceTrackData data;
     QString newCity = currentCity;
 
-    if (RaceTrackData data; TrackFileManager::loadTrackWithDialog(this, data, newCity)) {
+    if (TrackFileManager::loadTrackWithDialog(this, data, newCity)) {
         if (newCity != currentCity) {
             currentCity = newCity;
             mapRenderer->loadCityMap(currentCity);
@@ -174,44 +168,65 @@ void EditorWindow::onLoadRequested() {
     }
 }
 
-void EditorWindow::onCheckpointAdded(const QPointF& pos) const {
+void EditorWindow::onCheckpointAdded(const QPointF& pos) {
     updateStatusMessage(QString("Checkpoint %1 agregado en (%2, %3)")
         .arg(checkpointManager->count())
         .arg(static_cast<int>(pos.x()))
         .arg(static_cast<int>(pos.y())));
+
+    if (checkpointManager->hasMinimumCheckpoints()) {
+        onGenerateHints();
+    }
 }
 
-void EditorWindow::onHintAdded(const QPointF& pos, qreal rotation) const {
-    updateStatusMessage(QString("Hint %1 agregado en (%2, %3) - %4°")
-        .arg(hintManager->count())
-        .arg(static_cast<int>(pos.x()))
-        .arg(static_cast<int>(pos.y()))
-        .arg(static_cast<int>(rotation)));
+void EditorWindow::onCheckpointRemoved() {
+    updateStatusMessage(QString("Checkpoint eliminado (quedan %1)").arg(checkpointManager->count()));
+
+    if (checkpointManager->hasMinimumCheckpoints()) {
+        onGenerateHints();
+    } else {
+        hintManager->clear();
+    }
 }
 
-void EditorWindow::onModeCancelled() const {
+void EditorWindow::onCheckpointMoved(const QPointF& newPos) {
+    updateStatusMessage(QString("Checkpoint movido a (%1, %2)")
+        .arg(static_cast<int>(newPos.x()))
+        .arg(static_cast<int>(newPos.y())));
+
+    if (checkpointManager->hasMinimumCheckpoints()) {
+        onGenerateHints();
+    }
+}
+
+void EditorWindow::onModeCancelled() {
     toolbar->setCheckpointMode(false);
-    toolbar->setHintMode(false);
     updateStatusMessage("Modo cancelado - Navegación activada");
 }
 
-void EditorWindow::onHintDragUpdated(qreal angle) const {
-    updateStatusMessage(QString("Dirección: %1°").arg(static_cast<int>(angle)));
+void EditorWindow::onGenerateHints() {
+    const auto& checkpoints = checkpointManager->getCheckpoints();
+    HintGenerator::generateHintsForTrack(checkpoints, hintManager);
+    updateStatusMessage(QString("%1 hints generados automáticamente").arg(hintManager->count()));
 }
 
-void EditorWindow::onZoomIn() const {
+void EditorWindow::onZoomIn() {
     view->scale(1.2, 1.2);
     updateStatusMessage("Zoom aumentado");
 }
 
-void EditorWindow::onZoomOut() const {
+void EditorWindow::onZoomOut() {
     view->scale(1.0 / 1.2, 1.0 / 1.2);
     updateStatusMessage("Zoom reducido");
 }
 
-void EditorWindow::onResetZoom() const {
+void EditorWindow::onResetZoom() {
     view->resetTransform();
     updateStatusMessage("Zoom reseteado");
+}
+
+bool EditorWindow::validateTrack() const {
+    return true;
 }
 
 RaceTrackData EditorWindow::collectTrackData() const {
@@ -235,7 +250,7 @@ RaceTrackData EditorWindow::collectTrackData() const {
     return data;
 }
 
-void EditorWindow::restoreTrackData(const RaceTrackData& data) const {
+void EditorWindow::restoreTrackData(const RaceTrackData& data) {
     checkpointManager->clear();
     hintManager->clear();
 
@@ -249,12 +264,11 @@ void EditorWindow::restoreTrackData(const RaceTrackData& data) const {
 
     inputHandler->setMode(EditorInputHandler::EditMode::NONE);
     toolbar->setCheckpointMode(false);
-    toolbar->setHintMode(false);
 }
 
 bool EditorWindow::confirmDiscard() {
-    if (checkpointManager->count() > 0 || hintManager->count() > 0) {
-        const auto reply = QMessageBox::question(this, "Cargar Recorrido",
+    if (checkpointManager->count() > 0) {
+        auto reply = QMessageBox::question(this, "Cargar Recorrido",
             "¿Descartar cambios actuales y cargar un recorrido?",
             QMessageBox::Yes | QMessageBox::No);
         return reply == QMessageBox::Yes;
@@ -267,7 +281,7 @@ bool EditorWindow::eventFilter(QObject* obj, QEvent* event) {
         return QMainWindow::eventFilter(obj, event);
     }
 
-    auto* mouseEvent = dynamic_cast<QMouseEvent*>(event);
+    QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
     if (!mouseEvent) {
         return QMainWindow::eventFilter(obj, event);
     }
