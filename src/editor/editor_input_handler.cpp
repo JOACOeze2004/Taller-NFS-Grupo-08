@@ -1,13 +1,15 @@
 #include "editor_input_handler.h"
+#include <QMessageBox>
 #include <cmath>
 
-EditorInputHandler::EditorInputHandler(QGraphicsView* view, QGraphicsScene* scene, CheckpointManager* checkpointMgr, HintManager* hintMgr, QObject* parent)
-    : QObject(parent), view(view), scene(scene), checkpointManager(checkpointMgr),hintManager(hintMgr), currentMode(EditMode::NONE), isDraggingHint(false), tempArrow(nullptr) {}
+EditorInputHandler::EditorInputHandler(QGraphicsView* view, QGraphicsScene* scene,
+                                       CheckpointManager* checkpointMgr, HintManager* hintMgr,
+                                       QObject* parent)
+    : QObject(parent), view(view), scene(scene), checkpointManager(checkpointMgr),
+      hintManager(hintMgr), currentMode(EditMode::NONE),
+      isDraggingCheckpoint(false), draggedCheckpoint(nullptr) {}
 
 void EditorInputHandler::setMode(EditMode mode) {
-    if (isDraggingHint) {
-        cancelHintDrag();
-    }
     currentMode = mode;
 
     if (mode == EditMode::NONE) {
@@ -19,24 +21,32 @@ void EditorInputHandler::setMode(EditMode mode) {
 
 bool EditorInputHandler::handleMousePress(QMouseEvent* event) {
     QPointF scenePos = view->mapToScene(event->pos());
+
     if (event->button() == Qt::LeftButton) {
+        if (currentMode == EditMode::NONE) {
+            if (QGraphicsEllipseItem* checkpoint = checkpointManager->getCheckpointAt(scenePos)) {
+                handleCheckpointDragStart(checkpoint, scenePos);
+                return true;
+            }
+            return false;
+        }
+
         switch (currentMode) {
             case EditMode::CHECKPOINT:
                 handleCheckpointClick(scenePos);
                 return true;
 
-            case EditMode::HINT:
-                handleHintStart(scenePos);
-                return true;
-
             case EditMode::NONE:
                 return false;
+            default:;
         }
     }
     else if (event->button() == Qt::RightButton) {
-        if (isDraggingHint) {
-            cancelHintDrag();
+        if (QGraphicsEllipseItem* checkpoint = checkpointManager->getCheckpointAt(scenePos)) {
+            showCheckpointContextMenu(checkpoint, event->globalPos());
+            return true;
         }
+
         setMode(EditMode::NONE);
         emit modeCancelled();
         return true;
@@ -45,20 +55,37 @@ bool EditorInputHandler::handleMousePress(QMouseEvent* event) {
 }
 
 bool EditorInputHandler::handleMouseMove(QMouseEvent* event) {
-    if (isDraggingHint && tempArrow) {
-        QPointF scenePos = view->mapToScene(event->pos());
-        handleHintDrag(scenePos);
+    QPointF scenePos = view->mapToScene(event->pos());
+
+    if (isDraggingCheckpoint && draggedCheckpoint) {
+        handleCheckpointDrag(scenePos);
         return true;
     }
+
     return false;
 }
 
 bool EditorInputHandler::handleMouseRelease(QMouseEvent* event) {
-    if (event->button() == Qt::LeftButton && isDraggingHint) {
-        QPointF scenePos = view->mapToScene(event->pos());
-        handleHintEnd(scenePos);
+    QPointF scenePos = view->mapToScene(event->pos());
+
+    if (event->button() == Qt::LeftButton) {
+        if (isDraggingCheckpoint) {
+            handleCheckpointDragEnd(scenePos);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool EditorInputHandler::handleContextMenu(QContextMenuEvent* event) {
+    QPointF scenePos = view->mapToScene(event->pos());
+
+    if (QGraphicsEllipseItem* checkpoint = checkpointManager->getCheckpointAt(scenePos)) {
+        showCheckpointContextMenu(checkpoint, event->globalPos());
         return true;
     }
+
     return false;
 }
 
@@ -67,42 +94,40 @@ void EditorInputHandler::handleCheckpointClick(const QPointF& scenePos) {
     emit checkpointAdded(scenePos);
 }
 
-void EditorInputHandler::handleHintStart(const QPointF& scenePos) {
-    isDraggingHint = true;
-    hintStartPos = scenePos;
-    tempArrow = hintManager->createTempArrow(scenePos);
-    emit hintDragStarted();
+void EditorInputHandler::handleCheckpointDragStart(QGraphicsEllipseItem* checkpoint, const QPointF& scenePos) {
+    isDraggingCheckpoint = true;
+    draggedCheckpoint = checkpoint;
+    dragStartPos = scenePos;
+    view->setDragMode(QGraphicsView::NoDrag);
 }
 
-void EditorInputHandler::handleHintDrag(const QPointF& scenePos) {
-    qreal dx = scenePos.x() - hintStartPos.x();
-    qreal dy = scenePos.y() - hintStartPos.y();
-    qreal angle = std::atan2(dy, dx) * 180.0 / M_PI + 90;
-
-    tempArrow->setRotation(angle);
-    emit hintDragUpdated(angle);
-}
-
-void EditorInputHandler::handleHintEnd(const QPointF& scenePos) {
-    qreal dx = scenePos.x() - hintStartPos.x();
-    qreal dy = scenePos.y() - hintStartPos.y();
-    qreal angle = std::atan2(dy, dx) * 180.0 / M_PI + 90;
-
-    scene->removeItem(tempArrow);
-    delete tempArrow;
-    tempArrow = nullptr;
-
-    hintManager->addHint(hintStartPos, angle);
-    emit hintAdded(hintStartPos, angle);
-
-    isDraggingHint = false;
-}
-
-void EditorInputHandler::cancelHintDrag() {
-    if (tempArrow) {
-        scene->removeItem(tempArrow);
-        delete tempArrow;
-        tempArrow = nullptr;
+void EditorInputHandler::handleCheckpointDrag(const QPointF& scenePos) {
+    if (draggedCheckpoint) {
+        checkpointManager->moveCheckpoint(draggedCheckpoint, scenePos);
     }
-    isDraggingHint = false;
+}
+
+void EditorInputHandler::handleCheckpointDragEnd(const QPointF& scenePos) {
+    if (draggedCheckpoint) {
+        checkpointManager->moveCheckpoint(draggedCheckpoint, scenePos);
+        emit checkpointMoved(scenePos);
+    }
+
+    isDraggingCheckpoint = false;
+    draggedCheckpoint = nullptr;
+
+    if (currentMode == EditMode::NONE) {
+        view->setDragMode(QGraphicsView::ScrollHandDrag);
+    }
+}
+
+void EditorInputHandler::showCheckpointContextMenu(QGraphicsEllipseItem* checkpoint, const QPoint& screenPos) {
+    QMenu menu;
+    QAction* deleteAction = menu.addAction("Eliminar Checkpoint");
+
+    QAction* selected = menu.exec(screenPos);
+    if (selected == deleteAction) {
+        checkpointManager->removeCheckpoint(checkpoint);
+        emit checkpointRemoved();
+    }
 }
