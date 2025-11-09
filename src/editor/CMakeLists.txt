@@ -23,6 +23,8 @@ target_sources(taller_editor PRIVATE
         yaml_parser.cpp
         yaml_parser.h
         race_track_data.h
+        hint_generator.cpp
+        hint_generator.h
 )
 
 target_link_libraries(taller_editor Qt5::Widgets)

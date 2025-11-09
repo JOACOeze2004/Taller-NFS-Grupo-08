@@ -139,6 +139,8 @@ if(TALLER_CLIENT)
             src/client/final_results/final_results_windows.cpp
             src/client/final_results/final_results_windows.h
             src/client/InvalidId.h
+            src/client/lobby/lobby_window.cpp
+            src/client/lobby/lobby_window.h
     )
 
     # Make them depend on taller_common lib
@@ -226,7 +228,10 @@ if(TALLER_EDITOR)
             src/editor/city_config.cpp
             src/editor/city_config.h
             src/editor/city_selec.cpp
-            src/editor/city_selec.h)
+            src/editor/city_selec.h
+            src/editor/hint_generator.cpp
+            src/editor/hint_generator.h
+    )
 
     # Make them depend on taller_common lib
     add_dependencies(taller_editor taller_common SDL2pp::SDL2pp)
