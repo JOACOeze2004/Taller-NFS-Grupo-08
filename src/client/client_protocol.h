@@ -15,6 +15,7 @@ class ClientProtocol {
 
     public:
         explicit ClientProtocol(Socket& _socket);
+        std::string receive_error_message();
         const std::vector<std::string> receive_games_list();
         void send_player_config(const std::string& name, uint8_t car_id,
                             const std::string& map_name) ;

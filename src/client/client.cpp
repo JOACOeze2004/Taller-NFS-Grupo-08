@@ -20,6 +20,13 @@ void Client::run(const PlayerConfig& config,uint8_t lobby_action, const std::str
     try {
         protocol.send_player_config(config.playerName, config.carId, config.mapName);        
         protocol.send_lobby_action(lobby_action, game_id);
+        
+        uint8_t response = protocol.receive_byte();
+
+        if (response == SEND_ERROR_MESSAGE) {
+            std::string error_msg = protocol.receive_error_message();
+            throw std::runtime_error(error_msg); 
+        }
         if (lobby_action == SEND_CREATE_GAME){
             std::cout << "[CLIENT] Waiting for other player to start: " << std::endl;
         }        

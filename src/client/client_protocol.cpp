@@ -126,6 +126,10 @@ Snapshot ClientProtocol::receive_game_state() const {
     return snapshot;
 }
 
+std::string ClientProtocol::receive_error_message(){
+    size_t size = protocol.receive_big_endian_16();
+    return protocol.receive_string(size);
+}
 
 void ClientProtocol::close(){
     protocol.close_socket();
