@@ -190,3 +190,7 @@ CarDTO Car::get_state() const {
     float speed = b2Length(vel);
     return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro);  //cambiar el car id y el under bridge para que funcione
 }
+
+b2Vec2 Car::get_position() {
+    return b2Body_GetPosition(body_id);
+}

@@ -34,6 +34,7 @@ public:
     void turn_left();
     void apply_friction();
     void handle_hit(b2Vec2& normal, float& force, bool is_hitter);
+    b2Vec2 get_position();
 
     void restore_life();
     void activate_infinite_life();
