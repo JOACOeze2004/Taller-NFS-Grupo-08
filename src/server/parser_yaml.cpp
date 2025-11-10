@@ -47,3 +47,27 @@ CarStats ParserYaml::parse_car(const int car_id) {
     CarStats car_stats = {mass, handling, acceleration, braking};
     return car_stats;
 }
+
+Track ParserYaml::parse_tracks(const std::string& tracks_file) {
+    Track track;
+    YAML::Node tracks = YAML::LoadFile(tracks_file);
+
+    track.city_id = tracks["cityId"].as<std::string>();
+    for (const auto& cp : tracks["checkpoints"]) {
+        Checkpoint c;
+        c.x = cp["x"].as<float>();
+        c.y = cp["y"].as<float>();
+        c.order = cp["order"].as<int>();
+        track.checkpoints.push_back(c);
+    }
+
+    for (const auto& hnt : tracks["hints"]) {
+        Hint hint;
+        hint.x = hnt["x"].as<float>();
+        hint.y = hnt["y"].as<float>();
+        hint.rotation = hnt["rotation"].as<float>();
+        track.hints.push_back(hint);
+    }
+
+    return track;
+}

@@ -14,12 +14,31 @@ struct StaticBody {
     float height;
 };
 
+struct Checkpoint {
+    float x;
+    float y;
+    int order;
+};
+
+struct Hint {
+    float x;
+    float y;
+    float rotation;
+};
+
+struct Track {
+    std::string city_id;
+    std::vector<Checkpoint> checkpoints;
+    std::vector<Hint> hints;
+};
+
 class ParserYaml {
     YAML::Node cars_file;
 public:
     explicit ParserYaml();
     std::vector<StaticBody> parse_map(std::string& map_name);
     CarStats parse_car(const int car_id);
+    Track parse_tracks(const std::string& tracks_file);
 };
 
 
