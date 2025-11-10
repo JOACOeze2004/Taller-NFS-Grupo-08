@@ -45,6 +45,7 @@ public:
     void activate_win_race();
 
     void toggle_nitro_status();
+    void apply_nitro_force();
     void update_nitro_usage();
 
     CarDTO get_state() const;

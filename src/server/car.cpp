@@ -35,11 +35,6 @@ void Car::accelerate() {
 
     float accel = acceleration;
     float limit = max_speed;
-
-    if (nitro_activated){
-        accel *= 3.0f;
-        limit *= 2.0f;
-    }
     
     if (speed < limit) {
         b2Vec2 velocity = b2Body_GetWorldVector(body_id, {1,0});
@@ -161,6 +156,28 @@ void Car::toggle_nitro_status(){
         return;
     }
     nitro_activated = true;
+}
+void Car::apply_nitro_force() {
+    if (!nitro_activated){
+        return;
+    }
+
+    b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
+    float speed = b2Length(vel);
+    float limit = max_speed * 3.0f;
+
+    if (speed < 1.0f) {
+        b2Vec2 forward = b2Body_GetWorldVector(body_id, {1,0});
+        b2Vec2 boost = {forward.x * acceleration * 1.2f, forward.y * acceleration * 1.2f};
+        b2Body_ApplyLinearImpulseToCenter(body_id, boost, true);
+        return;
+    }
+
+    if (speed < limit) {
+        b2Vec2 forward = b2Body_GetWorldVector(body_id, {1,0});
+        b2Vec2 force = {forward.x * acceleration * 1.5f, forward.y * acceleration * 1.5f};
+        b2Body_ApplyForceToCenter(body_id, force, true);
+    }
 }
 
 void Car::update_nitro_usage(){

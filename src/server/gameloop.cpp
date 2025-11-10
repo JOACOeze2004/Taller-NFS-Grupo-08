@@ -49,6 +49,7 @@ void Gameloop::run() {
             update_positions(track);
             for (auto& [id, car] : cars) {
                 car.update_nitro_usage();
+                car.apply_nitro_force();
             }
             broadcast();
             if (get_time_remaining_ms() <= 0){
