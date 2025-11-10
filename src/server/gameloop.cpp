@@ -6,7 +6,7 @@
 
 
 Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_name):
-        cmd_queue(),game_id(gid), monitor(_monitor), ready_to_start(false), parser() {
+        cmd_queue(), game_id(gid), monitor(_monitor), ready_to_start(false), race("../src/server/prueba.yaml", &cars) {
     initialize_car_actions();
     world.generate_map(map_name);
 
@@ -34,7 +34,6 @@ void Gameloop::initialize_car_actions() {
 }
 
 void Gameloop::run() {
-    auto track = parser.parse_tracks("../src/server/prueba.yaml");
     auto rate = std::chrono::milliseconds(16);
     auto t1 = std::chrono::steady_clock::now();
 
@@ -46,7 +45,7 @@ void Gameloop::run() {
             start_time = std::chrono::steady_clock::now();
         }
         if (ready_to_start){
-            update_positions(track);
+            update_positions();
             for (auto& [id, car] : cars) {
                 car.update_nitro_usage();
                 car.apply_nitro_force();
@@ -91,7 +90,8 @@ void Gameloop::process_commands() {
         }
 
         auto it = cars.find(client_command.id);
-        if (finished[it->first]) {
+        auto& id = it->first;
+        if (race.car_finished(id) || race.car_dead(id)) {
             continue;
         }
 
@@ -114,41 +114,15 @@ void Gameloop::add_car(const int client_id, const int car_id,  const std::string
     cars.emplace(std::piecewise_construct,
     std::forward_as_tuple(client_id),
     std::forward_as_tuple(world.get_id(), car.mass, car.handling, car.acceleration, car.braking, car_id));
-    car_progress[client_id] = 0;
-    finished[client_id] = false;
 }
 
 void Gameloop::push_command(const ClientCommand& cmd){
     this->cmd_queue.push(cmd);
 }
 
-void Gameloop::update_positions(Track& track) {
+void Gameloop::update_positions() {
     world.update();
-    for (auto& [id, car] : cars) {
-        int next_checkpoint = car_progress[id];
-        if (next_checkpoint >= static_cast<int>(track.checkpoints.size())) continue;
-
-        const auto& cp = track.checkpoints[next_checkpoint];
-        auto [x, y] = car.get_position();
-
-        float dx = x - cp.x;
-        float dy = y - cp.y;
-        float dist2 = dx*dx + dy*dy;
-        const float radius = 50.0f;
-
-        if (dist2 <= radius * radius) {
-            car_progress[id]++;
-
-            std::cout << "Auto " << id
-                      << " pasa por checkpoint " << cp.order
-                      << " (" << car_progress[id] << "/" << track.checkpoints.size() << ")" << std::endl;
-
-            if (car_progress[id] == static_cast<int>(track.checkpoints.size())) {
-                finished[id] = true;
-                std::cout << "Auto " << id << " completo la carrera" << std::endl;
-            }
-        }
-    }
+    race.update_checkpoints();
 }
 
 Snapshot Gameloop::initialize_DTO() {

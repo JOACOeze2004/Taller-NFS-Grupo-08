@@ -211,3 +211,7 @@ CarDTO Car::get_state() const {
 b2Vec2 Car::get_position() {
     return b2Body_GetPosition(body_id);
 }
+
+bool Car::is_dead() {
+    return life == 0;
+}

@@ -4,7 +4,6 @@
 #pragma once
 #include <functional>
 #include <map>
-#include "world.h"
 
 #include "../common/queue.h"
 #include "../common/thread.h"
@@ -12,6 +11,8 @@
 #include "car.h"
 #include "client_command.h"
 #include "monitor.h"
+#include "race.h"
+#include "world.h"
 
 class Monitor;
 
@@ -41,15 +42,14 @@ private:
     Map current_map;
     ParserYaml parser;
     std::unordered_map<int, std::string> user_names;
-    std::unordered_map<int, int> car_progress;
-    std::unordered_map<int, bool> finished;
+    Race race;
     // Workshop workshop; para entre carreras mejorar el auto
     // GameMap game_map; quiza que guarde todos los mapas y circuitos posibles (lo recibe por parametro)
 
 
 
     void process_commands();
-    void update_positions(Track& track);
+    void update_positions();
     void broadcast();
     Snapshot initialize_DTO();
 };
