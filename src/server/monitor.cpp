@@ -1,5 +1,8 @@
 #include "monitor.h"
 #include "gameloop.h"
+#include "GameFullException.h"
+#include "InvalidGameIDException.h"
+
 
 Monitor::Monitor() { game_id = 0; }
 
@@ -65,7 +68,8 @@ std::shared_ptr<Gameloop> Monitor::create_game(std::string map_name, const int c
     std::string id = generate_game_id();
     auto game_loop = std::make_shared<Gameloop>(*this, id, map_name);
     current_games[id] = game_loop;
-    game_loop->add_car(client_id, car_id);
+    game_loop->add_car(client_id, car_id);    
+    
     return game_loop;
 }
 
@@ -73,12 +77,12 @@ std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const 
     std::unique_lock<std::mutex> lock(mutex);
     auto game_i = current_games.find(_game_id);
     if (game_i == current_games.end()){
-        return nullptr;
+        throw InvalidGameIDException();
     }
     //quizas handelear si el game esta muerto, tirar una excepcion de q la palmo la partida.
     auto game = game_i->second;
     if (!game->can_join_to_game()){
-        return nullptr;
+        throw GameFullException();
     }    
     players[username] = _game_id;
     game->add_car(client_id, car_id);

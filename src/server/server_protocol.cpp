@@ -117,6 +117,18 @@ void ServerProtocol::send_game_state(const Snapshot& snapshot) {
     }
 }
 
+void ServerProtocol::send_error_message(const std::string& msg) {
+    uint8_t signal = SEND_ERROR_MESSAGE;
+    protocol.send_byte(signal);
+    
+    protocol.send_big_endian_16(static_cast<uint16_t>(msg.size()));
+    protocol.send_string(msg);
+}
+
+void ServerProtocol::send_ok() {
+    protocol.send_byte(SEND_OK_MESSAGE);
+}
+
 void ServerProtocol::close(){
     protocol.close_socket();    
 }

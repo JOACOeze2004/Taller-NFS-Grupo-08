@@ -2,6 +2,8 @@
 
 #include "src/common/DTO.h"
 #include "src/common/constants.h"
+#include "GameFullException.h"
+
 
 Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_name):
         cmd_queue(),game_id(gid), monitor(_monitor), ready_to_start(false), parser() {
@@ -95,13 +97,6 @@ void Gameloop::process_commands() {
 }
 
 void Gameloop::add_car(const int client_id, const int car_id) {
-
-    if (cars.size() == MAX_PLAYERS_PER_GAME){
-        //estaria bueno mandar un command especifico diciendole al jugador q no se pudo unir xq estaba llena la partida. O tirar una excepcion (no me gusta mucho eso)
-        std::cout << "[GAMELOOP] The game is already full.Try to join to other game." << std::endl;        
-        return;
-    }
-
     CarStats car = parser.parse_car(car_id);
 
     cars.emplace(std::piecewise_construct,

@@ -27,6 +27,9 @@ public:
     uint8_t receive_standar_command() const;
 
     void send_game_state(const Snapshot& snapshot);
+    void send_error_message(const std::string& msg);
+    void send_ok();
+
 
     void close();
 
