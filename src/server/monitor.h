@@ -32,6 +32,7 @@ public:
     Monitor();
     void add_client(const int client_id, std::unique_ptr<ClientHandler> client);
     void broadcast(Snapshot& snapshot,const std::string& gid);
+    void broadcast(const Snapshot& snapshot,const std::string& gid, int client_id);
     void clear_clients();
     void reap();
 

@@ -65,6 +65,14 @@ void Monitor::broadcast(Snapshot& snapshot, const std::string& gid) {
     }
 }
 
+void Monitor::broadcast(const Snapshot& snapshot, const std::string& gid, const int client_id) {
+    std::unique_lock<std::mutex> lock(mutex);
+    auto& client = clients[client_id];
+    if (client->get_game_id() == gid && !client->is_dead()) {
+        client->send_state(snapshot);
+    }
+}
+
 std::shared_ptr<Gameloop> Monitor::create_game(std::string map_name, const int client_id, const int car_id, const std::string& username) {
     std::unique_lock<std::mutex> lock(mutex);
     std::string id = generate_game_id();
