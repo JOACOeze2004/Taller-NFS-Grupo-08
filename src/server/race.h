@@ -1,8 +1,10 @@
 #ifndef TALLER_NFS_GRUPO_08_RACE_H
 #define TALLER_NFS_GRUPO_08_RACE_H
+#include <algorithm>
 #include <map>
 #include <string>
-#include <algorithm>
+
+#include "src/common/DTO.h"
 
 #include "car.h"
 #include "parser_yaml.h"
@@ -28,7 +30,8 @@ public:
 	bool car_dead(const int& id);
 	void update_checkpoints();
     void update_positions_order();
-    int get_position(const int id) const;
+    int get_position(const int& id) const;
+    StateRunning get_state(const int& id, const int& time_remaining);
 };
 
 

@@ -17,7 +17,7 @@ int Race::get_checkpoints(const int id) const {
     return it->second;
 }
 
-int Race::get_position(const int id) const {
+int Race::get_position(const int& id) const {
     for (size_t i = 0; i < positions_order.size(); ++i) {
         if (positions_order[i] == id)
             return static_cast<int>(i) + 1;
@@ -101,5 +101,19 @@ bool Race::car_dead(const int& id) {
 
 bool Race::car_finished(const int& id) {
     return finished[id];
+}
+
+StateRunning Race::get_state(const int& id, const int& time_remaining) {
+    if (car_finished(id)) {
+        return FINISHED;
+    }
+    if (car_dead(id)) {
+        return DEAD;
+    }
+    if (time_remaining <= 0) {
+        return TIMEOUTED;
+    }
+
+    return IN_GAME;
 }
 
