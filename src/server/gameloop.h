@@ -29,6 +29,7 @@ public:
     bool can_join_to_game();
     bool is_username_taken(const int username_id) const;
     int get_time_remaining_ms() const;
+
 private:
     Queue<ClientCommand> cmd_queue;
     std::string game_id;
@@ -36,7 +37,6 @@ private:
     std::map<int, Car> cars;
     std::map<uint8_t, std::function<void(Car& car)>> car_actions;
     World world;
-    void initialize_car_actions();
     bool ready_to_start; 
     std::chrono::steady_clock::time_point start_time;
     Map current_map;
@@ -47,7 +47,7 @@ private:
     // GameMap game_map; quiza que guarde todos los mapas y circuitos posibles (lo recibe por parametro)
 
 
-
+    void initialize_car_actions();
     void process_commands();
     void update_positions();
     void broadcast();

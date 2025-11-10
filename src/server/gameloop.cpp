@@ -123,12 +123,12 @@ void Gameloop::push_command(const ClientCommand& cmd){
 void Gameloop::update_positions() {
     world.update();
     race.update_checkpoints();
+    race.update_positions_order();
 }
 
 Snapshot Gameloop::initialize_DTO() {
     Snapshot dto;
     dto.state = IN_GAME;
-    dto.position = 1;   //usar std::max_element y ademas comparar distancia al proximo checkpoint
     dto.cars_count = static_cast<int>(cars.size());
     dto.map = current_map;
     dto.upgrade = NONE_UPGRADE;
@@ -151,6 +151,7 @@ void Gameloop::broadcast() {
         dto.cars = carsDTO;
         dto.checkpoint = {car.get_position().x, car.get_position().y};
         dto.hint = {0.0f, 0.0f, 0.0f};
+        dto.position = race.get_position(id);
         monitor.broadcast(dto,this->game_id, id);
     }
 
