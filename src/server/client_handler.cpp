@@ -4,6 +4,7 @@
 #include "receiver.h"
 #include "GameFullException.h"
 #include "InvalidGameIDException.h"
+#include "InvalidPlayerNameException.h"
 
 ClientHandler::ClientHandler(Socket&& peer,Monitor& monitor, int _id):
         peer(std::move(peer)),
@@ -20,9 +21,11 @@ void ClientHandler::run() {
         // auto active_games = monitor.get_active_games();
         // protocol.send_games_list(active_games);
         protocol.receive_player_config(player_name, car_id, map_name);
-
-    } catch (const std::exception& e) {
-        std::cerr << "[SERVER " << id << "] Error receiving config: " << e.what() << std::endl;
+        if (player_name.size() < MIN_NAME_LEN || player_name.size() > MAX_NAME_LEN) {
+            throw InvalidPlayerNameException("must be between 3 and 16 characters");
+        }
+    } catch (const InvalidPlayerNameException& e) {
+        protocol.send_error_message(e.what());
         return;
     }
 
@@ -33,33 +36,31 @@ void ClientHandler::run() {
     std::string g_id;
     try {
         if (action == SEND_CREATE_GAME) {
-            game = monitor.create_game(map_name,this->id, car_id);
+            game = monitor.create_game(map_name,this->id, car_id,this->player_name);
             g_id = monitor.get_last_created_game_id();
             set_game_id(g_id);
             game->start();
 
         } else if (action == SEND_JOIN_GAME) {
-            game = monitor.join_game(player_name, game_id_to_join, this->id, car_id);
-            if (!game) {
-                std::cerr << "[SERVER] Game not found or is full " << std::endl;
-                return;
-            }        
+            game = monitor.join_game(player_name, game_id_to_join, this->id, car_id);       
             g_id = game_id_to_join;
             set_game_id(game_id_to_join);
             
         } else {
-            std::cerr << "[SERVER " << id << "] Invalid lobby action: " << static_cast<int>(action) << std::endl;
+            std::cerr << "[SERVER]" "Client " << id << " Invalid lobby action: " << static_cast<int>(action) << std::endl;
             return;
         }
     } catch(const GameFullException& e){
-        std::cerr << "[SERVER " << id << "] Game is full: " << std::endl;
         protocol.send_error_message(e.what());
         return;
     } catch (const InvalidGameIDException& e) {
-        std::cerr << "[SERVER " << id << "] Invalid gaem id: " << std::endl;
         protocol.send_error_message(e.what());
         return;
-    } catch (...) {
+    } catch(const InvalidPlayerNameException& e){
+        protocol.send_error_message(e.what());
+        return;
+    }
+    catch (...) {
         protocol.send_error_message("unexpected error");
         return;
     }
@@ -81,7 +82,7 @@ void ClientHandler::run() {
     try {
         protocol.send_game_init_data(map_path, spawn_x, spawn_y);
     } catch (const std::exception& e) {
-        std::cerr << "[SERVER " << id << "] Error sending init data: " << e.what() << std::endl;
+        std::cerr << "[SERVER]" "Client " << id << " Error sending init data: " << e.what() << std::endl;
         return;
     }
 

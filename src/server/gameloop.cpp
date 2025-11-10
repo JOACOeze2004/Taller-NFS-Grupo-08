@@ -96,8 +96,13 @@ void Gameloop::process_commands() {
     }
 }
 
-void Gameloop::add_car(const int client_id, const int car_id) {
+bool Gameloop::is_username_taken(const std::string& username) const {
+    return user_names.find(username) != user_names.end();
+}
+
+void Gameloop::add_car(const int client_id, const int car_id,  const std::string& player_name) {
     CarStats car = parser.parse_car(car_id);
+    user_names.insert(player_name);
 
     cars.emplace(std::piecewise_construct,
     std::forward_as_tuple(client_id),

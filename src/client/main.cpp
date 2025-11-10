@@ -10,6 +10,7 @@
 #include <QApplication>
 #include <QWidget>
 #include "final_results/final_results_windows.h"
+#include <QMessageBox>
 
 using namespace SDL2pp;
 

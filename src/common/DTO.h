@@ -4,11 +4,6 @@
 #include "car_DTO.h"
 #include <unordered_map>
 
-struct DTO {
-    int id;
-    std::unordered_map<int, CarDTO> cars;
-};
-
 struct LobbyCarDTO {
     int car_id;
     float acceleration;
