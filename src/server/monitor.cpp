@@ -85,7 +85,7 @@ std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const 
     if (!game->can_join_to_game()){
         throw GameFullException();
     }
-    // if (game->is_username_taken(username)) {
+    // if (game->is_username_taken(client_id)) {
     //     throw InvalidPlayerNameException("name already in use");
     // }          
     players[username] = _game_id;

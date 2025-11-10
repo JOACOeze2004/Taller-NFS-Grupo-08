@@ -5,7 +5,6 @@
 #include <functional>
 #include <map>
 #include "world.h"
-#include <unordered_set>
 
 #include "../common/queue.h"
 #include "../common/thread.h"
@@ -27,7 +26,7 @@ public:
     void push_command(const ClientCommand& cmd);
     const std::string& get_game_id() const;
     bool can_join_to_game();
-    bool is_username_taken(const std::string& username) const;
+    bool is_username_taken(const int username_id) const;
     int get_time_remaining_ms() const;
 private:
     Queue<ClientCommand> cmd_queue;
@@ -41,7 +40,7 @@ private:
     std::chrono::steady_clock::time_point start_time;
     Map current_map;
     ParserYaml parser;
-    std::unordered_set<std::string> user_names;
+    std::unordered_map<int, std::string> user_names;
     // Workshop workshop; para entre carreras mejorar el auto
     // GameMap game_map; quiza que guarde todos los mapas y circuitos posibles (lo recibe por parametro)
 

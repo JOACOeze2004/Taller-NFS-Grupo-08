@@ -82,7 +82,8 @@ int Gameloop::get_time_remaining_ms() const {
 void Gameloop::process_commands() {
     ClientCommand client_command{};
     while (cmd_queue.try_pop(client_command)) {
-        if (client_command.cmd_struct.cmd == SEND_DISCONNECT) {            
+        if (client_command.cmd_struct.cmd == SEND_DISCONNECT) {    
+            user_names.erase(client_command.id);       
             cars.erase(client_command.id);
             continue;
         }
@@ -96,13 +97,13 @@ void Gameloop::process_commands() {
     }
 }
 
-bool Gameloop::is_username_taken(const std::string& username) const {
-    return user_names.find(username) != user_names.end();
+bool Gameloop::is_username_taken(const int username_id) const {
+    return user_names.find(username_id) != user_names.end();
 }
 
 void Gameloop::add_car(const int client_id, const int car_id,  const std::string& player_name) {
     CarStats car = parser.parse_car(car_id);
-    user_names.insert(player_name);
+    user_names[client_id] = player_name;;
 
     cars.emplace(std::piecewise_construct,
     std::forward_as_tuple(client_id),
