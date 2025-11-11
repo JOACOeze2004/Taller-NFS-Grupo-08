@@ -44,9 +44,9 @@ GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initia
     if (TTF_Init() == -1) {
         std::cerr << "[CLIENT] Error inicializando SDL_ttf: " << TTF_GetError() << std::endl;
     } else {
-        const char* default_font_path = "../assets/fonts/NFS.ttf";
+        const char* default_font_path = "../assets/fonts/DejaVuSans.ttf";
         text = new TextRenderer();
-        if (!text->load(default_font_path, 20) || !text->ok()) {
+        if (!text->load(default_font_path, 35) || !text->ok()) {
             std::cerr << "[CLIENT] Fuente no disponible, no se renderizará texto en pantalla." << std::endl;
             delete text;
             text = nullptr;
@@ -250,24 +250,22 @@ void GraphicClient::draw_state(int state) {
     
     if (state == FINISHED) {
         msg = "You Finished!";
-        overlay_color = {0, 255, 0, 76}; // Verde transparente
+        overlay_color = {0, 255, 0, 76}; 
     } else if (state == DEAD) {
         msg = "You Died!";
-        overlay_color = {255, 0, 0, 76}; // Rojo transparente
+        overlay_color = {255, 0, 0, 76}; 
     } else if (state == TIMEOUTED) {
         msg = "Time Out!";
-        overlay_color = {255, 0, 0, 76}; // Rojo transparente
+        overlay_color = {255, 0, 0, 76}; 
     } else {
         return; 
     }
     
-    // Dibujar cuadrado transparente que cubre toda la pantalla
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, overlay_color.r, overlay_color.g, overlay_color.b, overlay_color.a);
     SDL_Rect fullscreen_rect = {0, 0, screen_width, screen_height};
     SDL_RenderFillRect(renderer, &fullscreen_rect);
     
-    // Dibujar texto encima del overlay
     SDL_Color text_color{255, 255, 255, 255};
     int text_x = (screen_width / 2) - 100; 
     int text_y = (screen_height / 2) - 25; 
@@ -332,13 +330,11 @@ void GraphicClient::draw_hint(HintCoords hint) {
 }
 
 
-
-
 void GraphicClient::draw_position(int position, int total_cars) {
     if (!text) return;
-    std::string msg = "Posición: " + std::to_string(position) + "/" + std::to_string(total_cars);
-    SDL_Color color{255, 255, 255, 255};
-    text->render(renderer, msg, 15, 45, color);
+    std::string msg = "POSITION: " + std::to_string(position) + " / " + std::to_string(total_cars);
+    SDL_Color color{0, 0, 0, 255};
+    text->render(renderer, msg, 500, 30, color);
 }
 
 void GraphicClient::draw_time(int time_ms) {
@@ -348,16 +344,16 @@ void GraphicClient::draw_time(int time_ms) {
     int seconds = total_seconds % 60;
     int milliseconds = time_ms % 1000;
     char buffer[64];
-    std::snprintf(buffer, sizeof(buffer), "Tiempo: %02d:%02d.%03d", minutes, seconds, milliseconds);
-    SDL_Color color{255, 255, 255, 255};
-    text->render(renderer, buffer, 15, 70, color);
+    std::snprintf(buffer, sizeof(buffer), "TIME: %02d:%02d.%03d", minutes, seconds, milliseconds);
+    SDL_Color color{0, 0, 0, 255};
+    text->render(renderer, buffer, 500, 100, color);
 }
 
 void GraphicClient::draw_speed(float speed) {
     if (!text) return;
     char buffer[64];
-    std::snprintf(buffer, sizeof(buffer), "Velocidad: %.1f KM/H", speed);
-    SDL_Color color{255, 255, 255, 255};
+    std::snprintf(buffer, sizeof(buffer), "SPEED: %.1f KM/H", speed);
+    SDL_Color color{0, 0, 0, 255};
     text->render(renderer, buffer, 15, 20, color);
 }
 
