@@ -5,62 +5,59 @@ version: "1.0"
 cityId: "liberty_city"
 trackName: "prueba"
 author: "vboxuser"
-createdDate: "2025-11-10T13:31:13"
+createdDate: "2025-11-11T16:19:38"
 
 checkpoints:
   - x: 384
-    y: 97
+    y: 98
     order: 1
-  - x: 646
-    y: 97
+  - x: 649
+    y: 98
     order: 2
-  - x: 651
-    y: 305
+  - x: 650
+    y: 302
     order: 3
-  - x: 607
-    y: 530
+  - x: 601
+    y: 526
     order: 4
-  - x: 726
-    y: 531
+  - x: 724
+    y: 530
     order: 5
-  - x: 729
-    y: 305
+  - x: 728
+    y: 309
     order: 6
-  - x: 779
-    y: 103
+  - x: 911
+    y: 303
     order: 7
+  - x: 913
+    y: 104
+    order: 8
+  - x: 1101
+    y: 101
+    order: 9
 
 hints:
-  - x: 471.333
-    y: 97
+  - x: 516.5
+    y: 98
     rotation: 90
-  - x: 558.667
-    y: 97
-    rotation: 90
-  - x: 647.667
-    y: 166.333
-    rotation: 178.623
-  - x: 649.333
-    y: 235.667
-    rotation: 178.623
-  - x: 636.333
-    y: 380
-    rotation: 191.065
-  - x: 621.667
-    y: 455
-    rotation: 191.065
-  - x: 666.5
-    y: 530.5
-    rotation: 90.4815
-  - x: 727
-    y: 455.667
-    rotation: 0.760519
-  - x: 728
-    y: 380.333
-    rotation: 0.760519
-  - x: 745.667
-    y: 237.667
-    rotation: 13.9027
-  - x: 762.333
-    y: 170.333
-    rotation: 13.9027
+  - x: 649.5
+    y: 200
+    rotation: 179.719
+  - x: 625.5
+    y: 414
+    rotation: 192.339
+  - x: 662.5
+    y: 528
+    rotation: 91.8626
+  - x: 726
+    y: 419.5
+    rotation: 1.03691
+  - x: 819.5
+    y: 306
+    rotation: 88.1221
+  - x: 912
+    y: 203.5
+    rotation: 0.575818
+  - x: 1007
+    y: 102.5
+    rotation: 89.0858
