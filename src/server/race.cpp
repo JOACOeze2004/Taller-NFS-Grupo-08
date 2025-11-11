@@ -117,3 +117,10 @@ StateRunning Race::get_state(const int& id, const int& time_remaining) {
     return IN_GAME;
 }
 
+Checkpoint Race::get_checkpoint(const int id) const {
+    auto it = car_progress.find(id);
+    if (it == car_progress.end()){
+        return {0, 0, 0};
+    }
+    return track.checkpoints[it->second];
+}

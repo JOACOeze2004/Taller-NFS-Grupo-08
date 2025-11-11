@@ -32,6 +32,7 @@ public:
     void update_positions_order();
     int get_position(const int& id) const;
     StateRunning get_state(const int& id, const int& time_remaining);
+    Checkpoint get_checkpoint(int id) const;
 };
 
 
