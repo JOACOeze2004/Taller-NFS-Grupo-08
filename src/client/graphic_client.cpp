@@ -261,13 +261,13 @@ void GraphicClient::draw_state(int state) {
         return; 
     }
     
-    // Dibujar cuadrado transparente que cubre toda la pantalla
+
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, overlay_color.r, overlay_color.g, overlay_color.b, overlay_color.a);
     SDL_Rect fullscreen_rect = {0, 0, screen_width, screen_height};
     SDL_RenderFillRect(renderer, &fullscreen_rect);
     
-    // Dibujar texto encima del overlay
+
     SDL_Color text_color{255, 255, 255, 255};
     int text_x = (screen_width / 2) - 100; 
     int text_y = (screen_height / 2) - 25; 

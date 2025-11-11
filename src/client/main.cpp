@@ -29,17 +29,24 @@ int main(int argc, char *argv[]) try {
 
     QObject::connect(loginWindow, &LoginWindow::startButtonClicked, [&]() {
         playerConfig = loginWindow->getPlayerConfig();
-        startPressed = true;
-        loginWindow->close();
-        QApplication::quit();
+        try {
+            Client client(host, port);
+            client.send_config(playerConfig,loginWindow->getLobbyAction(), loginWindow->getSelectedGameId());
+            loginWindow->close();
+            client.run();
+            startPressed = true;
+            QApplication::quit();
+        } catch (const std::exception& e) {
+            QMessageBox::warning(loginWindow, "No existe esa partida", e.what());
+        }
+
     });
 
     loginWindow->show();
     QApplication::exec();
 
     if (startPressed) {
-        Client client(host, port);
-        client.run(playerConfig,loginWindow->getLobbyAction(), loginWindow->getSelectedGameId());
+
         auto results = new FinalResultsWindow();
         results->setMockResults();
         results->show();
