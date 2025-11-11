@@ -15,16 +15,9 @@ void HintGenerator::generateHintsForTrack(
         const QPointF& start = checkpoints[i].position;
         const QPointF& end = checkpoints[i + 1].position;
         
-        qreal distance = QLineF(start, end).length();
-        int numHints = static_cast<int>(distance / 100.0);
-        numHints = qMax(1, qMin(numHints, 5));
-        
-        std::vector<QPointF> points = interpolatePoints(start, end, numHints);
-        
-        for (const QPointF& point : points) {
-            qreal angle = calculateAngle(start, end);
-            hintManager->addHint(point, angle);
-        }
+        QPointF midPoint = (start + end) / 2.0;
+        qreal angle = calculateAngle(start, end);
+        hintManager->addHint(midPoint, angle);
     }
 }
 
