@@ -1,36 +1,36 @@
 cars_stats:
-  - id: 1
+  - id: 0
     mass: 20
     handling: 80
-    acceleration: 80
+    acceleration: 75
     braking: 20
-  - id: 2
-    mass: 20
+  - id: 1
+    mass: 25
     handling: 80
-    acceleration: 80
+    acceleration: 90
+    braking: 25
+  - id: 2
+    mass: 25
+    handling: 85
+    acceleration: 85
     braking: 20
   - id: 3
-    mass: 20
-    handling: 80
-    acceleration: 80
-    braking: 20
+    mass: 30
+    handling: 85
+    acceleration: 85
+    braking: 25
   - id: 4
-    mass: 20
-    handling: 80
-    acceleration: 80
-    braking: 20
+    mass: 30
+    handling: 90
+    acceleration: 90
+    braking: 25
   - id: 5
-    mass: 20
-    handling: 80
-    acceleration: 80
+    mass: 25
+    handling: 75
+    acceleration: 85
     braking: 20
   - id: 6
-    mass: 20
-    handling: 80
-    acceleration: 80
-    braking: 20
-  - id: 7
-    mass: 50
+    mass: 30
     handling: 120
-    acceleration: 80
+    acceleration: 83
     braking: 40
