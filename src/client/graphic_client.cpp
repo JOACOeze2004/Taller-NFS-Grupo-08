@@ -489,7 +489,7 @@ void GraphicClient::draw_cars() {
 
     for (const auto& [id, car_dto_world] : cars) {
         if (car_dto_world.x >= camera_x && car_dto_world.x <= camera_x + viewport_width &&
-            car_dto_world.y >= camera_y && car_dto_world.y <= camera_y + viewport_height) {
+            car_dto_world.y >= camera_y && car_dto_world.y <= camera_y + viewport_height && car_dto_world.state == IN_GAME) {
             
             CarDTO adjusted = car_dto_world;
             adjusted.x = (car_dto_world.x - camera_x) * ZOOM_FACTOR;
