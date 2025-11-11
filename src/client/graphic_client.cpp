@@ -201,7 +201,7 @@ void GraphicClient::draw(const Snapshot& snapshot) {
 
     draw_cars();
     
-    draw_minimap();
+    draw_minimap(snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
 
     
     if (player_car_id >= 0 && cars.find(player_car_id) != cars.end()) {
@@ -286,7 +286,7 @@ void GraphicClient::draw_nitro(bool nitro) {
 
 
 void GraphicClient::draw_position(int position, int total_cars) {
-    if (!text) return; // si no hay fuente, evitamos crash; se podría mantener stdout
+    if (!text) return;
     std::string msg = "Posición: " + std::to_string(position) + "/" + std::to_string(total_cars);
     SDL_Color color{255, 255, 255, 255};
     text->render(renderer, msg, 15, 45, color);
@@ -312,7 +312,7 @@ void GraphicClient::draw_speed(float speed) {
     text->render(renderer, buffer, 15, 20, color);
 }
 
-void GraphicClient::draw_minimap() {
+void GraphicClient::draw_minimap(const CheckpointCoords& checkpoint, int checkpoint_type, const HintCoords& hint) {
     if (!bg_texture) return;
 
     const float minimap_scale = 0.04f;  
@@ -372,6 +372,105 @@ void GraphicClient::draw_minimap() {
         }
     }
     
+    float checkpoint_minimap_x, checkpoint_minimap_y;
+    bool is_inside = (checkpoint.x >= src_rect.x && checkpoint.x <= src_rect.x + src_rect.w &&
+                        checkpoint.y >= src_rect.y && checkpoint.y <= src_rect.y + src_rect.h);
+    
+    if (is_inside) {
+        checkpoint_minimap_x = minimap_x + (checkpoint.x - src_rect.x) * scale;
+        checkpoint_minimap_y = minimap_y + (checkpoint.y - src_rect.y) * scale;
+    } else {
+        float center_x = player_car.x;
+        float center_y = player_car.y;
+        float dx = checkpoint.x - center_x;
+        float dy = checkpoint.y - center_y;
+        float distance = std::sqrt(dx * dx + dy * dy);
+        
+        if (distance > 0) {
+            dx /= distance;
+            dy /= distance;
+            checkpoint_minimap_x = minimap_x + minimap_width * 0.5f + dx * (minimap_width * 0.45f);
+            checkpoint_minimap_y = minimap_y + minimap_height * 0.5f + dy * (minimap_height * 0.45f);
+        } else {
+            checkpoint_minimap_x = minimap_x + minimap_width * 0.5f;
+            checkpoint_minimap_y = minimap_y + minimap_height * 0.5f;
+        }
+    }
+    
+    SDL_Color checkpoint_color;
+    switch (checkpoint_type) {
+        case 1: checkpoint_color = {0, 255, 0, 255}; break;   
+        case 2: checkpoint_color = {255, 255, 0, 255}; break; 
+        default: checkpoint_color = {255, 100, 0, 255}; break; 
+    }
+    
+    const float checkpoint_size = is_inside ? 10.0f : 8.0f;
+    SDL_FRect checkpoint_rect = {
+        checkpoint_minimap_x - checkpoint_size * 0.5f,
+        checkpoint_minimap_y - checkpoint_size * 0.5f,
+        checkpoint_size,
+        checkpoint_size
+    };
+    
+    SDL_SetRenderDrawColor(renderer, checkpoint_color.r, checkpoint_color.g, checkpoint_color.b, 255);
+    SDL_RenderFillRectF(renderer, &checkpoint_rect);
+    
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderDrawRectF(renderer, &checkpoint_rect);
+    
+    float hint_minimap_x, hint_minimap_y;
+    bool is_hint_inside = (hint.x >= src_rect.x && hint.x <= src_rect.x + src_rect.w &&
+                        hint.y >= src_rect.y && hint.y <= src_rect.y + src_rect.h);
+    
+    if (is_hint_inside) {
+        hint_minimap_x = minimap_x + (hint.x - src_rect.x) * scale;
+        hint_minimap_y = minimap_y + (hint.y - src_rect.y) * scale;
+    } else {
+        float center_x = player_car.x;
+        float center_y = player_car.y;
+        float dx = hint.x - center_x;
+        float dy = hint.y - center_y;
+        float distance = std::sqrt(dx * dx + dy * dy);
+        
+        if (distance > 0) {
+            dx /= distance;
+            dy /= distance;
+            
+            hint_minimap_x = minimap_x + minimap_width * 0.5f + dx * (minimap_width * 0.45f);
+            hint_minimap_y = minimap_y + minimap_height * 0.5f + dy * (minimap_height * 0.45f);
+        } else {
+            hint_minimap_x = minimap_x + minimap_width * 0.5f;
+            hint_minimap_y = minimap_y + minimap_height * 0.5f;
+        }
+    }
+    
+    const float arrow_size = is_inside ? 8.0f : 6.0f;
+    
+    float angle_rad = hint.angle + 180;
+    float cos_a = std::cos(angle_rad);
+    float sin_a = std::sin(angle_rad);
+    
+    SDL_FPoint tip = {
+        hint_minimap_x + cos_a * arrow_size,
+        hint_minimap_y + sin_a * arrow_size
+    };
+    
+    float base_offset = arrow_size * 0.6f;
+    SDL_FPoint base1 = {
+        hint_minimap_x - cos_a * arrow_size * 0.3f + sin_a * base_offset,
+        hint_minimap_y - sin_a * arrow_size * 0.3f - cos_a * base_offset
+    };
+    SDL_FPoint base2 = {
+        hint_minimap_x - cos_a * arrow_size * 0.3f - sin_a * base_offset,
+        hint_minimap_y - sin_a * arrow_size * 0.3f + cos_a * base_offset
+    };
+    
+    SDL_SetRenderDrawColor(renderer, 0, 200, 255, 255); 
+    SDL_RenderDrawLineF(renderer, tip.x, tip.y, base1.x, base1.y);
+    SDL_RenderDrawLineF(renderer, base1.x, base1.y, base2.x, base2.y);
+    SDL_RenderDrawLineF(renderer, base2.x, base2.y, tip.x, tip.y);
+    
+    SDL_RenderDrawLineF(renderer, tip.x, tip.y, hint_minimap_x, hint_minimap_y);
     
     SDL_FRect border_rect = {
         static_cast<float>(minimap_x), 
@@ -382,6 +481,7 @@ void GraphicClient::draw_minimap() {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderDrawRectF(renderer, &border_rect);
 }
+
 
 void GraphicClient::draw_cars() {
     const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;

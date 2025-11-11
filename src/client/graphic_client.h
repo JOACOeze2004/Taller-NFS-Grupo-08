@@ -37,7 +37,7 @@ class GraphicClient {
     void draw_car(const CarDTO& car, int car_id);
     void draw_cars();
     void draw_camera();
-    void draw_minimap();
+    void draw_minimap(const CheckpointCoords& checkpoint, int checkpoint_type, const HintCoords& hint);
     void update_camera();
     void set_player_car(int id);
     void draw_position(int position, int total_cars);
