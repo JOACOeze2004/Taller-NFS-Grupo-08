@@ -175,15 +175,6 @@ void LoginWindow::map_sellec(QLabel*& mapLabel) {
     styleCombo(mapSelector);
 }
 
-
-void LoginWindow::game_selector(QLabel*& gameLabel) {
-    gameLabel = new QLabel("Choose a game to join:");
-    gameLabel->setStyleSheet("color: #00eaff; font-size: 22px; font-weight: bold;");
-    gameSelector = new QComboBox();
-    gameSelector->addItem("No games available");
-    styleCombo(gameSelector);
-}
-
 void LoginWindow::updateGameList(const std::vector<std::string>& gameList) {
     gameSelector->clear();
 
@@ -251,11 +242,6 @@ LoginWindow::LoginWindow(QWidget *parent)
     gameIdInput->setPlaceholderText("Enter the game ID...");
     styleInput(gameIdInput);
     layout->addWidget(gameIdInput);
-
-    QLabel* gameLabel;
-    game_selector(gameLabel);
-    layout->addWidget(gameLabel);
-    layout->addWidget(gameSelector);
 
     layout->addWidget(joinGameButton, 0, Qt::AlignHCenter);
 
