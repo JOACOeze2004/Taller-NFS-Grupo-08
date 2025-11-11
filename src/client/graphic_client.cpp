@@ -44,7 +44,7 @@ GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initia
     if (TTF_Init() == -1) {
         std::cerr << "[CLIENT] Error inicializando SDL_ttf: " << TTF_GetError() << std::endl;
     } else {
-        const char* default_font_path = "../assets/fonts/DejaVuSans.ttf";
+        const char* default_font_path = "../assets/fonts/NFS.ttf";
         text = new TextRenderer();
         if (!text->load(default_font_path, 20) || !text->ok()) {
             std::cerr << "[CLIENT] Fuente no disponible, no se renderizará texto en pantalla." << std::endl;
