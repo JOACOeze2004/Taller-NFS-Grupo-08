@@ -6,9 +6,10 @@
 #include <QLineEdit>
 #include <QPainter>
 #include <QPushButton>
+#include <QGridLayout>
 #include <optional>
 #include "../../common/constants.h"
-#include <iostream> 
+#include <iostream>
 
 #include <qlabel.h>
 
@@ -16,6 +17,16 @@ struct PlayerConfig {
     std::string playerName;
     int carId;
     std::string mapName;
+};
+
+class CarButton : public QPushButton {
+    Q_OBJECT
+public:
+    CarButton(int carId, QWidget* parent = nullptr);
+    int getCarId() const { return carId; }
+
+private:
+    int carId;
 };
 
 class LoginWindow final: public QWidget {
@@ -51,7 +62,10 @@ private:
     QVBoxLayout *layout;
     QPixmap backgroundImage;
     QLineEdit* nameInput;
-    QComboBox* carSelector;
+    QWidget* carSelectorWidget;
+    QGridLayout* carGridLayout;
+    std::vector<CarButton*> carButtons;
+    int selectedCarIndex;
     QComboBox* mapSelector;
     QComboBox* gameSelector;
     QLabel* gameLabel;
@@ -59,9 +73,11 @@ private:
     QPushButton *createGameButton;
     QPushButton *joinGameButton;
     QLineEdit* gameIdInput;
-    
+
     uint8_t lobbyAction;
     std::string selectedGameId;
+
+    void selectCar(int carId);
 };
 
 #endif  // TALLER_TP_LOGIN_WINDOW_H
