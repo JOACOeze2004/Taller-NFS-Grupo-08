@@ -157,6 +157,7 @@ void Car::toggle_nitro_status(){
     }
     nitro_activated = true;
 }
+
 void Car::apply_nitro_force() {
     if (!nitro_activated){
         return;
@@ -166,16 +167,25 @@ void Car::apply_nitro_force() {
     float speed = b2Length(vel);
     float limit = max_speed * 3.0f;
 
+    float speed_factor = 1.0f; 
+    if (speed > 50.0f) {
+        speed_factor = 0.9f;
+    } else if (speed > 25.0f) {
+        speed_factor = 1.4f;
+    } else if (speed > 10.0f) {
+        speed_factor = 1.8f;
+    }
+
     if (speed < 1.0f) {
         b2Vec2 forward = b2Body_GetWorldVector(body_id, {1,0});
-        b2Vec2 boost = {forward.x * acceleration * 1.2f, forward.y * acceleration * 1.2f};
+        b2Vec2 boost = {forward.x * acceleration * 2.5f, forward.y * acceleration * 2.5f};
         b2Body_ApplyLinearImpulseToCenter(body_id, boost, true);
         return;
     }
 
     if (speed < limit) {
         b2Vec2 forward = b2Body_GetWorldVector(body_id, {1,0});
-        b2Vec2 force = {forward.x * acceleration * 1.5f, forward.y * acceleration * 1.5f};
+        b2Vec2 force = {forward.x * acceleration * speed_factor, forward.y * acceleration * speed_factor};
         b2Body_ApplyForceToCenter(body_id, force, true);
     }
 }
@@ -205,7 +215,7 @@ CarDTO Car::get_state() const {
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro);  //cambiar el car id y el under bridge para que funcione
+    return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME);  //cambiar el car id y el under bridge para que funcione
 }
 
 b2Vec2 Car::get_position() {
