@@ -137,7 +137,6 @@ Snapshot Gameloop::initialize_DTO() {
     dto.upgrade = NONE_UPGRADE;
     dto.upgradeable = false;
     dto.collision = NONE_COLLISION;
-    dto.type_checkpoint = REGULAR;
     dto.time_ms = get_time_remaining_ms();
     dto.lobby_cars = {};
 
@@ -157,6 +156,7 @@ void Gameloop::broadcast() {
         dto.checkpoint = race.get_checkpoint(id);
         dto.hint = race.get_hint(id);
         dto.position = race.get_position(id);
+        dto.type_checkpoint = race.get_cp_type(id);
         monitor.broadcast(dto,this->game_id, id);
     }
 
@@ -164,7 +164,7 @@ void Gameloop::broadcast() {
 
 void Gameloop::delete_deads() {
     for (auto& [id, car] : cars) {
-        if (car.is_dead()) {
+        if (car.is_dead() || race.car_finished(id)) {
             car.delete_from_map();
         }
     }

@@ -5,16 +5,29 @@
 Race::Race(const std::string& track_name, std::map<int, Car> *_cars) : track(parser.parse_tracks(track_name)), cars(_cars) {
     for (auto& [id, car] : *cars) {
         finished[id] = false;
-        car_progress[id] = 0;
+        car_next_cp[id] = 0;
+        car_next_hint[id] = 0;
     }
 }
 
 int Race::get_checkpoints(const int id) const {
-    auto it = car_progress.find(id);
-    if (it == car_progress.end()){
+    auto it = car_next_cp.find(id);
+    if (it == car_next_cp.end()){
         return 0;
     } 
     return it->second;
+}
+
+TypeCheckpoint Race::get_cp_type(const int& id) const {
+    int checkpoint = get_checkpoints(id);
+    if (checkpoint == 0) {
+        return FIRST;
+    }
+    if (checkpoint+1 >= static_cast<int>(track.checkpoints.size())) {
+        return FINAL;
+    }
+
+    return REGULAR;
 }
 
 int Race::get_position(const int& id) const {
@@ -68,7 +81,7 @@ void Race::update_positions_order() {
 
 void Race::update_checkpoints() {
     for (auto& [id, car] : *cars) {
-        int next_checkpoint = car_progress[id];
+        int next_checkpoint = car_next_cp[id];
         if (next_checkpoint >= static_cast<int>(track.checkpoints.size())) continue;
 
         const auto& cp = track.checkpoints[next_checkpoint];
@@ -80,13 +93,16 @@ void Race::update_checkpoints() {
         const float radius = 50.0f;
 
         if (dist2 <= radius * radius) {
-            car_progress[id]++;
+            if (next_checkpoint != 0) {
+                car_next_hint[id]++;
+            }
+            car_next_cp[id]++;
 
             std::cout << "Auto " << id
                       << " pasa por checkpoint " << cp.order
-                      << " (" << car_progress[id] << "/" << track.checkpoints.size() << ")" << std::endl;
+                      << " (" << car_next_cp[id] << "/" << track.checkpoints.size() << ")" << std::endl;
 
-            if (car_progress[id] == static_cast<int>(track.checkpoints.size())) {
+            if (car_next_cp[id] == static_cast<int>(track.checkpoints.size())) {
                 finished[id] = true;
                 std::cout << "Auto " << id << " completo la carrera" << std::endl;
             }
@@ -94,7 +110,7 @@ void Race::update_checkpoints() {
     }
 }
 
-bool Race::car_dead(const int& id) {
+bool Race::car_dead(const int& id) const {
     auto it = cars->find(id);
     return it->second.is_dead();
 }
@@ -117,22 +133,16 @@ StateRunning Race::get_state(const int& id, const int& time_remaining) {
     return IN_GAME;
 }
 
-CheckpointCoords Race::get_checkpoint(const int id) const {
-    auto it = car_progress.find(id);
-    if (it == car_progress.end()){
-        return {0, 0};
-    }
-    Checkpoint checkpoint = track.checkpoints[it->second];
+CheckpointCoords Race::get_checkpoint(const int& id) const {
+    const int next_cp = car_next_cp.find(id)->second;
+    const Checkpoint checkpoint = track.checkpoints[next_cp];
     const CheckpointCoords cp = {checkpoint.x, checkpoint.y};
     return cp;
 }
 
-HintCoords Race::get_hint(const int id) const {
-    auto it = car_progress.find(id);
-    if (it == car_progress.end()){
-        return {0, 0, 0};
-    }
-    auto [x, y, rotation] = track.hints[it->second];
+HintCoords Race::get_hint(const int& id) const {
+    const int next_hint = car_next_hint.find(id)->second;
+    auto [x, y, rotation] = track.hints[next_hint];
     const HintCoords hint = {x, y, rotation};
     return hint;
 }
