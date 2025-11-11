@@ -96,6 +96,7 @@ void Car::update_from_dto(const CarDTO& state) {
     velocity = state.velocity;
     life = state.life;
     nitro = state.nitro;
+    nitro_remaining = state.remaining_nitro;
 
 }
 
@@ -104,6 +105,7 @@ void Car::render() {
         renderNitro();
         renderTexture();
         renderLife();
+        renderNitroBar();
     } else {
         renderFallback();
     }
@@ -223,4 +225,27 @@ void Car::renderLife() {
         
         SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
         SDL_RenderFillRect(renderer, &lifeBarFg);
+}
+
+void Car::renderNitroBar() {
+    std::cout << nitro_remaining << std::endl;
+    float nitro_real = nitro_remaining/5.00;
+
+    SDL_Rect nitroBg;
+    nitroBg.x = static_cast<int>(x - 25);
+    nitroBg.y = static_cast<int>(y - 30);
+    nitroBg.w = 50;
+    nitroBg.h = 5;
+
+    SDL_SetRenderDrawColor(renderer, 40, 40, 60, 255);
+    SDL_RenderFillRect(renderer, &nitroBg);
+
+    SDL_Rect nitroFg;
+    nitroFg.x = nitroBg.x;
+    nitroFg.y = nitroBg.y;
+    nitroFg.w = static_cast<int>(50 * nitro_real / 100.0f);
+    nitroFg.h = 5;
+
+    SDL_SetRenderDrawColor(renderer, 0, 150, 255, 255);
+    SDL_RenderFillRect(renderer, &nitroFg);
 }

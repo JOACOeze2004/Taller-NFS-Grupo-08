@@ -23,6 +23,7 @@ private:
     float angle;
     float velocity;
     float nitro;
+    float nitro_remaining; // porcentaje 0..100 (o 0..1 si así viene)
     int life;
     float render_scale;  
     
@@ -38,6 +39,7 @@ private:
     void renderDirectionIndicator();
     void renderNitro();
     void renderLife();
+    void renderNitroBar();
 };
 
 #endif // CAR_H
