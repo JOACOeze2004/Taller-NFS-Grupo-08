@@ -13,6 +13,7 @@ class GraphicClient {
     SDL_Texture* bg_texture;
     SDL_Texture* checkpoint_texture;
     SDL_Texture* hint_texture;
+    SDL_Texture* speedometer_texture;
     SDL_Window* window;
     std::unordered_map<int, CarDTO> cars;
     std::unordered_map<int, std::unique_ptr<Car>> car_objects;
@@ -42,6 +43,7 @@ class GraphicClient {
     void draw_position(int position, int total_cars);
     void draw_time(int time_ms);
     void draw_speed(float speed);
+    void draw_speedometer(float speed);
     void draw_life(int life);
     void draw_checkpoint(CheckpointCoords checkpoint, int type);
     void draw_hint(HintCoords hint);

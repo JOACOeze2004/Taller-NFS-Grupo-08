@@ -23,7 +23,7 @@ private:
     float angle;
     float velocity;
     float nitro;
-    float nitro_remaining; // porcentaje 0..100 (o 0..1 si así viene)
+    float nitro_remaining;
     int life;
     float render_scale;  
     

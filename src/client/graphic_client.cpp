@@ -11,7 +11,7 @@
 constexpr float ZOOM_FACTOR = 2.0f;
 
 GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot)
-        : renderer(nullptr), bg_texture(nullptr), window(nullptr), 
+        : renderer(nullptr), bg_texture(nullptr), window(nullptr),
             player_car_id(-1), camera_x(0.0f), camera_y(0.0f), 
             screen_width(1200), screen_height(900), text(nullptr) {
 
@@ -46,7 +46,7 @@ GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initia
     } else {
         const char* default_font_path = "../assets/fonts/DejaVuSans.ttf";
         text = new TextRenderer();
-        if (!text->load(default_font_path, 35) || !text->ok()) {
+        if (!text->load(default_font_path, 20) || !text->ok()) {
             std::cerr << "[CLIENT] Fuente no disponible, no se renderizará texto en pantalla." << std::endl;
             delete text;
             text = nullptr;
@@ -74,6 +74,19 @@ GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initia
             std::cerr << "[CLIENT] Error creando textura de hint: " << SDL_GetError() << std::endl;
         }
     }
+
+    SDL_Surface* speedometer_surface = IMG_Load("../assets/need-for-speed/sprits/Speedmeter.png");
+    if (!speedometer_surface) {
+        std::cerr << "[CLIENT] Error cargando textura de speedometer: " << SDL_GetError() << std::endl;
+    } else {
+        speedometer_texture = SDL_CreateTextureFromSurface(renderer, speedometer_surface);
+        SDL_FreeSurface(speedometer_surface);
+        if (!speedometer_texture) {
+            std::cerr << "[CLIENT] Error creando textura de speedometer: " << SDL_GetError() << std::endl;
+        }
+    }
+
+
 
     SDL_Surface* bg_surface = IMG_Load(map_path.c_str());
 
@@ -216,12 +229,12 @@ void GraphicClient::draw(const Snapshot& snapshot) {
 
     draw_camera();
 
-    draw_cars();
     
     draw_minimap(snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
 
     if (player_car_id >= 0 && cars.find(player_car_id) != cars.end()) {
         draw_speed(cars[player_car_id].velocity);
+        draw_speedometer(cars[player_car_id].velocity);
         draw_position(snapshot.position, snapshot.cars.size());
         draw_time(snapshot.time_ms);
         draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint);
@@ -239,6 +252,8 @@ void GraphicClient::draw(const Snapshot& snapshot) {
         }
         draw_state(player_it->second.state);
     }
+
+    draw_cars();
 
     SDL_RenderPresent(renderer);
 } 
@@ -333,7 +348,7 @@ void GraphicClient::draw_hint(HintCoords hint) {
 void GraphicClient::draw_position(int position, int total_cars) {
     if (!text) return;
     std::string msg = "POSITION: " + std::to_string(position) + " / " + std::to_string(total_cars);
-    SDL_Color color{0, 0, 0, 255};
+    SDL_Color color{255, 255, 255, 255};
     text->render(renderer, msg, 500, 30, color);
 }
 
@@ -345,7 +360,7 @@ void GraphicClient::draw_time(int time_ms) {
     int milliseconds = time_ms % 1000;
     char buffer[64];
     std::snprintf(buffer, sizeof(buffer), "TIME: %02d:%02d.%03d", minutes, seconds, milliseconds);
-    SDL_Color color{0, 0, 0, 255};
+    SDL_Color color{255, 255, 255, 255};
     text->render(renderer, buffer, 500, 100, color);
 }
 
@@ -355,6 +370,21 @@ void GraphicClient::draw_speed(float speed) {
     std::snprintf(buffer, sizeof(buffer), "SPEED: %.1f KM/H", speed);
     SDL_Color color{0, 0, 0, 255};
     text->render(renderer, buffer, 15, 20, color);
+}
+
+void GraphicClient::draw_speedometer(float speed) {
+    if (!speedometer_texture) return;
+    SDL_Rect src_rect = {40, 70, 530, 240};
+    SDL_Rect dst_rect = {75, screen_height - 175, 265, 140};
+    SDL_RenderCopy(renderer, speedometer_texture, &src_rect, &dst_rect);
+
+
+    SDL_Rect src_rect_needle = {270, 235, 61, 200};
+    float angle = (speed / 400.0f) * 180.0f - 90.0f;
+    SDL_FPoint center = {30.5f, 180.0f};
+    SDL_FRect dst_rect_needle = {160, screen_height - 225.0f, 60.0f, 200.0f};
+    SDL_RenderCopyExF(renderer, speedometer_texture, &src_rect_needle, &dst_rect_needle, angle, &center, SDL_FLIP_NONE);
+
 }
 
 void GraphicClient::draw_minimap(const CheckpointCoords& checkpoint, int checkpoint_type, const HintCoords& hint) {
@@ -556,6 +586,9 @@ void GraphicClient::draw_cars() {
 GraphicClient::~GraphicClient() {
     if (bg_texture) {
         SDL_DestroyTexture(bg_texture);
+    }
+    if (speedometer_texture) {
+        SDL_DestroyTexture(speedometer_texture);
     }
     if (renderer) {
         SDL_DestroyRenderer(renderer);
