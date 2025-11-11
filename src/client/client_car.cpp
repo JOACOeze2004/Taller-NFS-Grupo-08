@@ -228,12 +228,11 @@ void Car::renderLife() {
 }
 
 void Car::renderNitroBar() {
-    std::cout << nitro_remaining << std::endl;
     float nitro_real = nitro_remaining/5.00;
 
     SDL_Rect nitroBg;
     nitroBg.x = static_cast<int>(x - 25);
-    nitroBg.y = static_cast<int>(y - 30);
+    nitroBg.y = static_cast<int>(y - 35);
     nitroBg.w = 50;
     nitroBg.h = 5;
 

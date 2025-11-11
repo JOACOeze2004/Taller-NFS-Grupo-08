@@ -43,7 +43,6 @@ class GraphicClient {
     void draw_time(int time_ms);
     void draw_speed(float speed);
     void draw_life(int life);
-    void draw_nitro(bool nitro);
     void draw_checkpoint(CheckpointCoords checkpoint, int type);
     void draw_hint(HintCoords hint);
     void draw_game_id(int id);

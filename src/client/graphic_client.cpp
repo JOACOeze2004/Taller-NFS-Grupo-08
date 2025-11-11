@@ -224,7 +224,6 @@ void GraphicClient::draw(const Snapshot& snapshot) {
         draw_speed(cars[player_car_id].velocity);
         draw_position(snapshot.position, snapshot.cars.size());
         draw_time(snapshot.time_ms);
-        draw_nitro(cars[player_car_id].nitro);
         draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint);
         draw_hint(snapshot.hint);
     }
@@ -332,12 +331,7 @@ void GraphicClient::draw_hint(HintCoords hint) {
 
 }
 
-void GraphicClient::draw_nitro(bool nitro) {
-    if (!text) return; 
-    std::string msg = "Nitro: " + std::string(nitro ? "ON" : "OFF");
-    SDL_Color color{255, 255, 255, 255};
-    text->render(renderer, msg, 15, 95, color);
-}
+
 
 
 void GraphicClient::draw_position(int position, int total_cars) {
