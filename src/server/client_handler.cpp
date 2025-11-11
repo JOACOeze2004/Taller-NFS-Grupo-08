@@ -99,7 +99,9 @@ void ClientHandler::send_state(Snapshot snapshot) {
 
 void ClientHandler::kill() {
     stop();
-
+    if (!receiver){
+        return;
+    }    
     receiver->stop();
     sender.stop();
     client_queue.close();
