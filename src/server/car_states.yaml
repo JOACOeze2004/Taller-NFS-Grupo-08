@@ -32,5 +32,5 @@ cars_stats:
   - id: 6
     mass: 30
     handling: 120
-    acceleration: 83
-    braking: 40
+    acceleration: 85
+    braking: 30

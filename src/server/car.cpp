@@ -45,8 +45,17 @@ void Car::accelerate() {
 }
 
 void Car::brake() {
-    b2Vec2 vel = b2Body_GetWorldVector(body_id, {1,0});
-    b2Vec2 brake = {-vel.x * braking, -vel.y * braking};
+    b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
+    b2Vec2 vec = b2Body_GetWorldVector(body_id, {1, 0});
+    float speed = b2Dot(vel, vec);
+    b2Vec2 brake;
+
+    if (speed < 0) {
+        brake = {-vec.x * braking * 2, -vec.y * braking * 2};
+    }else{
+        brake = {-vec.x * braking, -vec.y * braking};
+    }
+
     b2Body_ApplyForceToCenter(body_id, brake, true);
     apply_friction();
 }
