@@ -10,30 +10,40 @@
 #include "graphic_client.h"
 
 Client::Client(const std::string& host, const std::string& port)
-    : host(host), port(port), client_socket(host.c_str(), port.c_str()) {}
+    : host(host), port(port), client_socket(host.c_str(), port.c_str()), protocol(client_socket) {}
 
-void Client::run(const PlayerConfig& config,uint8_t lobby_action, const std::string& game_id) {
+void Client::send_config(const PlayerConfig& config,uint8_t lobby_action, const std::string& game_id) {
     std::cout << "[CLIENT] Connected to " << host << ":" << port << std::endl;
 
-    ClientProtocol protocol(client_socket);
-
     try {
-        protocol.send_player_config(config.playerName, config.carId, config.mapName);        
+        protocol.send_player_config(config.playerName, config.carId, config.mapName);
         protocol.send_lobby_action(lobby_action, game_id);
-        
+
         uint8_t response = protocol.receive_byte();
 
         if (response == SEND_ERROR_MESSAGE) {
             std::string error_msg = protocol.receive_error_message();
-            throw std::runtime_error(error_msg); 
+            throw std::runtime_error(error_msg);
         }
         if (lobby_action == SEND_CREATE_GAME){
             std::cout << "[CLIENT] Waiting for other player to start: " << std::endl;
-        }        
+        }
     } catch (const std::exception& e) {
         std::cerr << "[CLIENT] Error sending config: " << e.what() << std::endl;
-        return;
+        throw;
     }
+
+}
+
+void Client::wait_lobby() {
+    Snapshot snapshot;
+    snapshot.state = LOBBY;
+    while (snapshot.state == LOBBY) {
+        protocol.recive_lobby_state();
+    }
+}
+
+void Client::run() {
 
     std::string map_path;
     float spawn_x, spawn_y;

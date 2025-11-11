@@ -1,16 +1,20 @@
+#include <QApplication>
+#include <QMessageBox>
+#include <QWidget>
+#include <exception>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <exception>
-#include <SDL2pp/SDL2pp.hh>
+
 #include <SDL2/SDL.h>
-#include "client.h"
+#include <SDL2pp/SDL2pp.hh>
+
 #include "../common/constants.h"
-#include "login/login_window.h"
-#include <QApplication>
-#include <QWidget>
 #include "final_results/final_results_windows.h"
-#include <QMessageBox>
+#include "lobby/lobby_window.h"
+#include "login/login_window.h"
+
+#include "client.h"
 
 using namespace SDL2pp;
 
@@ -24,22 +28,35 @@ int main(int argc, char *argv[]) try {
 
     const QApplication app(argc, argv);
     const auto loginWindow = new LoginWindow();
+    const auto lobbyWindow = new LobbyWindow();
     bool startPressed = false;
     PlayerConfig playerConfig;
 
     QObject::connect(loginWindow, &LoginWindow::startButtonClicked, [&]() {
         playerConfig = loginWindow->getPlayerConfig();
-        startPressed = true;
-        loginWindow->close();
-        QApplication::quit();
+        try {
+            Client client(host, port);
+            client.send_config(playerConfig,loginWindow->getLobbyAction(), loginWindow->getSelectedGameId());
+            loginWindow->close();
+            if (loginWindow->getLobbyAction() == SEND_CREATE_GAME) {
+                lobbyWindow->show();
+                client.wait_lobby();
+                lobbyWindow->close();
+            }
+            client.run();
+            startPressed = true;
+            QApplication::quit();
+        } catch (const std::exception& e) {
+            QMessageBox::warning(loginWindow, "No existe esa partida", e.what());
+        }
+
     });
 
     loginWindow->show();
     QApplication::exec();
 
     if (startPressed) {
-        Client client(host, port);
-        client.run(playerConfig,loginWindow->getLobbyAction(), loginWindow->getSelectedGameId());
+
         auto results = new FinalResultsWindow();
         results->setMockResults();
         results->show();
