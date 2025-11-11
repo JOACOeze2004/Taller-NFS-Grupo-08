@@ -53,6 +53,28 @@ GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initia
         }
     } //pasarlo al constructor del text render
 
+    SDL_Surface* checkpoint_surface = IMG_Load("../assets/need-for-speed/sprits/checkpoints.png");
+    if (!checkpoint_surface) {
+        std::cerr << "[CLIENT] Error cargando textura de checkpoint: " << SDL_GetError() << std::endl;
+    } else {
+        checkpoint_texture = SDL_CreateTextureFromSurface(renderer, checkpoint_surface);
+        SDL_FreeSurface(checkpoint_surface);
+        if (!checkpoint_texture) {
+            std::cerr << "[CLIENT] Error creando textura de checkpoint: " << SDL_GetError() << std::endl;
+        }
+    }
+
+    SDL_Surface* hint_surface = IMG_Load("../assets/need-for-speed/sprits/Hints.png");
+    if (!hint_surface) {
+        std::cerr << "[CLIENT] Error cargando textura de hint: " << SDL_GetError() << std::endl;
+    } else {
+        hint_texture = SDL_CreateTextureFromSurface(renderer, hint_surface);
+        SDL_FreeSurface(hint_surface);
+        if (!hint_texture) {
+            std::cerr << "[CLIENT] Error creando textura de hint: " << SDL_GetError() << std::endl;
+        }
+    }
+
     SDL_Surface* bg_surface = IMG_Load(map_path.c_str());
 
     if (!bg_surface) {
@@ -188,20 +210,72 @@ void GraphicClient::draw(const Snapshot& snapshot) {
         draw_time(snapshot.time_ms);
         draw_nitro(cars[player_car_id].nitro);
     }
+
+    draw_id_partida(snapshot.id);
     
-    /* draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint);
+    draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint);
 
-    draw_hint(snapshot.hint); */
-
+    draw_hint(snapshot.hint);
 
     SDL_RenderPresent(renderer);
 } 
 
-/* void GraphicClient::draw_checkpoint(const Checkpoint& checkpoint, int type) {
-    SDL_Rect dst_rect = {checkpoint.x, checkpoint.y, 20, 20};
-    SDL_Color color = (type == 1) ? SDL_Color{0, 255, 0, 255} : SDL_Color{255, 0, 0, 255};
-    SDL_RenderFillRect(renderer, &dst_rect);
-} */
+void GraphicClient::draw_id_partida(int id) {
+    if (!text) return; 
+    std::string msg = "ID Partida: " + std::to_string(id);
+    SDL_Color color{255, 0, 0, 255};
+    text->render(renderer, msg, screen_width - 150, 200, color);
+}
+
+void GraphicClient::draw_checkpoint(CheckpointCoords checkpoint, int type) {
+    if (!checkpoint_texture) return;
+
+    const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
+    const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
+
+    if (checkpoint.x >= camera_x && checkpoint.x <= camera_x + viewport_width &&
+        checkpoint.y >= camera_y && checkpoint.y <= camera_y + viewport_height) {
+        
+        float screen_x = (checkpoint.x - camera_x) * ZOOM_FACTOR;
+        float screen_y = (checkpoint.y - camera_y) * ZOOM_FACTOR;
+
+        const float dst_w = 40.0f;
+        const float dst_h = 60.0f;
+        SDL_FRect dst_rect = {screen_x - dst_w * 0.5f, screen_y - dst_h * 0.5f, dst_w, dst_h};
+
+        if (type == 1){
+            SDL_Rect src_rect = {290, 650, 95, 120};
+            SDL_RenderCopyF(renderer, checkpoint_texture, &src_rect, &dst_rect);
+        }else if (type == 2){
+            SDL_Rect src_rect = {410, 20, 90, 127};
+            SDL_RenderCopyF(renderer, checkpoint_texture, &src_rect, &dst_rect);
+        } else {
+            SDL_Rect src_rect = {290, 175, 95, 120};
+            SDL_RenderCopyF(renderer, checkpoint_texture, &src_rect, &dst_rect);
+        }
+    }    
+} 
+
+void GraphicClient::draw_hint(HintCoords hint) {
+    if (!hint_texture) return;
+    const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
+    const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
+    if (hint.x >= camera_x && hint.x <= camera_x + viewport_width &&
+        hint.y >= camera_y && hint.y <= camera_y + viewport_height) {
+        
+        float screen_x = (hint.x - camera_x) * ZOOM_FACTOR;
+        float screen_y = (hint.y - camera_y) * ZOOM_FACTOR;
+
+        SDL_Rect src_rect = {260, 20, 120, 150};
+        SDL_FRect dst_rect = {screen_x, screen_y, 30.0f, 45.0f};
+
+        double angle_deg = hint.angle + 180;
+        SDL_FPoint center = {15.0f, 15.0f}; 
+                    
+        SDL_RenderCopyExF(renderer, hint_texture, &src_rect, &dst_rect, angle_deg, &center, SDL_FLIP_NONE);
+    }
+
+}
 
 void GraphicClient::draw_nitro(bool nitro) {
     if (!text) return; 
@@ -362,6 +436,9 @@ GraphicClient::~GraphicClient() {
     }
     if (TTF_WasInit()) {
         TTF_Quit();
+    }
+    if (checkpoint_texture) {
+        SDL_DestroyTexture(checkpoint_texture);
     }
     IMG_Quit();
     SDL_Quit();

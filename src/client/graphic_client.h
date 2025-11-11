@@ -11,6 +11,8 @@
 class GraphicClient {
     SDL_Renderer* renderer;
     SDL_Texture* bg_texture;
+    SDL_Texture* checkpoint_texture;
+    SDL_Texture* hint_texture;
     SDL_Window* window;
     std::unordered_map<int, CarDTO> cars;
     std::unordered_map<int, std::unique_ptr<Car>> car_objects;
@@ -19,7 +21,8 @@ class GraphicClient {
     float camera_x, camera_y;
     int screen_width, screen_height;
     float map_width, map_height;
-    TextRenderer* text; 
+    TextRenderer* text;
+
     
 
     public:
@@ -42,6 +45,9 @@ class GraphicClient {
     void draw_speed(float speed);
     void draw_life(int life);
     void draw_nitro(bool nitro);
+    void draw_checkpoint(CheckpointCoords checkpoint, int type);
+    void draw_hint(HintCoords hint);
+    void draw_id_partida(int id);
 };
 
 
