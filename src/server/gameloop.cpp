@@ -3,6 +3,7 @@
 #include "src/common/DTO.h"
 #include "src/common/constants.h"
 #include "GameFullException.h"
+#include <sstream>
 
 
 Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_name):
@@ -130,6 +131,7 @@ void Gameloop::update_positions() {
 
 Snapshot Gameloop::initialize_DTO() {
     Snapshot dto;
+    dto.game_id =std::stoi(this->game_id);
     dto.cars_count = static_cast<int>(cars.size());
     dto.map = current_map;
     dto.upgrade = NONE_UPGRADE;

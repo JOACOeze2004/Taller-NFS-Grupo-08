@@ -90,6 +90,8 @@ void ServerProtocol::send_game_state(const Snapshot& snapshot) {
         send_car_state(car); 
     }
 
+    protocol.send_byte(static_cast<uint8_t>(snapshot.game_id));
+
     protocol.send_byte(static_cast<uint8_t>(snapshot.position));
 
     protocol.send_byte(static_cast<uint8_t>(snapshot.map));

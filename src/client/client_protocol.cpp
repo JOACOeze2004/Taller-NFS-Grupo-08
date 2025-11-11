@@ -100,6 +100,8 @@ Snapshot ClientProtocol::receive_game_state() const {
         snapshot.cars[car_id] = car;
     }
 
+    snapshot.game_id = protocol.receive_byte();
+
     snapshot.position = protocol.receive_byte();
     
     snapshot.cars_count = cars_count;

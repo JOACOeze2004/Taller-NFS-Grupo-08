@@ -211,7 +211,7 @@ void GraphicClient::draw(const Snapshot& snapshot) {
         draw_nitro(cars[player_car_id].nitro);
     }
 
-    draw_id_partida(snapshot.id);
+    draw_game_id(snapshot.game_id);
     
     draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint);
 
@@ -220,9 +220,9 @@ void GraphicClient::draw(const Snapshot& snapshot) {
     SDL_RenderPresent(renderer);
 } 
 
-void GraphicClient::draw_id_partida(int id) {
+void GraphicClient::draw_game_id(int id) {
     if (!text) return; 
-    std::string msg = "ID Partida: " + std::to_string(id);
+    std::string msg = "GAME ID: " + std::to_string(id);
     SDL_Color color{255, 0, 0, 255};
     text->render(renderer, msg, screen_width - 150, 200, color);
 }

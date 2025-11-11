@@ -47,7 +47,7 @@ class GraphicClient {
     void draw_nitro(bool nitro);
     void draw_checkpoint(CheckpointCoords checkpoint, int type);
     void draw_hint(HintCoords hint);
-    void draw_id_partida(int id);
+    void draw_game_id(int id);
 };
 
 
