@@ -12,6 +12,7 @@ void ServerProtocol::send_car_state(const CarDTO& car){
     protocol.send_float(car.y);
     protocol.send_float(car.velocity);
     protocol.send_float(car.angle);
+    protocol.send_big_endian_32(car.car_id);
 
     //protocol.send_bool(car.under_bridge); VER SI QUEDA O SE VA
 

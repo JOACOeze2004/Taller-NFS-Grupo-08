@@ -10,6 +10,7 @@ CarDTO ClientProtocol::receive_car_state() const {
     car.y = protocol.receive_float();
     car.velocity = protocol.receive_float();
     car.angle = protocol.receive_float();
+    car.car_id = protocol.receive_big_endian_32();
 
     //protocol.receive_bool(car.under_bridge); VER SI QUEDA O SE VA
 
