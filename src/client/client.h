@@ -14,6 +14,7 @@ public:
     Client(const std::string& host, const std::string& port);
     void run();
     void send_config(const PlayerConfig& config,uint8_t lobby_action, const std::string& game_id);
+    void wait_lobby();
 
 private:
     std::string host;

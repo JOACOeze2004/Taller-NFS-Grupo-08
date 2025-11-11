@@ -35,6 +35,14 @@ void Client::send_config(const PlayerConfig& config,uint8_t lobby_action, const 
 
 }
 
+void Client::wait_lobby() {
+    Snapshot snapshot;
+    snapshot.state = LOBBY;
+    while (snapshot.state == LOBBY) {
+        protocol.recive_lobby_state();
+    }
+}
+
 void Client::run() {
 
     std::string map_path;
