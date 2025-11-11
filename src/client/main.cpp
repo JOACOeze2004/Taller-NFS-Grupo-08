@@ -28,7 +28,6 @@ int main(int argc, char *argv[]) try {
 
     const QApplication app(argc, argv);
     const auto loginWindow = new LoginWindow();
-    const auto lobbyWindow = new LobbyWindow();
     bool startPressed = false;
     PlayerConfig playerConfig;
 
@@ -38,11 +37,6 @@ int main(int argc, char *argv[]) try {
             Client client(host, port);
             client.send_config(playerConfig,loginWindow->getLobbyAction(), loginWindow->getSelectedGameId());
             loginWindow->close();
-            if (loginWindow->getLobbyAction() == SEND_CREATE_GAME) {
-                lobbyWindow->show();
-                client.wait_lobby();
-                lobbyWindow->close();
-            }
             client.run();
             startPressed = true;
             QApplication::quit();
