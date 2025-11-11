@@ -23,7 +23,7 @@ class GraphicClient {
     float map_width, map_height;
     TextRenderer* text;
 
-    
+    int camera_id;
 
     public:
     explicit GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot);
@@ -34,7 +34,6 @@ class GraphicClient {
     
     private:
     void clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dto);
-    void draw_car(const CarDTO& car, int car_id);
     void draw_cars();
     void draw_camera();
     void draw_minimap(const CheckpointCoords& checkpoint, int checkpoint_type, const HintCoords& hint);

@@ -97,11 +97,28 @@ GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initia
         update_car(id, car_state);
     }
     set_player_car(initial_snapshot.id);
+    camera_id = initial_snapshot.id;
 
     update_camera();
     
     draw(initial_snapshot);
 }
+
+/* void GraphicClient::update_from_snapshot(const Snapshot& snapshot) {
+    
+    update_camera();
+
+    clear_cars(snapshot.cars);
+    
+    auto player_it = snapshot.cars.find(player_car_id);
+    if (player_it != snapshot.cars.end() && player_it->second.state != IN_GAME) {
+        for (const auto& [id, car_state] : snapshot.cars) {
+            if (car_state.state == IN_GAME && id != player_car_id) {
+               camera_id = id;
+            }
+        }
+    }
+} */
 
 void GraphicClient::set_player_car(int id) { 
     player_car_id = id;
@@ -110,16 +127,16 @@ void GraphicClient::set_player_car(int id) {
 void GraphicClient::update_car(int id, const CarDTO& car_state) {
     cars[id] = car_state;
     if (car_objects.find(id) == car_objects.end()) {
-        car_objects[id] = std::make_unique<Car>(0.0f, 0.0f, 0.0f, renderer, id, ZOOM_FACTOR);
+        car_objects[id] = std::make_unique<Car>(0.0f, 0.0f, 0.0f, renderer, car_state.car_id, ZOOM_FACTOR);
     }
 }
 
 void GraphicClient::update_camera() {
-    if (player_car_id < 0 || cars.find(player_car_id) == cars.end()) {
+    if (camera_id < 0 || cars.find(camera_id) == cars.end()) {
         return;
     }
 
-    const CarDTO& player_car = cars[player_car_id];
+    const CarDTO& player_car = cars[camera_id];
 
     camera_x = (player_car.x - static_cast<float>(screen_width) / (2.0f * ZOOM_FACTOR));
     camera_y = (player_car.y - static_cast<float>(screen_height) / (2.0f * ZOOM_FACTOR));
@@ -203,19 +220,26 @@ void GraphicClient::draw(const Snapshot& snapshot) {
     
     draw_minimap(snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
 
-    
     if (player_car_id >= 0 && cars.find(player_car_id) != cars.end()) {
         draw_speed(cars[player_car_id].velocity);
         draw_position(snapshot.position, snapshot.cars.size());
         draw_time(snapshot.time_ms);
         draw_nitro(cars[player_car_id].nitro);
+        draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint);
+        draw_hint(snapshot.hint);
     }
 
     draw_game_id(snapshot.game_id);
     
-    draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint);
+    auto player_it = snapshot.cars.find(player_car_id);
+    if (player_it != snapshot.cars.end() && player_it->second.state != IN_GAME) {
+        for (const auto& [id, car_state] : snapshot.cars) {
+            if (car_state.state == IN_GAME && id != player_car_id) {
+               camera_id = id;
+            }
+        }
+    }
 
-    draw_hint(snapshot.hint);
 
     SDL_RenderPresent(renderer);
 } 
@@ -356,7 +380,7 @@ void GraphicClient::draw_minimap(const CheckpointCoords& checkpoint, int checkpo
 
     for (const auto& [id, car] : cars) {
         if (car.x >= src_rect.x && car.x <= src_rect.x + src_rect.w &&
-            car.y >= src_rect.y && car.y <= src_rect.y + src_rect.h) {
+            car.y >= src_rect.y && car.y <= src_rect.y + src_rect.h && car.state == IN_GAME) {
             
             float car_minimap_x = minimap_x + (car.x - src_rect.x) * scale - 3.0f;
             float car_minimap_y = minimap_y + (car.y - src_rect.y) * scale - 3.0f;
@@ -497,7 +521,8 @@ void GraphicClient::draw_cars() {
 
             auto it = car_objects.find(id);
             if (it == car_objects.end()) {
-                car_objects[id] = std::make_unique<Car>(adjusted.x, adjusted.y, adjusted.angle, renderer, id, ZOOM_FACTOR);
+                std::cout << "Creating new car object for car_id: " << car_dto_world.car_id << std::endl;
+                car_objects[id] = std::make_unique<Car>(adjusted.x, adjusted.y, adjusted.angle, renderer, car_dto_world.car_id, ZOOM_FACTOR);
                 it = car_objects.find(id);
             }
             Car* car_obj = it->second.get();
@@ -505,19 +530,6 @@ void GraphicClient::draw_cars() {
             car_obj->render();
         }
     }
-}
-
-void GraphicClient::draw_car(const CarDTO& car, int car_id) {
-    CarDTO adjusted_car = car;
-    adjusted_car.x = (car.x - camera_x) * ZOOM_FACTOR;
-    adjusted_car.y = (car.y - camera_y) * ZOOM_FACTOR;
-    auto it = car_objects.find(car_id);
-    if (it == car_objects.end()) {
-        car_objects[car_id] = std::make_unique<Car>(adjusted_car.x, adjusted_car.y, adjusted_car.angle, renderer, car_id, ZOOM_FACTOR);
-        it = car_objects.find(car_id);
-    }
-    it->second->update_from_dto(adjusted_car);
-    it->second->render();
 }
 
 GraphicClient::~GraphicClient() {
