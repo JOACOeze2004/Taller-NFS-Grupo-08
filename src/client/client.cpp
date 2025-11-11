@@ -57,15 +57,6 @@ void Client::run(const PlayerConfig& config,uint8_t lobby_action, const std::str
         SDL_Delay(10);
     }
 
-    /* 
-        while(!receiver.try_pop_snapshot(snapshot)) {
-            SDL_Delay(10);
-        }
-    */
-
-    /* 
-        GraphicClient graphic_client(map_path, snapshot);
-    */
     GraphicClient graphic_client(map_path,snapshot);
     ClientHandler handler(parser);
     const Uint32 FRAME_DELAY = 1000 / 60;  // ~60 FPS
@@ -93,7 +84,6 @@ void Client::run(const PlayerConfig& config,uint8_t lobby_action, const std::str
         }
 
         graphic_client.draw(snapshot);
-        /* graphic_client.draw(snapshot); */
 
         Uint32 frame_time = SDL_GetTicks() - frame_start;
         if (frame_time < FRAME_DELAY) {
