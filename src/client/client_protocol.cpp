@@ -16,6 +16,7 @@ CarDTO ClientProtocol::receive_car_state() const {
     car.life = protocol.receive_float();
     car.nitro = protocol.receive_bool();
     car.remaining_nitro = protocol.receive_float();
+    car.state = static_cast<StateRunning>(protocol.receive_byte());
     return car;
 }
 
@@ -99,7 +100,6 @@ Snapshot ClientProtocol::receive_game_state() const {
         snapshot.cars[car_id] = car;
     }
 
-    snapshot.state = static_cast<StateRunning>(protocol.receive_byte());
     snapshot.position = protocol.receive_byte();
     
     snapshot.cars_count = cars_count;

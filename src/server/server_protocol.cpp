@@ -20,6 +20,7 @@ void ServerProtocol::send_car_state(const CarDTO& car){
     protocol.send_float(life_percentage);
     protocol.send_bool(car.nitro);
     protocol.send_float(car.remaining_nitro);
+    protocol.send_byte(static_cast<uint8_t>(car.state));
 }
 
 void ServerProtocol::send_lobby_car_state(const LobbyCarDTO& car) {
@@ -88,8 +89,6 @@ void ServerProtocol::send_game_state(const Snapshot& snapshot) {
         protocol.send_big_endian_16(car_id);
         send_car_state(car); 
     }
-
-    protocol.send_byte(static_cast<uint8_t>(snapshot.state));
 
     protocol.send_byte(static_cast<uint8_t>(snapshot.position));
 
