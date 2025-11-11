@@ -2,6 +2,7 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QComboBox>
@@ -12,6 +13,25 @@
 #include <QScreen>
 #include <QPropertyAnimation>
 #include <QKeyEvent>
+
+CarButton::CarButton(int carId, QWidget* parent)
+    : QPushButton(parent), carId(carId) {
+
+    QString imagePath = QString("../assets/images/auto_%1.png").arg(carId);
+    QPixmap carPixmap(imagePath);
+
+    if (!carPixmap.isNull()) {
+        setIcon(QIcon(carPixmap));
+        setIconSize(QSize(120, 90));
+    } else {
+        setText(QString("Auto %1").arg(carId));
+        std::cout << "[CLIENT] WARNING: No se pudo cargar: "
+                  << imagePath.toStdString() << std::endl;
+    }
+
+    setFixedSize(140, 110);
+    setCheckable(true);
+}
 
 void LoginWindow::styleButton(QPushButton* btn) {
     btn->setStyleSheet(
@@ -88,19 +108,61 @@ void LoginWindow::player_name(QLabel*& nameLabel) {
     styleInput(nameInput);
 }
 
+void LoginWindow::selectCar(int carId) {
+    selectedCarIndex = carId;
+
+    for (auto* btn : carButtons) {
+        if (btn->getCarId() == carId) {
+            btn->setChecked(true);
+            btn->setStyleSheet(
+                "CarButton {"
+                "   background-color: rgba(0, 60, 80, 220);"
+                "   border: 3px solid #66ffff;"
+                "   border-radius: 10px;"
+                "}"
+            );
+        } else {
+            btn->setChecked(false);
+            btn->setStyleSheet(
+                "CarButton {"
+                "   background-color: rgba(20, 20, 30, 200);"
+                "   border: 2px solid #00eaff;"
+                "   border-radius: 10px;"
+                "}"
+                "CarButton:hover {"
+                "   background-color: rgba(0, 40, 60, 180);"
+                "   border: 2px solid #66ffff;"
+                "}"
+            );
+        }
+    }
+}
+
 void LoginWindow::car_sellec(QLabel*& carLabel) {
     carLabel = new QLabel("Choose your vehicle:");
     carLabel->setStyleSheet("color: #00eaff; font-size: 22px; font-weight: bold;");
-    carSelector = new QComboBox();
-    carSelector->addItem("auto 0");
-    carSelector->addItem("auto 1");
-    carSelector->addItem("auto 2");
-    carSelector->addItem("auto 3");
-    carSelector->addItem("auto 4");
-    carSelector->addItem("auto 5");
-    carSelector->addItem("auto 6");
 
-    styleCombo(carSelector);
+    carSelectorWidget = new QWidget();
+    carGridLayout = new QGridLayout(carSelectorWidget);
+    carGridLayout->setSpacing(15);
+    carGridLayout->setContentsMargins(0, 0, 0, 0);
+
+    for (int i = 0; i < 7; i++) {
+        CarButton* carBtn = new CarButton(i, carSelectorWidget);
+        carButtons.push_back(carBtn);
+
+        int row = i / 4;
+        int col = i % 4;
+        carGridLayout->addWidget(carBtn, row, col);
+
+        connect(carBtn, &QPushButton::clicked, this, [this, i]() {
+            selectCar(i);
+        });
+    }
+
+    carSelectorWidget->setLayout(carGridLayout);
+    selectedCarIndex = 0;
+    selectCar(0);
 }
 
 void LoginWindow::map_sellec(QLabel*& mapLabel) {
@@ -123,11 +185,11 @@ void LoginWindow::game_selector(QLabel*& gameLabel) {
 }
 
 void LoginWindow::updateGameList(const std::vector<std::string>& gameList) {
-    gameSelector->clear(); 
+    gameSelector->clear();
 
     if (gameList.empty()){
         return;
-    }   
+    }
 
     for (const auto& game : gameList) {
         gameSelector->addItem(QString::fromStdString(game));
@@ -140,11 +202,13 @@ LoginWindow::LoginWindow(QWidget *parent)
       startButton(nullptr),
       layout(nullptr),
       nameInput(nullptr),
-      carSelector(nullptr),
+      carSelectorWidget(nullptr),
+      carGridLayout(nullptr),
+      selectedCarIndex(0),
       mapSelector(nullptr),
       gameIdInput(nullptr),
       lobbyAction(SEND_CREATE_GAME),
-      selectedGameId("") 
+      selectedGameId("")
 {
     setWindowTitle("Need for Speed - Login");
     showMaximized();
@@ -170,14 +234,14 @@ LoginWindow::LoginWindow(QWidget *parent)
     applyGlowEffect(joinGameButton);
 
     layout = new QVBoxLayout(this);
-    layout->setContentsMargins(400, 100, 400, 100);
-    layout->setSpacing(30);
+    layout->setContentsMargins(300, 50, 300, 50);
+    layout->setSpacing(20);
     layout->setAlignment(Qt::AlignTop);
 
     layout->addWidget(nameLabel);
     layout->addWidget(nameInput);
     layout->addWidget(carLabel);
-    layout->addWidget(carSelector);
+    layout->addWidget(carSelectorWidget);
     layout->addWidget(mapLabel);
     layout->addWidget(mapSelector);
     layout->addSpacing(40);
@@ -197,7 +261,7 @@ LoginWindow::LoginWindow(QWidget *parent)
 
     setLayout(layout);
 
-    
+
     connect(createGameButton, &QPushButton::clicked, this, [this]() {
         this->lobbyAction = SEND_CREATE_GAME;
         this->selectedGameId = "";
@@ -206,7 +270,7 @@ LoginWindow::LoginWindow(QWidget *parent)
 
     connect(joinGameButton, &QPushButton::clicked, this, [this]() {
         std::string gameId = gameIdInput->text().toStdString();
-        
+
         if (gameId.empty()) {
             std::cout << "[CLIENT] ERROR: Debes ingresar un ID de partida" << std::endl;
             return;
@@ -238,12 +302,12 @@ void LoginWindow::paintEvent(QPaintEvent *event) {
     QWidget::paintEvent(event);
 }
 
-uint8_t LoginWindow::getLobbyAction() const { 
-    return lobbyAction; 
+uint8_t LoginWindow::getLobbyAction() const {
+    return lobbyAction;
 }
 
-std::string LoginWindow::getSelectedGameId() const { 
-    return selectedGameId; 
+std::string LoginWindow::getSelectedGameId() const {
+    return selectedGameId;
 }
 
 PlayerConfig LoginWindow::getPlayerConfig() const {
@@ -253,7 +317,7 @@ PlayerConfig LoginWindow::getPlayerConfig() const {
     if (config.playerName.empty()) {
         config.playerName = "Player";
     }
-    config.carId = carSelector->currentIndex();
+    config.carId = selectedCarIndex;
     config.mapName = mapSelector->currentText().toStdString();
 
     return config;

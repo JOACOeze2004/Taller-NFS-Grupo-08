@@ -39,7 +39,8 @@ std::vector<StaticBody> ParserYaml::parse_map(std::string& map_name) {
 }
 
 CarStats ParserYaml::parse_car(const int car_id) {
-    auto id = cars_file["cars_stats"][car_id];
+    int _car_id = car_id % 7;
+    auto id = cars_file["cars_stats"][_car_id];
     const auto mass = id["mass"].as<float>();
     const auto handling = id["handling"].as<float>();
     const auto acceleration = id["acceleration"].as<float>();

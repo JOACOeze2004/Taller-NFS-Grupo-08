@@ -233,6 +233,8 @@ if(TALLER_EDITOR)
             src/editor/city_selec.h
             src/editor/hint_generator.cpp
             src/editor/hint_generator.h
+            src/editor/collision_validator.cpp
+            src/editor/collision_validator.h
     )
 
     # Make them depend on taller_common lib
@@ -248,7 +250,7 @@ if(TALLER_EDITOR)
     target_include_directories(taller_editor PRIVATE ${libSDL2pp_SOURCE_DIR})
 
     # Link the taller_common lib target
-    target_link_libraries(taller_editor taller_common SDL2pp::SDL2pp)
+    target_link_libraries(taller_editor taller_common SDL2pp::SDL2pp Qt5::Widgets yaml-cpp)
 endif()
 
 

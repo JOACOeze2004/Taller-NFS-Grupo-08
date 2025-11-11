@@ -11,6 +11,7 @@
 #include "editor_toolbar.h"
 #include "editor_input_handler.h"
 #include "race_track_data.h"
+#include "collision_validator.h"
 
 class EditorWindow : public QMainWindow {
     Q_OBJECT
@@ -47,6 +48,7 @@ private:
     HintManager* hintManager;
     EditorToolbar* toolbar;
     EditorInputHandler* inputHandler;
+    CollisionValidator* collisionValidator;
 
     void setupScene();
     void setupView();
