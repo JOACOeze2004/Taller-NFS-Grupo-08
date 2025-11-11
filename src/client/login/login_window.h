@@ -40,7 +40,6 @@ public:
     void player_name(QLabel*& nameLabel);
     void car_sellec(QLabel*& carLabel);
     void map_sellec(QLabel*& mapLabel);
-    void game_selector(QLabel*& gameLabel);
     void updateGameList(const std::vector<std::string>& gameList);
 
     explicit LoginWindow(QWidget *parent = nullptr);
