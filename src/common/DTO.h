@@ -13,13 +13,6 @@ struct LobbyCarDTO {
     float mass;
 };
 
-enum StateRunning {
-    IN_GAME,
-    FINISHED,
-    DEAD, 
-    TIMEOUTED
-};
-
 enum Map {
     SAN_ANDREAS,
     VICE_CITY,
@@ -62,7 +55,6 @@ enum TypeCheckpoint{
 struct Snapshot { //deberia ser una clase
     int id;
     std::unordered_map<int, CarDTO> cars;
-    enum StateRunning state;
     int position;
     int cars_count;
     enum Map map;

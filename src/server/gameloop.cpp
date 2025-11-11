@@ -143,7 +143,9 @@ Snapshot Gameloop::initialize_DTO() {
 void Gameloop::broadcast() {
     std::unordered_map<int, CarDTO> carsDTO;
     for  (auto& [id, car] : cars) {
-        carsDTO.emplace(id, car.get_state());
+        CarDTO car_dto = car.get_state();
+        car_dto.state = race.get_state(id, get_time_remaining_ms());
+        carsDTO.emplace(id, car_dto);
     }
     for (auto& [id, car] : cars) {
         Snapshot dto = initialize_DTO();
@@ -151,7 +153,6 @@ void Gameloop::broadcast() {
         dto.checkpoint = {car.get_position().x, car.get_position().y};
         dto.hint = {0.0f, 0.0f, 0.0f};
         dto.position = race.get_position(id);
-        dto.state = race.get_state(id, get_time_remaining_ms());
         monitor.broadcast(dto,this->game_id, id);
     }
 
