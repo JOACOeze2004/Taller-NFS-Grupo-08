@@ -46,6 +46,8 @@ void Gameloop::run() {
         }
         if (ready_to_start){
             update_positions();
+            delete_deads();
+
             for (auto& [id, car] : cars) {
                 car.update_nitro_usage();
                 car.apply_nitro_force();
@@ -156,6 +158,14 @@ void Gameloop::broadcast() {
         monitor.broadcast(dto,this->game_id, id);
     }
 
+}
+
+void Gameloop::delete_deads() {
+    for (auto& [id, car] : cars) {
+        if (car.is_dead()) {
+            car.delete_from_map();
+        }
+    }
 }
 
 bool Gameloop::can_join_to_game(){ return cars.size() < MAX_PLAYERS_PER_GAME; }

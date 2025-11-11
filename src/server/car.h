@@ -36,6 +36,7 @@ public:
     void handle_hit(b2Vec2& normal, float& force, bool is_hitter);
     b2Vec2 get_position();
     bool is_dead();
+    void delete_from_map();
 
     void restore_life();
     void activate_infinite_life();

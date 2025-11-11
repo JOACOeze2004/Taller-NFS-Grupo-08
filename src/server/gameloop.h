@@ -52,6 +52,7 @@ private:
     void update_positions();
     void broadcast();
     Snapshot initialize_DTO();
+    void delete_deads();
 };
 
 

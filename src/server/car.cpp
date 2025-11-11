@@ -225,3 +225,9 @@ b2Vec2 Car::get_position() {
 bool Car::is_dead() {
     return life == 0;
 }
+
+void Car::delete_from_map() {
+    if (b2Body_IsValid(body_id)) {
+        b2Body_Disable(body_id);
+    }
+}
