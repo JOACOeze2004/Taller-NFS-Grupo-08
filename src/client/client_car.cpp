@@ -186,10 +186,10 @@ void Car::renderNitro() {
             nitroIndicator.w = 30;
             nitroIndicator.h = 25;
 
-            nitroSrcRect.x = 38;
-            nitroSrcRect.y = 105;
-            nitroSrcRect.w = 440;
-            nitroSrcRect.h = 120;
+            nitroSrcRect.x = 30;
+            nitroSrcRect.y = 80;
+            nitroSrcRect.w = 335;
+            nitroSrcRect.h = 97;
 
             nitroIndicator.x = static_cast<int>(x - indicator_distance * cos(angle) - nitroIndicator.w / 2.0f);
             nitroIndicator.y = static_cast<int>(y - indicator_distance * sin(angle) - nitroIndicator.h / 2.0f);
