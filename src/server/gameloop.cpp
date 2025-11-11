@@ -152,8 +152,8 @@ void Gameloop::broadcast() {
     for (auto& [id, car] : cars) {
         Snapshot dto = initialize_DTO();
         dto.cars = carsDTO;
-        dto.checkpoint = {race.get_checkpoint(id).x, race.get_checkpoint(id).y};
-        dto.hint = {0.0f, 0.0f, 0.0f};
+        dto.checkpoint = race.get_checkpoint(id);
+        dto.hint = race.get_hint(id);
         dto.position = race.get_position(id);
         monitor.broadcast(dto,this->game_id, id);
     }
