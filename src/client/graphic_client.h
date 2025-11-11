@@ -47,6 +47,7 @@ class GraphicClient {
     void draw_checkpoint(CheckpointCoords checkpoint, int type);
     void draw_hint(HintCoords hint);
     void draw_game_id(int id);
+    void draw_state(int state);
 };
 
 

@@ -238,11 +238,42 @@ void GraphicClient::draw(const Snapshot& snapshot) {
                camera_id = id;
             }
         }
+        draw_state(player_it->second.state);
     }
-
 
     SDL_RenderPresent(renderer);
 } 
+
+void GraphicClient::draw_state(int state) {
+    if (!text) return; 
+    std::string msg;
+    SDL_Color overlay_color;
+    
+    if (state == FINISHED) {
+        msg = "You Finished!";
+        overlay_color = {0, 255, 0, 76}; // Verde transparente
+    } else if (state == DEAD) {
+        msg = "You Died!";
+        overlay_color = {255, 0, 0, 76}; // Rojo transparente
+    } else if (state == TIMEOUTED) {
+        msg = "Time Out!";
+        overlay_color = {255, 0, 0, 76}; // Rojo transparente
+    } else {
+        return; 
+    }
+    
+    // Dibujar cuadrado transparente que cubre toda la pantalla
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, overlay_color.r, overlay_color.g, overlay_color.b, overlay_color.a);
+    SDL_Rect fullscreen_rect = {0, 0, screen_width, screen_height};
+    SDL_RenderFillRect(renderer, &fullscreen_rect);
+    
+    // Dibujar texto encima del overlay
+    SDL_Color text_color{255, 255, 255, 255};
+    int text_x = (screen_width / 2) - 100; 
+    int text_y = (screen_height / 2) - 25; 
+    text->render(renderer, msg, text_x, text_y, text_color);
+}
 
 void GraphicClient::draw_game_id(int id) {
     if (!text) return; 
@@ -551,6 +582,9 @@ GraphicClient::~GraphicClient() {
     }
     if (checkpoint_texture) {
         SDL_DestroyTexture(checkpoint_texture);
+    }
+    if (hint_texture) {
+        SDL_DestroyTexture(hint_texture);
     }
     IMG_Quit();
     SDL_Quit();
