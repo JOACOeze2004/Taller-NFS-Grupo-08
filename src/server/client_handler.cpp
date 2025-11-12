@@ -98,6 +98,7 @@ void ClientHandler::send_state(Snapshot snapshot) {
 }
 
 void ClientHandler::kill() {
+    protocol.close();
     stop();
     if (!receiver){
         return;
@@ -109,8 +110,8 @@ void ClientHandler::kill() {
 }
 
 void ClientHandler::kill_threads() {
-    receiver->join();
     sender.join();
+    receiver->join();
 }
 
 bool ClientHandler::is_dead() const { 

@@ -88,9 +88,11 @@ bool Protocol::receive_bool() const{
 
 void Protocol::close_socket(){
     try {
-        socket.shutdown(SHUT_RDWR);
+        if (!socket.is_stream_recv_closed()){
+            socket.shutdown(SHUT_RDWR);
+        } if (!socket.is_stream_send_closed()){
+            socket.shutdown(SHUT_RDWR);
+        }        
         socket.close();
-    } catch(const std::exception& e){
-        std::cerr << "Socket already closed in protocol: " << e.what() << '\n';
-    }
+    } catch(const std::exception& e){ }
 }
