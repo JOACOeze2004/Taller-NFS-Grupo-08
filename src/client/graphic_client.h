@@ -23,6 +23,7 @@ class GraphicClient {
     int screen_width, screen_height;
     float map_width, map_height;
     TextRenderer* text;
+    bool is_upgrade_phase;
 
     int camera_id;
 

@@ -135,6 +135,8 @@ if(TALLER_CLIENT)
             src/client/login/login_window.h
             src/client/graphic_client.cpp
             src/client/graphic_client.h
+            src/client/upgrade_phase.cpp
+            src/client/upgrade_phase.h
             src/client/ClientQuitException.h
             src/client/final_results/final_results_windows.cpp
             src/client/final_results/final_results_windows.h
