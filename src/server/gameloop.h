@@ -29,6 +29,7 @@ public:
     bool can_join_to_game();
     bool is_username_taken(const int username_id) const;
     int get_time_remaining_ms() const;
+    bool is_game_already_started() const;
 
 private:
     Queue<ClientCommand> cmd_queue;

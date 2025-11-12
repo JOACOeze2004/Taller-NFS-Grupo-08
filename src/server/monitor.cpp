@@ -1,10 +1,9 @@
 #include "monitor.h"
 #include "gameloop.h"
-#include "GameFullException.h"
-#include "InvalidGameIDException.h"
-#include "InvalidPlayerNameException.h"
-
-
+#include "exceptions/GameFullException.h"
+#include "exceptions/InvalidGameIDException.h"
+#include "exceptions/InvalidPlayerNameException.h"
+#include "exceptions/GameAlreadyStartedException.h"
 
 Monitor::Monitor() { game_id = 0; }
 
@@ -87,8 +86,10 @@ std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const 
     if (game_i == current_games.end()){
         throw InvalidGameIDException();
     }
-    //quizas handelear si el game esta muerto, tirar una excepcion de q la palmo la partida.
     auto game = game_i->second;
+    // if (game->is_game_already_started()){
+    //     throw GameAlreadyStartedException();
+    // }    
     if (!game->can_join_to_game()){
         throw GameFullException();
     }

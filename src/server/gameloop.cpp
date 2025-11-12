@@ -2,7 +2,6 @@
 
 #include "src/common/DTO.h"
 #include "src/common/constants.h"
-#include "GameFullException.h"
 #include <sstream>
 
 
@@ -173,3 +172,7 @@ void Gameloop::delete_deads() {
 bool Gameloop::can_join_to_game(){ return cars.size() < MAX_PLAYERS_PER_GAME; }
 
 const std::string& Gameloop::get_game_id() const{ return this->game_id; }
+
+bool Gameloop::is_game_already_started() const {
+    return this->ready_to_start;
+}

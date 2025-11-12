@@ -2,9 +2,10 @@
 
 #include "src/common/DTO.h"
 #include "receiver.h"
-#include "GameFullException.h"
-#include "InvalidGameIDException.h"
-#include "InvalidPlayerNameException.h"
+#include "exceptions/GameFullException.h"
+#include "exceptions/InvalidGameIDException.h"
+#include "exceptions/InvalidPlayerNameException.h"
+#include "exceptions/GameAlreadyStartedException.h"
 
 ClientHandler::ClientHandler(Socket&& peer,Monitor& monitor, int _id):
         peer(std::move(peer)),
@@ -59,8 +60,10 @@ void ClientHandler::run() {
     } catch(const InvalidPlayerNameException& e){
         protocol.send_error_message(e.what());
         return;
-    }
-    catch (...) {
+    }catch (const GameAlreadyStartedException& e){
+        protocol.send_error_message(e.what());
+        return;
+    } catch (...) {
         protocol.send_error_message("unexpected error");
         return;
     }
