@@ -24,6 +24,7 @@ class Car {
     b2BodyId body_id;
     bool nitro_activated = false;
     int nitro_consuption = NITRO_CONSUMPTION;
+    b2BodyDef body;
 
 public:
     explicit Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking, int _car_id);
@@ -51,6 +52,7 @@ public:
     void update_nitro_usage();
 
     CarDTO get_state() const;
+    void set_spawn(float x, float y);
 
 private:
     float calculate_torque() const;
