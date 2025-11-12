@@ -1,6 +1,9 @@
 #ifndef TALLER_TP_LOBBY_H
 #define TALLER_TP_LOBBY_H
 #include "phase.h"
+#include "../common/constants.h"
+#include <chrono>
+#include <thread>
 
 
 class Lobby : public Phase {

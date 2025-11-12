@@ -1,4 +1,5 @@
 #include "in_game.h"
+#include "gameloop.h" 
 
 InGame::InGame(Gameloop* _gameloop, float _duration, std::string& map_name, const std::string& races_path, std::map<int, Car>* cars): Phase(_gameloop, _duration), current_map(map_name), race(races_path, cars), cars(cars) {}
 

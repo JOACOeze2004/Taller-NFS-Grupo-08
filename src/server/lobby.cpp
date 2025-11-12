@@ -1,8 +1,5 @@
-//
-// Created by vboxuser on 11/12/25.
-//
-
 #include "lobby.h"
+#include "gameloop.h"
 
 Lobby::Lobby(Gameloop* _gameloop, float _duration): Phase(_gameloop, _duration) {}
 

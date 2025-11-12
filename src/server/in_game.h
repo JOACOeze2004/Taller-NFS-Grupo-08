@@ -1,10 +1,10 @@
-//
-// Created by vboxuser on 11/12/25.
-//
-
 #ifndef TALLER_TP_IN_GAME_H
 #define TALLER_TP_IN_GAME_H
 #include "phase.h"
+#include "../common/DTO.h"
+#include "race.h"
+#include <chrono>
+#include <thread>
 
 
 class InGame : public Phase {

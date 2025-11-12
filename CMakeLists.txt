@@ -141,6 +141,8 @@ if(TALLER_CLIENT)
             src/client/InvalidId.h
             src/client/lobby/lobby_window.cpp
             src/client/lobby/lobby_window.h
+            src/client/upgrade_phase.cpp
+            src/client/upgrade_phase.h
     )
 
     # Make them depend on taller_common lib
