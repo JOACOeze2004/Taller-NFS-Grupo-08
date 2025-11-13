@@ -37,9 +37,9 @@ void InGame::run() {
 
 
 void InGame::execute(ClientCommand& command) {
-    if (get_time_remaining_ms() <= 0){
+    /*if (get_time_remaining_ms() <= 0){
         cont = false;
-    }
+    }*/
     gameloop->process_command(command);
 }
 

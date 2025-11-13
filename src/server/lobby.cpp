@@ -33,7 +33,7 @@ void Lobby::run() {
 
 
 void Lobby::execute(ClientCommand& command) {
-    if (command.id == 0 && command.cmd_struct.cmd == SEND_READY_TO_PLAY) {
+    if (command.id == 0 || command.cmd_struct.cmd == SEND_READY_TO_PLAY) {
         cont = false;
     }
 }
