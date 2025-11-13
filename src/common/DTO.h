@@ -3,6 +3,7 @@
 
 #include "car_DTO.h"
 #include <unordered_map>
+#include <string>
 
 struct LobbyCarDTO {
     int car_id;

@@ -1,0 +1,33 @@
+#ifndef TALLER_TP_IN_GAME_H
+#define TALLER_TP_IN_GAME_H
+#include "phase.h"
+#include "../common/DTO.h"
+#include "race.h"
+#include <chrono>
+#include <thread>
+
+
+class InGame : public Phase {
+    std::chrono::steady_clock::time_point start_time;
+    std::string& current_map;
+    Race race;
+    std::map<int, Car>* cars;
+
+    int get_time_remaining_ms() const;
+    void delete_deads();
+
+public:
+    explicit InGame(Gameloop* _gameloop, float _duration, std::string& map_name, const std::string& races_path, std::map<int, Car>* cars);
+    void run() override;
+    void execute(ClientCommand& command) override;
+    //b2WorldId get_world();
+    StateRunning get_state(const int& id, const int& time_remaining);
+    CheckpointCoords get_checkpoint(const int& id) const;
+    HintCoords get_hint(const int& id) const;
+    TypeCheckpoint get_cp_type(const int& id) const;
+    int get_position(const int& id) const;
+    void update_positions();
+};
+
+
+#endif  // TALLER_TP_IN_GAME_H

@@ -4,7 +4,7 @@
 #include <iostream>
 
 Car::Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking, int _car_id) : mass(_mass), handling(_handling + mass), acceleration(_acceleration - mass), braking(_braking - mass/2), car_id(_car_id){
-    b2BodyDef body = b2DefaultBodyDef();
+    body = b2DefaultBodyDef();
     body.type = b2_dynamicBody;
     body.linearDamping = 2.0f;
     body.angularDamping = 7.0f;
@@ -239,4 +239,8 @@ void Car::delete_from_map() {
     if (b2Body_IsValid(body_id)) {
         b2Body_Disable(body_id);
     }
+}
+
+void Car::set_spawn(float x, float y) {
+    body.position = {x,y};
 }

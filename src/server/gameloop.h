@@ -10,8 +10,11 @@
 
 #include "car.h"
 #include "client_command.h"
+#include "in_game.h"
+#include "lobby.h"
 #include "monitor.h"
 #include "race.h"
+#include "workshop.h"
 #include "world.h"
 
 class Monitor;
@@ -29,6 +32,12 @@ public:
     bool can_join_to_game();
     bool is_username_taken(const int username_id) const;
     int get_time_remaining_ms() const;
+    void process_command(ClientCommand& client_command);
+    void broadcast_in_game();
+    void broadcast_lobby();
+    bool try_pop(ClientCommand& command);
+    void update_positions();
+
     bool is_game_already_started() const;
 
 private:
@@ -38,22 +47,18 @@ private:
     std::map<int, Car> cars;
     std::map<uint8_t, std::function<void(Car& car)>> car_actions;
     World world;
-    bool ready_to_start; 
+    bool ready_to_start;
+    Lobby lobby;
+    InGame in_game;
+    Workshop workshop;
     std::chrono::steady_clock::time_point start_time;
     Map current_map;
     ParserYaml parser;
     std::unordered_map<int, std::string> user_names;
-    Race race;
-    // Workshop workshop; para entre carreras mejorar el auto
-    // GameMap game_map; quiza que guarde todos los mapas y circuitos posibles (lo recibe por parametro)
 
 
     void initialize_car_actions();
-    void process_commands();
-    void update_positions();
-    void broadcast();
     Snapshot initialize_DTO();
-    void delete_deads();
 };
 
 

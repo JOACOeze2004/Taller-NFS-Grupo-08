@@ -135,14 +135,14 @@ if(TALLER_CLIENT)
             src/client/login/login_window.h
             src/client/graphic_client.cpp
             src/client/graphic_client.h
-            src/client/upgrade_phase.cpp
-            src/client/upgrade_phase.h
             src/client/ClientQuitException.h
             src/client/final_results/final_results_windows.cpp
             src/client/final_results/final_results_windows.h
             src/client/InvalidId.h
             src/client/lobby/lobby_window.cpp
             src/client/lobby/lobby_window.h
+            src/client/upgrade_phase.cpp
+            src/client/upgrade_phase.h
     )
 
     # Make them depend on taller_common lib
@@ -191,7 +191,15 @@ if(TALLER_SERVER)
             src/server/parser_yaml.h
             src/server/CarStats.h
             src/server/race.h
-            src/server/race.cpp)
+            src/server/race.cpp
+            src/server/phase.cpp
+            src/server/phase.h
+            src/server/lobby.cpp
+            src/server/lobby.h
+            src/server/in_game.cpp
+            src/server/in_game.h
+            src/server/workshop.cpp
+            src/server/workshop.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)
