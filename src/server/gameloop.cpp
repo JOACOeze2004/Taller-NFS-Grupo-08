@@ -114,7 +114,7 @@ void Gameloop::update_positions() {
 
 Snapshot Gameloop::initialize_DTO() {
     Snapshot dto;
-    dto.game_id =std::stoi(this->game_id);
+    dto.game_id = std::stoi(this->game_id);
     dto.cars_count = static_cast<int>(cars.size());
     dto.map = current_map;
     dto.upgrade = NONE_UPGRADE;
@@ -140,7 +140,7 @@ void Gameloop::broadcast_lobby() {
     for (auto& [id, car] : cars) {
         Snapshot dto = initialize_DTO();
         dto.cars = carsDTO;
-        //dto.state = LOBBY;
+        dto.state = IN_LOBBY;
         monitor.broadcast(dto,this->game_id, id);
     }
 }
@@ -159,6 +159,7 @@ void Gameloop::broadcast_in_game() {
         dto.hint = in_game.get_hint(id);
         dto.position = in_game.get_position(id);
         dto.type_checkpoint = in_game.get_cp_type(id);
+        dto.state = IN_RACE;
         monitor.broadcast(dto,this->game_id, id);
     }
 

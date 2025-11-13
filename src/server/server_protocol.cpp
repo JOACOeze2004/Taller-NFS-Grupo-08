@@ -113,6 +113,8 @@ void ServerProtocol::send_game_state(const Snapshot& snapshot) {
     
     protocol.send_big_endian_32(snapshot.time_ms);
 
+    protocol.send_byte(static_cast<uint8_t>(snapshot.state));
+
     protocol.send_big_endian_16(snapshot.lobby_cars.size());
     for (const auto& [car_id, lobby_car] : snapshot.lobby_cars) {
         send_lobby_car_state(lobby_car); 

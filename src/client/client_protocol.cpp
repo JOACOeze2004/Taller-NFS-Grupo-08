@@ -118,6 +118,7 @@ Snapshot ClientProtocol::receive_game_state() const {
     snapshot.hint.angle = protocol.receive_float();
     snapshot.type_checkpoint = static_cast<TypeCheckpoint>(protocol.receive_byte());
     snapshot.time_ms = protocol.receive_big_endian_32();
+    snapshot.state = static_cast<State>(protocol.receive_byte());
     
     uint16_t lobby_count = protocol.receive_big_endian_16();
 
