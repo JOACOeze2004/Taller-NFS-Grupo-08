@@ -106,6 +106,10 @@ void Gameloop::push_command(const ClientCommand& cmd){
 }
 
 void Gameloop::update_positions() {
+    for (auto& [id, car] : cars) {
+        car.update_nitro_usage();
+        car.apply_nitro_force();
+    }
     world.update();
 }
 

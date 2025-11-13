@@ -13,6 +13,7 @@ void Lobby::run() {
             execute(command);
             gameloop->process_command(command);
         }
+        gameloop->update_positions();
         gameloop->broadcast_lobby();
 
 
