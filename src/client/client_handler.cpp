@@ -24,6 +24,15 @@ void ClientHandler::handle_event() {
 }
 
 void ClientHandler::register_button(const SDL_Rect& rect, ButtonType type) {
+    buttons.emplace_back(rect, type);
+}
+
+void ClientHandler::clear_buttons() {
+    buttons.clear();
+}
+
+void ClientHandler::handle_button_action(ButtonType type) {
+    
     switch (type) {
         case BUTTON_READY:
             parser.parse_command(SEND_READY_TO_PLAY);
