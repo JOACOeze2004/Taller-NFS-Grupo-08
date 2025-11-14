@@ -32,31 +32,47 @@ void ClientHandler::clear_buttons() {
 }
 
 void ClientHandler::handle_button_action(ButtonType type) {
-    
     switch (type) {
         case BUTTON_READY:
             parser.parse_command(SEND_READY_TO_PLAY);
-            std::cout << "[CLIENT_HANDLER] Ready button clicked - sending R\n";
             break;
-        case BUTTON_UPGRADE_SPEED:
-            parser.parse_command(SEND_VELOCITY_UPGRADE);
-            std::cout << "[CLIENT_HANDLER] Speed upgrade selected\n";
-            break;
-        case BUTTON_UPGRADE_ACCELERATION:
-            parser.parse_command(SEND_ACCELERATION_UPGRADE);
-            std::cout << "[CLIENT_HANDLER] Acceleration upgrade selected\n";
-            break;
-        case BUTTON_UPGRADE_HANDLING:
-            parser.parse_command(SEND_HANDLING_UPGRADE);
-            std::cout << "[CLIENT_HANDLER] Handling upgrade selected\n";
-            break;
-        case BUTTON_UPGRADE_NITRO:
-            parser.parse_command(SEND_NITRO_UPGRADE);
-            std::cout << "[CLIENT_HANDLER] Nitro upgrade selected\n";
-            break;
-        case BUTTON_UPGRADE_LIFE:
+        // upgrades
+        case BUTTON_LIFE_UP:
             parser.parse_command(SEND_LIFE_UPGRADE);
-            std::cout << "[CLIENT_HANDLER] Life upgrade selected\n";
+            break;
+        case BUTTON_VELOCITY_UP:
+            parser.parse_command(SEND_VELOCITY_UPGRADE);
+            break;
+        case BUTTON_ACCELERATION_UP:
+            parser.parse_command(SEND_ACCELERATION_UPGRADE);
+            break;
+        case BUTTON_HANDLING_UP:
+            parser.parse_command(SEND_HANDLING_UPGRADE);
+            break;
+        case BUTTON_CONTROL_UP:
+            parser.parse_command(SEND_CONTROL_UPGRADE);
+            break;
+        case BUTTON_NITRO_UP:
+            parser.parse_command(SEND_NITRO_UPGRADE);
+            break;
+        // downgrades
+        case BUTTON_LIFE_DOWN:
+            parser.parse_command(SEND_LIFE_DOWNGRADE);
+            break;
+        case BUTTON_VELOCITY_DOWN:
+            parser.parse_command(SEND_VELOCITY_DOWNGRADE);
+            break;
+        case BUTTON_ACCELERATION_DOWN:
+            parser.parse_command(SEND_ACCELERATION_DOWNGRADE);
+            break;
+        case BUTTON_HANDLING_DOWN:
+            parser.parse_command(SEND_HANDLING_DOWNGRADE);
+            break;
+        case BUTTON_CONTROL_DOWN:
+            parser.parse_command(SEND_CONTROL_DOWNGRADE);
+            break;
+        case BUTTON_NITRO_DOWN:
+            parser.parse_command(SEND_NITRO_DOWNGRADE);
             break;
         default:
             break;

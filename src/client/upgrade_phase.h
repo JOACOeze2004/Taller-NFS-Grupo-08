@@ -17,20 +17,30 @@ private:
     TextRenderer* text;
     ClientHandler* handler;
     
+    SDL_Texture* icons_texture;
+    SDL_Texture* arrows_texture;
+    
     Upgrades selected_upgrade;
     bool upgrade_selected;
     
     struct UpgradeButton {
-        SDL_Rect rect;
-        ButtonType button_type;
+        SDL_Rect rect; 
         Upgrades upgrade_type;
         std::string title;
         std::string description;
+        SDL_Rect icon_src_rect;
+    };
+
+    struct ArrowButton {
+        SDL_Rect rect;              
+        ButtonType type;            
     };
     
     std::vector<UpgradeButton> upgrade_buttons;
+    std::vector<ArrowButton> arrow_buttons;
     
     void init_upgrade_buttons();
+    void load_textures();
     void render_background();
     void render_title();
     void render_upgrade_buttons();
