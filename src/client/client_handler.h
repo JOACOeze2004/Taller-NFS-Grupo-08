@@ -40,6 +40,7 @@ public:
     
     void register_button(const SDL_Rect& rect, ButtonType type);
     void clear_buttons();
+    bool is_mouse_over_button(const SDL_Rect& rect) const;
 
 private:
     void process_event(const SDL_Event& event);

@@ -100,12 +100,22 @@ void UpgradePhase::render_upgrade_buttons() {
         SDL_Color button_color;
         SDL_Color text_color = {255, 255, 255, 255};
         
-        button_color = {100, 150, 255, 255};
+        bool is_hovered = handler && handler->is_mouse_over_button(button.rect);
+        
+        if (is_hovered) {
+            button_color = {130, 180, 255, 255};
+        } else {
+            button_color = {100, 150, 255, 255};
+        }
         
         SDL_SetRenderDrawColor(renderer, button_color.r, button_color.g, button_color.b, button_color.a);
         SDL_RenderFillRect(renderer, &button.rect);
         
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        if (is_hovered) {
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        } else {
+            SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+        }
         SDL_RenderDrawRect(renderer, &button.rect);
         
         if (text) {
