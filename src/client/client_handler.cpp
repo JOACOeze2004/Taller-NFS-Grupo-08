@@ -2,7 +2,7 @@
 #include "ClientQuitException.h"
 #include "../common/constants.h"
 
-ClientHandler::ClientHandler(InputParser& _parser): parser(_parser) {
+ClientHandler::ClientHandler(InputParser& _parser): parser(_parser), mouse_was_down(false) {
     initialize_key_map();
     for (auto& [key, state] : key_state) {
         key_state[key] = false;
@@ -23,17 +23,39 @@ void ClientHandler::handle_event() {
     update();
 }
 
-void ClientHandler::initialize_key_map() {
-    key_map[SDLK_w] = [this]() { parser.parse_command(SEND_ACCELERATE); };
-    key_map[SDLK_a] = [this]() { parser.parse_command(SEND_ROTATE_LEFT); };
-    key_map[SDLK_s] = [this]() { parser.parse_command(SEND_BRAKE); };
-    key_map[SDLK_d] = [this]() { parser.parse_command(SEND_ROTATE_RIGHT); };
-    key_map[SDLK_n] = [this]() { parser.parse_command(SEND_USE_NITRO); };
-    key_map[SDLK_r] = [this]() { parser.parse_command(SEND_READY_TO_PLAY); };
+void ClientHandler::register_button(const SDL_Rect& rect, ButtonType type) {
+    switch (type) {
+        case BUTTON_READY:
+            parser.parse_command(SEND_READY_TO_PLAY);
+            std::cout << "[CLIENT_HANDLER] Ready button clicked - sending R\n";
+            break;
+        default:
+            break;
+    }
+}
+
+void ClientHandler::process_mouse_click(int x, int y) {
+    for (auto& button : buttons) {
+        if (button.enabled && 
+            x >= button.rect.x && x <= button.rect.x + button.rect.w &&
+            y >= button.rect.y && y <= button.rect.y + button.rect.h) {
+            handle_button_action(button.type);  
+            return;
+        }
+    }
 }
 
 void ClientHandler::process_event(const SDL_Event& event) {
-    if (event.type == SDL_KEYDOWN) {
+    if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+        if (!mouse_was_down) {
+            process_mouse_click(event.button.x, event.button.y);
+            mouse_was_down = true;
+        }
+    }
+    else if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT) {
+        mouse_was_down = false;
+    }
+    else if (event.type == SDL_KEYDOWN) {
         SDL_Keymod mod = SDL_GetModState();
         if (mod & KMOD_CTRL) {
             
@@ -59,13 +81,22 @@ void ClientHandler::process_event(const SDL_Event& event) {
                 default:
                     break;
             }
-                return; //ver si apretar igual el ctrl wasdn o que no se tome por apretar el ctl
+            return;
         }
         key_state[event.key.keysym.sym] = true;
     }
     else if (event.type == SDL_KEYUP) {
         key_state[event.key.keysym.sym] = false;
     }
+}
+
+void ClientHandler::initialize_key_map() {
+    key_map[SDLK_w] = [this]() { parser.parse_command(SEND_ACCELERATE); };
+    key_map[SDLK_a] = [this]() { parser.parse_command(SEND_ROTATE_LEFT); };
+    key_map[SDLK_s] = [this]() { parser.parse_command(SEND_BRAKE); };
+    key_map[SDLK_d] = [this]() { parser.parse_command(SEND_ROTATE_RIGHT); };
+    key_map[SDLK_n] = [this]() { parser.parse_command(SEND_USE_NITRO); };
+    key_map[SDLK_r] = [this]() { parser.parse_command(SEND_READY_TO_PLAY); };
 }
 
 void ClientHandler::update() {

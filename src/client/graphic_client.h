@@ -7,6 +7,7 @@
 #include <memory>
 #include "../common/DTO.h"
 #include "text_renderer.h"
+#include "client_handler.h"
 
 class GraphicClient {
     SDL_Renderer* renderer;
@@ -26,9 +27,11 @@ class GraphicClient {
     bool is_upgrade_phase;
 
     int camera_id;
+    ClientHandler* handler;
+    bool ready_sent;
 
     public:
-    explicit GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot);
+    explicit GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot, ClientHandler* _handler);
     void draw(const Snapshot& snapshot);
     void update_from_snapshot(const Snapshot& snapshot);
     ~GraphicClient();
@@ -49,6 +52,7 @@ class GraphicClient {
     void draw_hint(HintCoords hint);
     void draw_game_id(int id);
     void draw_state(int state);
+    void draw_ready_btn(int player_count, bool& ready_sent);
 };
 
 

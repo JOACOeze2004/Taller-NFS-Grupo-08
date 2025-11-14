@@ -11,10 +11,10 @@
 
 constexpr float ZOOM_FACTOR = 2.0f;
 
-GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot)
+GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot, ClientHandler* _handler)
         : renderer(nullptr), bg_texture(nullptr), window(nullptr),
             player_car_id(-1), camera_x(0.0f), camera_y(0.0f), 
-            screen_width(1200), screen_height(900), text(nullptr) {
+            screen_width(1200), screen_height(900), text(nullptr), handler(_handler), ready_sent(false) {
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cerr << "[CLIENT] Error inicializando SDL: " << SDL_GetError() << std::endl;
@@ -243,6 +243,8 @@ void GraphicClient::draw(const Snapshot& snapshot) {
             draw_time(snapshot.time_ms);
             draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint);
             draw_hint(snapshot.hint);
+        } else if (snapshot.state == IN_LOBBY && snapshot.is_owner) {
+            draw_ready_btn(static_cast<int>(snapshot.cars.size()), ready_sent);
         }
 
         draw_game_id(snapshot.game_id);
@@ -251,7 +253,6 @@ void GraphicClient::draw(const Snapshot& snapshot) {
 
         auto player_it = snapshot.cars.find(player_car_id);
         if (player_it != snapshot.cars.end() && player_it->second.state != IN_GAME) {
-            
             draw_state(player_it->second.state);
         }
 
@@ -266,6 +267,42 @@ void GraphicClient::draw(const Snapshot& snapshot) {
 
     }
 } 
+
+void GraphicClient::draw_ready_btn(int player_count, bool& ready_sent){
+    if (!text || !handler) return;
+
+    const int btn_w = 250;
+    const int btn_h = 50;
+    const int btn_x = (screen_width / 2) - (btn_w / 2);
+    const int btn_y = screen_height - 120;
+    SDL_Rect btn_rect = { btn_x, btn_y, btn_w, btn_h };
+
+    if (!ready_sent) {
+        handler->clear_buttons();
+        handler->register_button(btn_rect, BUTTON_READY); 
+    } else {
+        handler->clear_buttons();
+    }
+
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    if (ready_sent) {
+        SDL_SetRenderDrawColor(renderer, 0, 180, 0, 200); 
+    } else {
+        SDL_SetRenderDrawColor(renderer, 30, 144, 255, 200);
+    }
+    SDL_RenderFillRect(renderer, &btn_rect);
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 200);
+    SDL_RenderDrawRect(renderer, &btn_rect);
+
+    SDL_Color label_color{255, 255, 255, 255};
+    std::string label = ready_sent ? "READY (sent)" : "READY";
+    text->render(renderer, label, btn_x + btn_w / 2 - 40, btn_y + btn_h / 2 -10, label_color);
+
+    char buf[64];
+    std::snprintf(buf, sizeof(buf), "Players: %i", player_count);
+    text->render(renderer, buf, btn_x, btn_y - 28, label_color);
+}
 
 void GraphicClient::draw_state(int state) {
     if (!text) return; 

@@ -59,8 +59,10 @@ void Client::run() {
         SDL_Delay(10);
     }
 
-    GraphicClient graphic_client(map_path,snapshot);
     ClientHandler handler(parser);
+
+    GraphicClient graphic_client(map_path, snapshot, &handler);
+    
     const Uint32 FRAME_DELAY = 1000 / 60;  // ~60 FPS
 
 
