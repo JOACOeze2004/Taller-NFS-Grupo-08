@@ -110,6 +110,8 @@ GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initia
 
     update_from_snapshot(initial_snapshot);
     
+    camera_id = player_car_id;
+    
 
     upgrade_phase = new UpgradePhase(renderer, window, screen_width, screen_height, handler); 
 
@@ -226,7 +228,7 @@ void GraphicClient::clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dt
 
 void GraphicClient::draw(const Snapshot& snapshot) {
     
-    if (snapshot.state == IN_LOBBY) { // en reallllllllllidad es si estoy en whorkshowp
+    if (snapshot.state == IN_WORK_SHOP) { // en reallllllllllidad es si estoy en whorkshowp
         upgrade_phase->render();
         SDL_RenderPresent(renderer);
 
