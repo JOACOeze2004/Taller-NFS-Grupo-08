@@ -120,8 +120,12 @@ GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initia
     is_upgrade_phase = true;
 }
 
-/* void GraphicClient::update_from_snapshot(const Snapshot& snapshot) {
-    
+void GraphicClient::update_from_snapshot(const Snapshot& snapshot) {
+
+    for (auto& [id, car] : snapshot.cars) {
+        update_car(id, car);
+    }
+
     update_camera();
 
     clear_cars(snapshot.cars);
@@ -134,7 +138,7 @@ GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initia
             }
         }
     }
-} */
+}
 
 void GraphicClient::set_player_car(int id) { 
     player_car_id = id;
@@ -226,19 +230,15 @@ void GraphicClient::clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dt
 
 void GraphicClient::draw(const Snapshot& snapshot) {
     
-    if (snapshot.cars.size() < 2) { // cambiar por un fase de juego o lago asi 
-        update_camera();
-
-        clear_cars(snapshot.cars);
+    if (snapshot.state == IN_RACE || snapshot.state == IN_LOBBY) { 
 
         draw_camera();
-
         
         draw_minimap(snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
-
-        if (player_car_id >= 0 && cars.find(player_car_id) != cars.end()) {
-            draw_speed(cars[player_car_id].velocity);
-            draw_speedometer(cars[player_car_id].velocity);
+        
+        draw_speedometer(cars[player_car_id].velocity);
+        
+        if (snapshot.state == IN_RACE) {
             draw_position(snapshot.position, snapshot.cars.size());
             draw_time(snapshot.time_ms);
             draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint);
@@ -251,17 +251,13 @@ void GraphicClient::draw(const Snapshot& snapshot) {
 
         auto player_it = snapshot.cars.find(player_car_id);
         if (player_it != snapshot.cars.end() && player_it->second.state != IN_GAME) {
-            for (const auto& [id, car_state] : snapshot.cars) {
-                if (car_state.state == IN_GAME && id != player_car_id) {
-                camera_id = id;
-                }
-            }
+            
             draw_state(player_it->second.state);
         }
 
 
         SDL_RenderPresent(renderer);
-    } else if(is_upgrade_phase){ // estoy es un ram eater porque crea un upg phase cada vez
+    } else if(snapshot.state == IN_WORK_SHOP){ // esto es un ram eater porque crea un upg phase cada vez
         UpgradePhase upgrade_phase(renderer, window, screen_width, screen_height);
         Upgrades selected = upgrade_phase.show_and_wait_selection();
         
@@ -377,13 +373,7 @@ void GraphicClient::draw_time(int time_ms) {
     text->render(renderer, buffer, 500, 100, color);
 }
 
-void GraphicClient::draw_speed(float speed) {
-    if (!text) return;
-    char buffer[64];
-    std::snprintf(buffer, sizeof(buffer), "SPEED: %.1f KM/H", speed);
-    SDL_Color color{0, 0, 0, 255};
-    text->render(renderer, buffer, 15, 20, color);
-}
+
 
 void GraphicClient::draw_speedometer(float speed) {
     if (!speedometer_texture) return;

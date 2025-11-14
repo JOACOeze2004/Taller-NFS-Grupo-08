@@ -30,8 +30,7 @@ class GraphicClient {
     public:
     explicit GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot);
     void draw(const Snapshot& snapshot);
-    /* void update_from_snapshot(snapshot); */
-    void update_car(int id, const CarDTO& car_state); //este ya no se usa
+    void update_from_snapshot(const Snapshot& snapshot);
     ~GraphicClient();
     
     private:
@@ -40,10 +39,10 @@ class GraphicClient {
     void draw_camera();
     void draw_minimap(const CheckpointCoords& checkpoint, int checkpoint_type, const HintCoords& hint);
     void update_camera();
+    void update_car(int id, const CarDTO& car_state);
     void set_player_car(int id);
     void draw_position(int position, int total_cars);
     void draw_time(int time_ms);
-    void draw_speed(float speed);
     void draw_speedometer(float speed);
     void draw_life(int life);
     void draw_checkpoint(CheckpointCoords checkpoint, int type);

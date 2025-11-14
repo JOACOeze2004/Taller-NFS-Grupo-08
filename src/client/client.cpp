@@ -69,15 +69,9 @@ void Client::run() {
         Uint32 frame_start = SDL_GetTicks();
 
         while (receiver.try_pop_car_state(snapshot)) {
-            for (auto& [id, car] : snapshot.cars) {
-                graphic_client.update_car(id, car);
-            }
+            graphic_client.update_from_snapshot(snapshot);
         }
         
-        /* while(!receiver.try_pop_snapshot(snapshot)) {
-            // Condiciones tipo mori hacer algo, o lo que tenga que ver con juego y no con mostrar cosas
-            graphic_client.update_from_snapshot(snapshot);
-            } */
 
         try {
             handler.handle_event();
