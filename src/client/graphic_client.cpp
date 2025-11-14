@@ -227,8 +227,7 @@ void GraphicClient::clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dt
 }
 
 void GraphicClient::draw(const Snapshot& snapshot) {
-    
-    if (snapshot.state == IN_LOBBY) { // en reallllllllllidad es si estoy en whorkshowp
+    if (snapshot.state == IN_WORK_SHOP) { // en reallllllllllidad es si estoy en whorkshowp
         upgrade_phase->render();
         SDL_RenderPresent(renderer);
 

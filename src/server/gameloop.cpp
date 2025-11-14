@@ -35,7 +35,7 @@ void Gameloop::initialize_car_actions() {
 void Gameloop::run() {
     lobby.run();
     size_t cont = 0;
-    while (cont < 5/*MAX_RACES*/) {
+    while (cont < 1/*MAX_RACES*/) {
         try {
             in_game.run();
             workshop.run();
@@ -121,6 +121,7 @@ void Gameloop::broadcast_lobby() {
         Snapshot dto = initialize_DTO();
         dto.cars = carsDTO;
         dto.state = IN_LOBBY;
+        dto.is_owner = id == owner_id;
         monitor.broadcast(dto,this->game_id, id);
     }
 }
@@ -140,15 +141,27 @@ void Gameloop::broadcast_in_game() {
         dto.position = in_game.get_position(id);
         dto.type_checkpoint = in_game.get_cp_type(id);
         dto.state = IN_RACE;
-        dto.is_owner = carsDTO[id].car_id == owner_id;
+        dto.is_owner = id == owner_id;
         dto.time_ms = in_game.get_time_remaining_ms();
         monitor.broadcast(dto,this->game_id, id);
     }
 }
 
 void Gameloop::broadcast_workshop() {
-    Snapshot dto = initialize_DTO();
-    dto.prices = workshop.get_prices();
+    std::unordered_map<int, CarDTO> carsDTO;
+    for  (auto& [id, car] : cars) {
+        CarDTO car_dto = car.get_state();
+        car_dto.state = FINISHED;
+        carsDTO.emplace(id, car_dto);
+    }
+    for (auto& [id, car] : cars) {
+        Snapshot dto = initialize_DTO();
+        dto.cars = carsDTO;
+        dto.is_owner = id == owner_id;
+        dto.state = IN_WORK_SHOP;
+        dto.prices = workshop.get_prices();
+        monitor.broadcast(dto,this->game_id, id);
+    }
 }
 
 bool Gameloop::can_join_to_game(){ return cars.size() < MAX_PLAYERS_PER_GAME; }
