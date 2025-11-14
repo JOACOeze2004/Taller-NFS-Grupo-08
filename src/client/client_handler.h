@@ -11,6 +11,7 @@ enum ButtonType {
     BUTTON_READY,
     BUTTON_UPGRADE_LIFE,
     BUTTON_UPGRADE_NITRO,
+    BUTTON_UPGRADE_SPEED,
     BUTTON_UPGRADE_ACCELERATION,
     BUTTON_UPGRADE_BRAKE,
     BUTTON_UPGRADE_HANDLING,
@@ -35,6 +36,7 @@ class ClientHandler {
 public:
     explicit ClientHandler(InputParser& _parser);
     void handle_event();
+    ~ClientHandler();
     
     void register_button(const SDL_Rect& rect, ButtonType type);
     void clear_buttons();
@@ -45,7 +47,6 @@ private:
     void handle_button_action(ButtonType type);  
     void update();
     void initialize_key_map();
-
 };
 
 #endif  // TALLER_TP_CLIENT_HANDLER_H

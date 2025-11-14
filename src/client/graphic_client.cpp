@@ -14,7 +14,8 @@ constexpr float ZOOM_FACTOR = 2.0f;
 GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot, ClientHandler* _handler)
         : renderer(nullptr), bg_texture(nullptr), window(nullptr),
             player_car_id(-1), camera_x(0.0f), camera_y(0.0f), 
-            screen_width(1200), screen_height(900), text(nullptr), handler(_handler), ready_sent(false) {
+            screen_width(1200), screen_height(900), text(nullptr), handler(_handler), 
+            ready_sent(false), upgrade_phase(nullptr) {
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cerr << "[CLIENT] Error inicializando SDL: " << SDL_GetError() << std::endl;
@@ -107,17 +108,12 @@ GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initia
 
     set_player_car(initial_snapshot.id);
 
-    for (const auto& [id, car_state] : initial_snapshot.cars) {
-        update_car(id, car_state);
-    }
-    set_player_car(initial_snapshot.id);
-    camera_id = initial_snapshot.id;
-
-    update_camera();
+    update_from_snapshot(initial_snapshot);
     
-    draw(initial_snapshot);
 
-    is_upgrade_phase = true;
+    upgrade_phase = new UpgradePhase(renderer, window, screen_width, screen_height, handler); 
+
+    draw(initial_snapshot);
 }
 
 void GraphicClient::update_from_snapshot(const Snapshot& snapshot) {
@@ -230,7 +226,14 @@ void GraphicClient::clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dt
 
 void GraphicClient::draw(const Snapshot& snapshot) {
     
-    if (snapshot.state == IN_RACE || snapshot.state == IN_LOBBY) { 
+    if (snapshot.state == IN_LOBBY) { // en reallllllllllidad es si estoy en whorkshowp
+        upgrade_phase->render();
+        SDL_RenderPresent(renderer);
+
+        return;
+    }
+    
+    if (snapshot.state == IN_RACE || snapshot.state == IN_LOBBY){ 
 
         draw_camera();
         
@@ -258,13 +261,6 @@ void GraphicClient::draw(const Snapshot& snapshot) {
 
 
         SDL_RenderPresent(renderer);
-    } else if(snapshot.state == IN_WORK_SHOP){ // esto es un ram eater porque crea un upg phase cada vez
-        UpgradePhase upgrade_phase(renderer, window, screen_width, screen_height);
-        Upgrades selected = upgrade_phase.show_and_wait_selection();
-        
-        std::cout << "[CLIENT] Mejora seleccionada: " << selected << std::endl;
-        is_upgrade_phase = false;
-
     }
 } 
 
@@ -626,15 +622,24 @@ void GraphicClient::draw_cars() {
 GraphicClient::~GraphicClient() {
     if (bg_texture) {
         SDL_DestroyTexture(bg_texture);
+        bg_texture = nullptr;
     }
     if (speedometer_texture) {
         SDL_DestroyTexture(speedometer_texture);
+        speedometer_texture = nullptr;
     }
-    if (renderer) {
-        SDL_DestroyRenderer(renderer);
+    if (checkpoint_texture) {
+        SDL_DestroyTexture(checkpoint_texture);
+        checkpoint_texture = nullptr;
     }
-    if (window) {
-        SDL_DestroyWindow(window);
+    if (hint_texture) {
+        SDL_DestroyTexture(hint_texture);
+        hint_texture = nullptr;
+    }
+
+    if (upgrade_phase) {
+        delete upgrade_phase;
+        upgrade_phase = nullptr;
     }
     if (text) {
         delete text;
@@ -643,12 +648,16 @@ GraphicClient::~GraphicClient() {
     if (TTF_WasInit()) {
         TTF_Quit();
     }
-    if (checkpoint_texture) {
-        SDL_DestroyTexture(checkpoint_texture);
+
+    if (renderer) {
+        SDL_DestroyRenderer(renderer);
+        renderer = nullptr;
     }
-    if (hint_texture) {
-        SDL_DestroyTexture(hint_texture);
+    if (window) {
+        SDL_DestroyWindow(window);
+        window = nullptr;
     }
+
     IMG_Quit();
     SDL_Quit();
 }

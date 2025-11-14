@@ -8,6 +8,7 @@
 #include "../common/DTO.h"
 #include "text_renderer.h"
 #include "client_handler.h"
+#include "upgrade_phase.h"
 
 class GraphicClient {
     SDL_Renderer* renderer;
@@ -24,11 +25,11 @@ class GraphicClient {
     int screen_width, screen_height;
     float map_width, map_height;
     TextRenderer* text;
-    bool is_upgrade_phase;
 
     int camera_id;
     ClientHandler* handler;
     bool ready_sent;
+    UpgradePhase* upgrade_phase;
 
     public:
     explicit GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot, ClientHandler* _handler);

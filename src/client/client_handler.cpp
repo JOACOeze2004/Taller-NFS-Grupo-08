@@ -38,6 +38,26 @@ void ClientHandler::handle_button_action(ButtonType type) {
             parser.parse_command(SEND_READY_TO_PLAY);
             std::cout << "[CLIENT_HANDLER] Ready button clicked - sending R\n";
             break;
+        case BUTTON_UPGRADE_SPEED:
+            parser.parse_command(SEND_VELOCITY_UPGRADE);
+            std::cout << "[CLIENT_HANDLER] Speed upgrade selected\n";
+            break;
+        case BUTTON_UPGRADE_ACCELERATION:
+            parser.parse_command(SEND_ACCELERATION_UPGRADE);
+            std::cout << "[CLIENT_HANDLER] Acceleration upgrade selected\n";
+            break;
+        case BUTTON_UPGRADE_HANDLING:
+            parser.parse_command(SEND_HANDLING_UPGRADE);
+            std::cout << "[CLIENT_HANDLER] Handling upgrade selected\n";
+            break;
+        case BUTTON_UPGRADE_NITRO:
+            parser.parse_command(SEND_NITRO_UPGRADE);
+            std::cout << "[CLIENT_HANDLER] Nitro upgrade selected\n";
+            break;
+        case BUTTON_UPGRADE_LIFE:
+            parser.parse_command(SEND_LIFE_UPGRADE);
+            std::cout << "[CLIENT_HANDLER] Life upgrade selected\n";
+            break;
         default:
             break;
     }
@@ -112,4 +132,8 @@ void ClientHandler::update() {
     for (auto& [key, func] : key_map) {
         if (key_state[key]) {func();}
     }
+}
+
+ClientHandler::~ClientHandler() {
+    clear_buttons();
 }
