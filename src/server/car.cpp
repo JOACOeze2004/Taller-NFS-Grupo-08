@@ -245,5 +245,8 @@ void Car::set_spawn(float& x, float& y, float& angle) {
     b2Body_SetLinearVelocity(body_id, {0,0});
     b2Body_SetAngularVelocity(body_id, 0);
     b2Rot rot = b2MakeRot(angle*(static_cast<float>(std::numbers::pi)));
+    life = MAX_LIFE;
+    nitro = MAX_NITRO;
+    nitro_activated = false;
     b2Body_SetTransform(body_id, {x,y}, rot);
 }
