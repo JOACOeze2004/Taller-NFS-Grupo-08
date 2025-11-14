@@ -12,6 +12,7 @@ constexpr float ACCELERATION = 80.0f - MASS;
 constexpr float BRAKING = 20.0f - MASS/2;
 
 class Car {
+    float NITRO = MAX_NITRO;
     float max_speed = MAX_SPEED;
     CarState state;
     float mass;
@@ -20,7 +21,7 @@ class Car {
     float braking = BRAKING;
     int car_id;
     int life = MAX_LIFE;
-    int nitro = MAX_NITRO;
+    int nitro = NITRO;
     b2BodyId body_id;
     bool nitro_activated = false;
     int nitro_consuption = NITRO_CONSUMPTION;
@@ -53,6 +54,13 @@ public:
 
     CarDTO get_state() const;
     void set_spawn(float& x, float& y, float& angle);
+
+    void accelerate_upgrade();
+    void handling_upgrade();
+    void nitro_upgrade();
+    void life_upgrade();
+    void brake_upgrade();
+    void mass_upgrade();
 
 private:
     float calculate_torque() const;

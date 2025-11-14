@@ -1,9 +1,11 @@
 #ifndef TALLER_TP_DTO_H
 #define TALLER_TP_DTO_H
 
-#include "car_DTO.h"
-#include <unordered_map>
+#include <chrono>
 #include <string>
+#include <unordered_map>
+#include <map>
+#include "car_DTO.h"
 
 struct LobbyCarDTO {
     int car_id;
@@ -28,11 +30,12 @@ enum Map {
 
 enum Upgrades {
     NONE_UPGRADE,
-    SPEED,
     ACCELERATION_UPGRADE,
     HANDLING_UPGRADE,
-    NITRO,
-    LIFE
+    NITRO_UPGRADE,
+    LIFE_UPGRADE,
+    BRAKE_UPGRADE,
+    MASS_UPGRADE
 };
 
 enum CollisionType {
@@ -76,6 +79,7 @@ struct Snapshot { //deberia ser una clase
     State state;
     std::unordered_map<int, LobbyCarDTO> lobby_cars; // el int es el car_id. al cliente no le importa el int igual
     bool is_owner;
+    std::map<Upgrades, std::chrono::seconds> prices;
     //std::unordered_map<int, playerDTO> players_info;
 
 };

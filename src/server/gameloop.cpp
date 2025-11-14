@@ -47,16 +47,6 @@ void Gameloop::run() {
     }
 }
 
-/*void Gameloop::run() {
-    lobby.run();
-    size_t cont;
-    while (cont < MAX_RACES) {
-        in_game.run();
-        upgrades.run();
-        cont++;
-    }
-}*/
-
 void Gameloop::process_command(ClientCommand& client_command) {
     if (client_command.cmd_struct.cmd == SEND_DISCONNECT) {
         user_names.erase(client_command.id);
@@ -65,10 +55,6 @@ void Gameloop::process_command(ClientCommand& client_command) {
     }
 
     auto it = cars.find(client_command.id);
-    //auto& id = it->first;
-    /*if (race.car_finished(id) || race.car_dead(id)) {
-        return;
-    }*/
 
     Car& car = it->second;
     auto action = car_actions.find(client_command.cmd_struct.cmd);
@@ -84,7 +70,7 @@ bool Gameloop::is_username_taken(const int username_id) const {
 
 void Gameloop::add_car(const int client_id, const int car_id,  const std::string& player_name) {
     auto [mass, handling, acceleration, braking] = parser.parse_car(car_id);
-    user_names[client_id] = player_name;;
+    user_names[client_id] = player_name;
 
     cars.emplace(std::piecewise_construct,
     std::forward_as_tuple(client_id),
@@ -116,6 +102,10 @@ Snapshot Gameloop::initialize_DTO() {
     dto.hint = {0,0,0};
     dto.position = 0;
     dto.type_checkpoint = REGULAR;
+    dto.id = -1;
+    dto.time_ms = -1;
+    dto.state = IN_LOBBY;
+    dto.is_owner = false;
 
     return dto;
 }
@@ -154,7 +144,11 @@ void Gameloop::broadcast_in_game() {
         dto.time_ms = in_game.get_time_remaining_ms();
         monitor.broadcast(dto,this->game_id, id);
     }
+}
 
+void Gameloop::broadcast_workshop() {
+    Snapshot dto = initialize_DTO();
+    dto.prices = workshop.get_prices();
 }
 
 bool Gameloop::can_join_to_game(){ return cars.size() < MAX_PLAYERS_PER_GAME; }
@@ -167,4 +161,40 @@ bool Gameloop::try_pop(ClientCommand& command) {
 
 bool Gameloop::is_game_already_started() const {
     return this->ready_to_start;
+}
+
+void Gameloop::accelerate_upgrade(int& id) {
+    auto it = cars.find(id);
+    Car& car = it->second;
+    car.accelerate_upgrade();
+}
+
+void Gameloop::handling_upgrade(int& id) {
+    auto it = cars.find(id);
+    Car& car = it->second;
+    car.handling_upgrade();
+}
+
+void Gameloop::nitro_upgrade(int& id) {
+    auto it = cars.find(id);
+    Car& car = it->second;
+    car.nitro_upgrade();
+}
+
+void Gameloop::life_upgrade(int& id) {
+    auto it = cars.find(id);
+    Car& car = it->second;
+    car.life_upgrade();
+}
+
+void Gameloop::brake_upgrade(int& id) {
+    auto it = cars.find(id);
+    Car& car = it->second;
+    car.brake_upgrade();
+}
+
+void Gameloop::mass_upgrade(int& id) {
+    auto it = cars.find(id);
+    Car& car = it->second;
+    car.mass_upgrade();
 }
