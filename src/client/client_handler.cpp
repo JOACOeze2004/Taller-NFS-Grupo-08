@@ -134,6 +134,14 @@ void ClientHandler::update() {
     }
 }
 
+bool ClientHandler::is_mouse_over_button(const SDL_Rect& rect) const {
+    int mouse_x, mouse_y;
+    SDL_GetMouseState(&mouse_x, &mouse_y);
+    
+    return (mouse_x >= rect.x && mouse_x <= rect.x + rect.w &&
+            mouse_y >= rect.y && mouse_y <= rect.y + rect.h);
+}
+
 ClientHandler::~ClientHandler() {
     clear_buttons();
 }

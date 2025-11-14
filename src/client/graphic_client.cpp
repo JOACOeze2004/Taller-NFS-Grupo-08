@@ -228,7 +228,7 @@ void GraphicClient::clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dt
 
 void GraphicClient::draw(const Snapshot& snapshot) {
     
-    if (snapshot.state == IN_WORK_SHOP) { // en reallllllllllidad es si estoy en whorkshowp
+    if (snapshot.state == IN_LOBBY) { // en reallllllllllidad es si estoy en whorkshowp
         upgrade_phase->render();
         SDL_RenderPresent(renderer);
 
@@ -282,15 +282,23 @@ void GraphicClient::draw_ready_btn(int player_count, bool& ready_sent){
         handler->clear_buttons();
     }
 
+    bool is_hovered = handler->is_mouse_over_button(btn_rect);
+
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     if (ready_sent) {
         SDL_SetRenderDrawColor(renderer, 0, 180, 0, 200); 
+    } else if (is_hovered) {
+        SDL_SetRenderDrawColor(renderer, 50, 164, 255, 230);
     } else {
         SDL_SetRenderDrawColor(renderer, 30, 144, 255, 200);
     }
     SDL_RenderFillRect(renderer, &btn_rect);
 
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 200);
+    if (is_hovered && !ready_sent) {
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    } else {
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 200);
+    }
     SDL_RenderDrawRect(renderer, &btn_rect);
 
     SDL_Color label_color{255, 255, 255, 255};
