@@ -128,6 +128,14 @@ Snapshot ClientProtocol::receive_game_state() const {
         LobbyCarDTO lobby_car = this->receive_lobby_car_state();
         snapshot.lobby_cars[car_id] = lobby_car;
     }
+
+    uint16_t prices_count = protocol.receive_big_endian_16();
+    for (int i = 0; i < prices_count; i++) {
+        Upgrades upgrade = static_cast<Upgrades>(protocol.receive_byte());
+        int seconds = protocol.receive_big_endian_16();
+        snapshot.prices[upgrade] = std::chrono::seconds(seconds);
+    }
+
     return snapshot;
 }
 

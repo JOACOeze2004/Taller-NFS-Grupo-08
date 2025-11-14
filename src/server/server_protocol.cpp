@@ -120,6 +120,12 @@ void ServerProtocol::send_game_state(const Snapshot& snapshot) {
     for (const auto& [car_id, lobby_car] : snapshot.lobby_cars) {
         send_lobby_car_state(lobby_car); 
     }
+
+    protocol.send_big_endian_16(snapshot.prices.size());
+    for (const auto& [upgrade, secs] : snapshot.prices) {
+        protocol.send_byte(static_cast<uint8_t>(upgrade));
+        protocol.send_big_endian_16(secs.count());
+    }
 }
 
 void ServerProtocol::send_error_message(const std::string& msg) {
