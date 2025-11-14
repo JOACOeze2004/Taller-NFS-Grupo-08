@@ -4,6 +4,7 @@
 InGame::InGame(Gameloop* _gameloop, float _duration, std::string& map_name, const std::string& races_path, std::map<int, Car>* cars): Phase(_gameloop, _duration), current_map(map_name), race(races_path, cars), cars(cars) {}
 
 void InGame::run() {
+    start_time = std::chrono::steady_clock::now();
     Checkpoint start = race.get_start();
     float start_angle = race.get_start_angle();
     for (auto& [id, car] : *cars) {
@@ -51,8 +52,8 @@ int InGame::get_time_remaining_ms() const {
     return std::max(0, MAX_TIME_PER_RACE - static_cast<int>(elapsed));
 }
 
-StateRunning InGame::get_state(const int& id, const int& time_remaining) {
-    return race.get_state(id, time_remaining);
+StateRunning InGame::get_state(const int& id) {
+    return race.get_state(id, get_time_remaining_ms());
 }
 
 CheckpointCoords InGame::get_checkpoint(const int& id) const {

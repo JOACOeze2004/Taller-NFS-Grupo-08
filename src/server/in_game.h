@@ -13,7 +13,6 @@ class InGame : public Phase {
     Race race;
     std::map<int, Car>* cars;
 
-    int get_time_remaining_ms() const;
     void delete_deads();
 
 public:
@@ -21,12 +20,13 @@ public:
     void run() override;
     void execute(ClientCommand& command) override;
     //b2WorldId get_world();
-    StateRunning get_state(const int& id, const int& time_remaining);
+    StateRunning get_state(const int& id);
     CheckpointCoords get_checkpoint(const int& id) const;
     HintCoords get_hint(const int& id) const;
     TypeCheckpoint get_cp_type(const int& id) const;
     int get_position(const int& id) const;
     void update_positions();
+    int get_time_remaining_ms() const;
 };
 
 
