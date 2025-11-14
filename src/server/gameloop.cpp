@@ -47,15 +47,6 @@ void Gameloop::run() {
     }
 }
 
-int Gameloop::get_time_remaining_ms() const {
-    if (!this->ready_to_start) {
-        return MAX_TIME_PER_RACE;
-    }
-    auto now = std::chrono::steady_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count();
-    return std::max(0, MAX_TIME_PER_RACE - static_cast<int>(elapsed));
-}
-
 /*void Gameloop::run() {
     lobby.run();
     size_t cont;
@@ -120,7 +111,6 @@ Snapshot Gameloop::initialize_DTO() {
     dto.upgrade = NONE_UPGRADE;
     dto.upgradeable = false;
     dto.collision = NONE_COLLISION;
-    dto.time_ms = get_time_remaining_ms();
     dto.lobby_cars = {};
     dto.checkpoint = {0,0};
     dto.hint = {0,0,0};
@@ -149,7 +139,7 @@ void Gameloop::broadcast_in_game() {
     std::unordered_map<int, CarDTO> carsDTO;
     for  (auto& [id, car] : cars) {
         CarDTO car_dto = car.get_state();
-        car_dto.state = in_game.get_state(id, get_time_remaining_ms());
+        car_dto.state = in_game.get_state(id);
         carsDTO.emplace(id, car_dto);
     }
     for (auto& [id, car] : cars) {
@@ -161,6 +151,7 @@ void Gameloop::broadcast_in_game() {
         dto.type_checkpoint = in_game.get_cp_type(id);
         dto.state = IN_RACE;
         dto.is_owner = carsDTO[id].car_id == owner_id;
+        dto.time_ms = in_game.get_time_remaining_ms();
         monitor.broadcast(dto,this->game_id, id);
     }
 

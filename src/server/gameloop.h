@@ -31,7 +31,6 @@ public:
     const std::string& get_game_id() const;
     bool can_join_to_game();
     bool is_username_taken(const int username_id) const;
-    int get_time_remaining_ms() const;
     void process_command(ClientCommand& client_command);
     void broadcast_in_game();
     void broadcast_lobby();
