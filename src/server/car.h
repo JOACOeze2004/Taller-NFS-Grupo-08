@@ -52,7 +52,7 @@ public:
     void update_nitro_usage();
 
     CarDTO get_state() const;
-    void set_spawn(float x, float y);
+    void set_spawn(float& x, float& y, float& angle);
 
 private:
     float calculate_torque() const;

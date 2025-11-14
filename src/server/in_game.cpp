@@ -4,8 +4,10 @@
 InGame::InGame(Gameloop* _gameloop, float _duration, std::string& map_name, const std::string& races_path, std::map<int, Car>* cars): Phase(_gameloop, _duration), current_map(map_name), race(races_path, cars), cars(cars) {}
 
 void InGame::run() {
+    Checkpoint start = race.get_start();
+    float start_angle = race.get_start_angle();
     for (auto& [id, car] : *cars) {
-        car.set_spawn(300,300);
+        car.set_spawn(start.x,start.y, start_angle);
     }
 
     auto rate = std::chrono::milliseconds(16);

@@ -146,3 +146,11 @@ HintCoords Race::get_hint(const int& id) const {
     const HintCoords hint = {x, y, rotation};
     return hint;
 }
+
+Checkpoint Race::get_start() const {
+    return track.checkpoints[0];
+}
+
+float Race::get_start_angle() const {
+    return track.hints[0].rotation;
+}
