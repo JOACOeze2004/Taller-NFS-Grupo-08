@@ -352,8 +352,8 @@ void GraphicClient::draw_checkpoint(CheckpointCoords checkpoint, int type) {
         float screen_x = (checkpoint.x - camera_x) * ZOOM_FACTOR;
         float screen_y = (checkpoint.y - camera_y) * ZOOM_FACTOR;
 
-        const float dst_w = 40.0f;
-        const float dst_h = 60.0f;
+        const float dst_w = 60.0f;
+        const float dst_h = 90.0f;
         SDL_FRect dst_rect = {screen_x - dst_w * 0.5f, screen_y - dst_h * 0.5f, dst_w, dst_h};
 
         if (type == 1){
@@ -380,7 +380,7 @@ void GraphicClient::draw_hint(HintCoords hint) {
         float screen_y = (hint.y - camera_y) * ZOOM_FACTOR;
 
         SDL_Rect src_rect = {260, 20, 120, 150};
-        SDL_FRect dst_rect = {screen_x, screen_y, 30.0f, 45.0f};
+        SDL_FRect dst_rect = {screen_x, screen_y, 40.0f, 60.0f};
 
         double angle_deg = hint.angle + 180;
         SDL_FPoint center = {15.0f, 15.0f}; 
