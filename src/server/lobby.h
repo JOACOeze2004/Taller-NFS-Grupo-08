@@ -7,9 +7,9 @@
 
 
 class Lobby : public Phase {
-
+    int owner_id;
 public:
-    explicit Lobby(Gameloop* _gameloop, float _duration);
+    explicit Lobby(Gameloop* _gameloop, float _duration, const int owner_id);
     void run() override;
     void execute(ClientCommand& command) override;
 };

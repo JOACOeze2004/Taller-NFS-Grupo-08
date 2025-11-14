@@ -1,7 +1,7 @@
 #include "lobby.h"
 #include "gameloop.h"
 
-Lobby::Lobby(Gameloop* _gameloop, float _duration): Phase(_gameloop, _duration) {}
+Lobby::Lobby(Gameloop* _gameloop, float _duration, const int owner_id): Phase(_gameloop, _duration), owner_id(owner_id) {}
 
 void Lobby::run() {
     auto rate = std::chrono::milliseconds(16);
@@ -33,7 +33,7 @@ void Lobby::run() {
 
 
 void Lobby::execute(ClientCommand& command) {
-    if (command.id == 0 || command.cmd_struct.cmd == SEND_READY_TO_PLAY) {
+    if (command.id == owner_id && command.cmd_struct.cmd == SEND_READY_TO_PLAY) {
         cont = false;
     }
 }

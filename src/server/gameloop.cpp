@@ -4,8 +4,8 @@
 #include "src/common/constants.h"
 #include <sstream>
 
-Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_name):
-        game_id(gid), monitor(_monitor), ready_to_start(false), lobby(this, 0.0f), in_game(this, 10.0f, map_name, "../src/server/prueba.yaml", &cars), workshop(this, 10.0f){
+Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_name, const int client_id):
+        game_id(gid), monitor(_monitor), owner_id(client_id), ready_to_start(false), lobby(this, 0.0f, owner_id), in_game(this, 10.0f, map_name, "../src/server/prueba.yaml", &cars), workshop(this, 10.0f){
     initialize_car_actions();
     world.generate_map(map_name);
 
@@ -160,6 +160,7 @@ void Gameloop::broadcast_in_game() {
         dto.position = in_game.get_position(id);
         dto.type_checkpoint = in_game.get_cp_type(id);
         dto.state = IN_RACE;
+        dto.is_owner = carsDTO[id].car_id == owner_id;
         monitor.broadcast(dto,this->game_id, id);
     }
 

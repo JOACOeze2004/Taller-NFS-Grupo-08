@@ -65,7 +65,7 @@ void Monitor::broadcast(const Snapshot& snapshot, const std::string& gid, const 
 std::shared_ptr<Gameloop> Monitor::create_game(std::string map_name, const int client_id, const int car_id, const std::string& username) {
     std::unique_lock<std::mutex> lock(mutex);
     std::string id = generate_game_id();
-    auto game_loop = std::make_shared<Gameloop>(*this, id, map_name);
+    auto game_loop = std::make_shared<Gameloop>(*this, id, map_name, client_id);
     current_games[id] = game_loop;
     game_loop->add_car(client_id, car_id,username);    
     return game_loop;

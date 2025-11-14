@@ -23,7 +23,7 @@ class Monitor;
 class Gameloop: public Thread {
 
 public:
-    explicit Gameloop(Monitor& _monitor, const std::string& game_id, std::string map_name);
+    explicit Gameloop(Monitor& _monitor, const std::string& game_id, std::string map_name, const int client_id);
     void run() override;
 
     void add_car(const int client_id, const int car_id,  const std::string& player_name);
@@ -47,6 +47,7 @@ private:
     std::map<int, Car> cars;
     std::map<uint8_t, std::function<void(Car& car)>> car_actions;
     World world;
+    int owner_id;
     bool ready_to_start;
     Lobby lobby;
     InGame in_game;
