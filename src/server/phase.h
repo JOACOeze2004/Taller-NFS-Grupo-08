@@ -12,7 +12,7 @@ public:
     explicit Phase(Gameloop* _gameloop, float _duration);
     virtual void run() = 0;
     virtual bool should_continue();
-    virtual void execute(ClientCommand& command) = 0;
+    virtual void execute() = 0;
     virtual ~Phase();
 };
 

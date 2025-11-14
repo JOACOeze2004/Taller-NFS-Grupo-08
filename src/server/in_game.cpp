@@ -3,26 +3,31 @@
 
 InGame::InGame(Gameloop* _gameloop, float _duration, std::string& map_name, const std::string& races_path, std::map<int, Car>* cars): Phase(_gameloop, _duration), current_map(map_name), race(races_path, cars), cars(cars) {}
 
-void InGame::run() {
+void InGame::set_start_race() {
     start_time = std::chrono::steady_clock::now();
     Checkpoint start = race.get_start();
     float start_angle = race.get_start_angle();
     for (auto& [id, car] : *cars) {
         car.set_spawn(start.x,start.y, start_angle);
     }
+    update_positions();
+    gameloop->broadcast_in_game();
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+}
+
+void InGame::run() {
+    set_start_race();
 
     auto rate = std::chrono::milliseconds(16);
     auto t1 = std::chrono::steady_clock::now();
-    while (should_continue()) {
-        // contador de inicio de carrera
 
-        ClientCommand command{};
-        while (gameloop->try_pop(command)) {
-            execute(command);
-        }
+    while (should_continue()) {
+        execute();
         update_positions();
+
         gameloop->broadcast_in_game();
 
+        check_end_race();
 
         auto t2 = std::chrono::steady_clock::now();
         auto rest = rate - std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
@@ -38,12 +43,25 @@ void InGame::run() {
     }
 }
 
+void InGame::check_end_race() {
+    int cars_finished = 0;
+    for (auto& [id, car] : *cars) {
+        if (race.car_finished(id)) {
+            cars_finished++;
+        }
+    }
 
-void InGame::execute(ClientCommand& command) {
-    /*if (get_time_remaining_ms() <= 0){
+    if (cars_finished == static_cast<int>(cars->size())) {
         cont = false;
-    }*/
-    gameloop->process_command(command);
+    }
+}
+
+void InGame::execute() {
+    ClientCommand command{};
+    while (gameloop->try_pop(command)) {
+        gameloop->process_command(command);
+    }
+    update_positions();
 }
 
 int InGame::get_time_remaining_ms() const {
@@ -53,7 +71,8 @@ int InGame::get_time_remaining_ms() const {
 }
 
 StateRunning InGame::get_state(const int& id) {
-    return race.get_state(id, get_time_remaining_ms());
+    const StateRunning state = race.get_state(id, get_time_remaining_ms());
+    return state;
 }
 
 CheckpointCoords InGame::get_checkpoint(const int& id) const {

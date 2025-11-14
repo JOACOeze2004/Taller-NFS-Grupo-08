@@ -8,7 +8,7 @@ class Workshop : public Phase {
 public:
     explicit Workshop(Gameloop* _gameloop, float _duration);
     void run() override;
-    void execute(ClientCommand& command) override;
+    void execute() override;
 };
 
 

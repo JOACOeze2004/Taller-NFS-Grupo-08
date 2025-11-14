@@ -13,13 +13,15 @@ class InGame : public Phase {
     Race race;
     std::map<int, Car>* cars;
 
+
     void delete_deads();
+    void set_start_race();
+    void check_end_race();
 
 public:
     explicit InGame(Gameloop* _gameloop, float _duration, std::string& map_name, const std::string& races_path, std::map<int, Car>* cars);
     void run() override;
-    void execute(ClientCommand& command) override;
-    //b2WorldId get_world();
+    void execute() override;
     StateRunning get_state(const int& id);
     CheckpointCoords get_checkpoint(const int& id) const;
     HintCoords get_hint(const int& id) const;

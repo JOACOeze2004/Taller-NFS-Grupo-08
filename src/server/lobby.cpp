@@ -8,11 +8,7 @@ void Lobby::run() {
     auto t1 = std::chrono::steady_clock::now();
     while (should_continue()) {
 
-        ClientCommand command{};
-        while (gameloop->try_pop(command)) {
-            execute(command);
-            gameloop->process_command(command);
-        }
+        execute();
         gameloop->update_positions();
         gameloop->broadcast_lobby();
 
@@ -32,8 +28,12 @@ void Lobby::run() {
 }
 
 
-void Lobby::execute(ClientCommand& command) {
-    if (command.id == owner_id && command.cmd_struct.cmd == SEND_READY_TO_PLAY) {
-        cont = false;
+void Lobby::execute() {
+    ClientCommand command{};
+    while (gameloop->try_pop(command)) {
+        if (command.id == owner_id && command.cmd_struct.cmd == SEND_READY_TO_PLAY) {
+            cont = false;
+        }
+        gameloop->process_command(command);
     }
 }
