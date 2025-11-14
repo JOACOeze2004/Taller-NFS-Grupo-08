@@ -9,7 +9,6 @@
 
 enum ButtonType {
     BUTTON_READY,
-    // Arrow upgrade/downgrade buttons (right = upgrade, left = downgrade)
     BUTTON_LIFE_UP, BUTTON_LIFE_DOWN,
     BUTTON_VELOCITY_UP, BUTTON_VELOCITY_DOWN,
     BUTTON_ACCELERATION_UP, BUTTON_ACCELERATION_DOWN,

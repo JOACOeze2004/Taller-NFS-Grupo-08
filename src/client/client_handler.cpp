@@ -38,40 +38,52 @@ void ClientHandler::handle_button_action(ButtonType type) {
             break;
         // upgrades
         case BUTTON_LIFE_UP:
+            std::cout << "Clicked: BUTTON_LIFE_UP" << std::endl;
             parser.parse_command(SEND_LIFE_UPGRADE);
             break;
         case BUTTON_VELOCITY_UP:
-            parser.parse_command(SEND_VELOCITY_UPGRADE);
+            std::cout << "Clicked: BUTTON_VELOCITY_UP" << std::endl;
+            parser.parse_command(SEND_BRAKE_UPGRADE);
             break;
         case BUTTON_ACCELERATION_UP:
+            std::cout << "Clicked: BUTTON_ACCELERATION_UP" << std::endl;
             parser.parse_command(SEND_ACCELERATION_UPGRADE);
             break;
         case BUTTON_HANDLING_UP:
+            std::cout << "Clicked: BUTTON_HANDLING_UP" << std::endl;
             parser.parse_command(SEND_HANDLING_UPGRADE);
             break;
         case BUTTON_CONTROL_UP:
-            parser.parse_command(SEND_CONTROL_UPGRADE);
+            std::cout << "Clicked: BUTTON_CONTROL_UP" << std::endl;
+            parser.parse_command(SEND_MASS_UPGRADE);
             break;
         case BUTTON_NITRO_UP:
+            std::cout << "Clicked: BUTTON_NITRO_UP" << std::endl;
             parser.parse_command(SEND_NITRO_UPGRADE);
             break;
         // downgrades
         case BUTTON_LIFE_DOWN:
+            std::cout << "Clicked: BUTTON_LIFE_DOWN" << std::endl;
             parser.parse_command(SEND_LIFE_DOWNGRADE);
             break;
         case BUTTON_VELOCITY_DOWN:
-            parser.parse_command(SEND_VELOCITY_DOWNGRADE);
+            std::cout << "Clicked: BUTTON_VELOCITY_DOWN" << std::endl;
+            parser.parse_command(SEND_BRAKE_DOWNGRADE);
             break;
         case BUTTON_ACCELERATION_DOWN:
+            std::cout << "Clicked: BUTTON_ACCELERATION_DOWN" << std::endl;
             parser.parse_command(SEND_ACCELERATION_DOWNGRADE);
             break;
         case BUTTON_HANDLING_DOWN:
+            std::cout << "Clicked: BUTTON_HANDLING_DOWN" << std::endl;
             parser.parse_command(SEND_HANDLING_DOWNGRADE);
             break;
         case BUTTON_CONTROL_DOWN:
-            parser.parse_command(SEND_CONTROL_DOWNGRADE);
+            std::cout << "Clicked: BUTTON_CONTROL_DOWN" << std::endl;
+            parser.parse_command(SEND_MASS_DOWNGRADE);
             break;
         case BUTTON_NITRO_DOWN:
+            std::cout << "Clicked: BUTTON_NITRO_DOWN" << std::endl;
             parser.parse_command(SEND_NITRO_DOWNGRADE);
             break;
         default:

@@ -40,6 +40,10 @@ private:
     std::vector<ArrowButton> arrow_buttons;
     
     void init_upgrade_buttons();
+    void addUpgrade(int order, const char* title, const char* desc, SDL_Rect icon_src,
+                    ButtonType left_button_type, ButtonType right_button_type,
+                    int start_x, int start_y, int button_width, int button_height,
+                    int spacing, int icon_size, int arrow_size);
     void load_textures();
     void render_background();
     void render_title();

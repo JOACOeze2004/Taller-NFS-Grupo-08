@@ -12,7 +12,7 @@ UpgradePhase::UpgradePhase(SDL_Renderer* renderer, SDL_Window* window,
     
     const char* default_font_path = "../assets/fonts/DejaVuSans.ttf";
     text = new TextRenderer();
-    if (!text->load(default_font_path, 24) || !text->ok()) {
+    if (!text->load(default_font_path, 18) || !text->ok()) {
         std::cerr << "[UPGRADE_PHASE] Fuente no disponible" << std::endl;
         delete text;
         text = nullptr;
@@ -30,7 +30,7 @@ UpgradePhase::UpgradePhase(SDL_Renderer* renderer, SDL_Window* window,
 }
 
 void UpgradePhase::load_textures() {
-    SDL_Surface* icons_surface = IMG_Load("../assets/Workshop_icons.webp");
+    SDL_Surface* icons_surface = IMG_Load("../assets/need-for-speed/sprits/Workshop_icons_1.png");
     
     if (!icons_surface) {
         std::cerr << "[UPGRADE_PHASE] Error loading Workshop_icons.webp: " << IMG_GetError() << std::endl;
@@ -42,7 +42,7 @@ void UpgradePhase::load_textures() {
         }
     }
     
-    SDL_Surface* arrows_surface = IMG_Load("../assets/workshop_arrow_spritesheet.png");
+    SDL_Surface* arrows_surface = IMG_Load("../assets/need-for-speed/sprits/workshop_arrow_spritesheet.png");
     if (!arrows_surface) {
         std::cerr << "[UPGRADE_PHASE] Error loading workshop_arrow_spritesheet.png: " << IMG_GetError() << std::endl;
     } else {
@@ -54,69 +54,60 @@ void UpgradePhase::load_textures() {
     }
 }
 
+void UpgradePhase::addUpgrade(int order, const char* title, const char* desc, SDL_Rect icon_src,
+                              ButtonType left_button_type, ButtonType right_button_type,
+                              int start_x, int start_y, int button_width, int button_height,
+                              int spacing, int icon_size, int arrow_size) {
+    UpgradeButton btn;
+    btn.rect = {start_x, start_y + order * (button_height + spacing), button_width, button_height};
+    btn.upgrade_type = NONE_UPGRADE;
+    btn.title = title;
+    btn.description = desc;
+    btn.icon_src_rect = icon_src;
+    upgrade_buttons.push_back(btn);
+
+    int center_x = btn.rect.x + btn.rect.w / 2;
+    int arrow_gap = icon_size + 50;
+    int arrow_y = btn.rect.y + (btn.rect.h - arrow_size) / 2;
+
+    SDL_Rect left_arrow  = { center_x - arrow_gap - arrow_size, arrow_y, arrow_size, arrow_size };
+    SDL_Rect right_arrow = { center_x + arrow_gap, arrow_y, arrow_size, arrow_size };
+
+    arrow_buttons.push_back({left_arrow, left_button_type});
+    arrow_buttons.push_back({right_arrow, right_button_type});
+}
+
 void UpgradePhase::init_upgrade_buttons() {
     upgrade_buttons.clear();
     arrow_buttons.clear();
     
-    const int button_width = 280;
-    const int button_height = 80;
-    const int spacing = 20;
-    const int start_y = 150;
-    const int icon_size = 48;
-    const int arrow_size = 24;
+    const int button_width = 380;
+    const int button_height = 120;
+    const int spacing = 10;
+    const int start_y = 80;
+    const int icon_size = 64;
+    const int arrow_size = 40;
     
     int start_x = (screen_width - button_width) / 2;
     
-    auto addUpgrade = [&](int order, Upgrades up_type, const char* title, const char* desc, SDL_Rect icon_src) {
-        UpgradeButton btn;
-        btn.rect = {start_x, start_y + order * (button_height + spacing), button_width, button_height};
-        btn.upgrade_type = up_type;
-        btn.title = title;
-        btn.description = desc;
-        btn.icon_src_rect = icon_src;
-        upgrade_buttons.push_back(btn);
-
-        int center_x = btn.rect.x + btn.rect.w / 2;
-        int center_y = btn.rect.y + 15;
-        SDL_Rect left_arrow = { center_x - icon_size / 2 - arrow_size - 5, center_y, arrow_size, arrow_size };
-        SDL_Rect right_arrow = { center_x + icon_size / 2 + 5, center_y, arrow_size, arrow_size };
-
-        switch (up_type) {
-            case LIFE:
-                arrow_buttons.push_back({left_arrow, BUTTON_LIFE_DOWN});
-                arrow_buttons.push_back({right_arrow, BUTTON_LIFE_UP});
-                break;
-            case NITRO:
-                arrow_buttons.push_back({left_arrow, BUTTON_NITRO_DOWN});
-                arrow_buttons.push_back({right_arrow, BUTTON_NITRO_UP});
-                break;
-            case ACCELERATION_UPGRADE:
-                arrow_buttons.push_back({left_arrow, BUTTON_ACCELERATION_DOWN});
-                arrow_buttons.push_back({right_arrow, BUTTON_ACCELERATION_UP});
-                break;
-            case HANDLING_UPGRADE:
-                arrow_buttons.push_back({left_arrow, BUTTON_HANDLING_DOWN});
-                arrow_buttons.push_back({right_arrow, BUTTON_HANDLING_UP});
-                break;
-            case MASS_UPGRADE: 
-                arrow_buttons.push_back({left_arrow, BUTTON_CONTROL_DOWN});
-                arrow_buttons.push_back({right_arrow, BUTTON_CONTROL_UP});
-                break;
-            case BRAKE_UPGRADE: 
-                arrow_buttons.push_back({left_arrow, BUTTON_VELOCITY_DOWN});
-                arrow_buttons.push_back({right_arrow, BUTTON_VELOCITY_UP});
-                break;
-            default:
-                break;
-        }
-    };
-    
-    addUpgrade(3, NITRO, "NITRO", "Impulso de velocidad temporal", SDL_Rect{192,0,64,64});
-    addUpgrade(4, LIFE, "VIDA", "Aumenta la resistencia del auto", SDL_Rect{256,0,64,64});
-    addUpgrade(1, ACCELERATION_UPGRADE, "ACELERACION", "Acelera mas rapido", SDL_Rect{64,0,64,64});
-    addUpgrade(0, MASS_UPGRADE, "MASA", "Aumenta la masa del auto", SDL_Rect{0,0,64,64});
-    addUpgrade(5, BRAKE_UPGRADE, "FRENOS", "Mejora la capacidad de frenado", SDL_Rect{320,0,64,64});
-    addUpgrade(2, HANDLING_UPGRADE, "MANEJO", "Mejora el control del auto", SDL_Rect{128,0,64,64});
+    addUpgrade(3, "NITRO", "Temporary speed boost", SDL_Rect{372, 175,135,140},
+               BUTTON_NITRO_DOWN, BUTTON_NITRO_UP,
+               start_x, start_y, button_width, button_height, spacing, icon_size, arrow_size);
+    addUpgrade(4, "LIFE", "Increases car durability", SDL_Rect{355,10, 180, 170},
+               BUTTON_LIFE_DOWN, BUTTON_LIFE_UP,
+               start_x, start_y, button_width, button_height, spacing, icon_size, arrow_size);
+    addUpgrade(1, "ACCELERATION", "Improves acceleration", SDL_Rect{350, 310, 180, 110},
+               BUTTON_ACCELERATION_DOWN, BUTTON_ACCELERATION_UP,
+               start_x, start_y, button_width, button_height, spacing, icon_size, arrow_size);
+    addUpgrade(0, "MASS", "Increases car mass", SDL_Rect{305,430,275,140},
+               BUTTON_CONTROL_DOWN, BUTTON_CONTROL_UP,
+               start_x, start_y, button_width, button_height, spacing, icon_size, arrow_size);
+    addUpgrade(5, "BRAKES", "Improves braking ability", SDL_Rect{350,565,180,145},
+               BUTTON_VELOCITY_DOWN, BUTTON_VELOCITY_UP,
+               start_x, start_y, button_width, button_height, spacing, icon_size, arrow_size);
+    addUpgrade(2, "HANDLING", "Improves car handling", SDL_Rect{360,710,170,170},
+               BUTTON_HANDLING_DOWN, BUTTON_HANDLING_UP,
+               start_x, start_y, button_width, button_height, spacing, icon_size, arrow_size);
 }
 
 void UpgradePhase::render_background() {
@@ -127,73 +118,105 @@ void UpgradePhase::render_background() {
 
 void UpgradePhase::render_title() {
     if (!text) return;
-    
-    std::string title = "MEJORAS DISPONIBLES";
-    SDL_Color title_color = {255, 215, 0, 255}; 
-    
-    int title_x = (screen_width / 2) - 200;
-    int title_y = 100;
-    
+    std::string title = "AVAILABLE UPGRADES";
+    SDL_Color title_color = {255, 215, 0, 255};
+    int title_y = 30;
+    int est_width = static_cast<int>(title.size()) * 10;
+    int title_x = (screen_width - est_width) / 2;
     text->render(renderer, title, title_x, title_y, title_color);
 }
 
 void UpgradePhase::render_upgrade_buttons() {
-    SDL_Rect left_arrow_src = {0, 0, 32, 32};   // Placeholder - ajustar coordenadas
-    SDL_Rect right_arrow_src = {32, 0, 32, 32}; // Placeholder - ajustar coordenadas
     
-    for (auto& button : upgrade_buttons) {
-        SDL_Color bg_color = {80, 120, 200, 255};
+    if (handler) {
+        handler->clear_buttons();
+        for (const auto& arrow : arrow_buttons) {
+            handler->register_button(arrow.rect, arrow.type);
+        }
+    }
+
+    SDL_Rect arrow_src = {550, 340, 240, 230};
+    for (size_t i = 0; i < upgrade_buttons.size(); ++i) {
+        auto& button = upgrade_buttons[i];
+        SDL_Color bg_color = {60, 90, 150, 220};
         SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
         SDL_RenderFillRect(renderer, &button.rect);
-        SDL_SetRenderDrawColor(renderer, 160, 190, 230, 255);
+        SDL_SetRenderDrawColor(renderer, 140, 170, 210, 255);
         SDL_RenderDrawRect(renderer, &button.rect);
-        
-        const int icon_size = 48;
-        const int arrow_size = 24;
-        const int center_x = button.rect.x + button.rect.w / 2;
-        const int center_y = button.rect.y + 15;
-        
-        // derive arrow rects (same math as init) for hover highlighting
-        SDL_Rect left_arrow = { center_x - icon_size / 2 - arrow_size - 5, center_y, arrow_size, arrow_size };
-        SDL_Rect right_arrow = { center_x + icon_size / 2 + 5, center_y, arrow_size, arrow_size };
-        bool hover_left = handler && handler->is_mouse_over_button(left_arrow);
-        bool hover_right = handler && handler->is_mouse_over_button(right_arrow);
-        
-        if (arrows_texture) {
-            if (hover_left) SDL_SetTextureColorMod(arrows_texture, 200, 80, 80);
-            SDL_RenderCopy(renderer, arrows_texture, &left_arrow_src, &left_arrow);
-            if (hover_left) SDL_SetTextureColorMod(arrows_texture, 255, 255, 255);
-        }
+
         
         if (icons_texture) {
-            SDL_Rect icon_dst = { center_x - icon_size / 2, center_y, icon_size, icon_size };
-            SDL_RenderCopy(renderer, icons_texture, &button.icon_src_rect, &icon_dst);
+            int tex_w = 0, tex_h = 0;
+            SDL_QueryTexture(icons_texture, nullptr, nullptr, &tex_w, &tex_h);
+
+            SDL_Rect src = button.icon_src_rect;
+            
+            if (src.x < 0) src.x = 0;
+            if (src.y < 0) src.y = 0;
+            if (src.x + src.w > tex_w) src.w = tex_w - src.x;
+            if (src.y + src.h > tex_h) src.h = tex_h - src.y;
+
+            int padding = 12;
+            int max_h = button.rect.h - padding * 2;
+            if (max_h < 8) max_h = button.rect.h;
+            
+            const int ICON_MAX_H = 64;
+            int dest_h = (ICON_MAX_H < max_h ? ICON_MAX_H : max_h);
+            
+            double aspect = (src.h == 0) ? 1.0 : (double)src.w / (double)src.h;
+            int dest_w = static_cast<int>(aspect * dest_h);
+            
+            if (dest_w > button.rect.w - padding * 2) {
+                dest_w = button.rect.w - padding * 2;
+                dest_h = static_cast<int>( (double)dest_w / (aspect == 0 ? 1.0 : aspect) );
+            }
+            SDL_Rect icon_dst = {
+                button.rect.x + (button.rect.w - dest_w)/2,
+                button.rect.y + (button.rect.h - dest_h)/2,
+                dest_w,
+                dest_h
+            };
+            SDL_RenderCopy(renderer, icons_texture, &src, &icon_dst);
         }
+
         
+        SDL_Rect left_arrow = arrow_buttons[2*i].rect;
+        SDL_Rect right_arrow = arrow_buttons[2*i + 1].rect;
+        bool hover_left = handler && handler->is_mouse_over_button(left_arrow);
+        bool hover_right = handler && handler->is_mouse_over_button(right_arrow);
+
         if (arrows_texture) {
-            if (hover_right) SDL_SetTextureColorMod(arrows_texture, 80, 200, 80);
-            SDL_RenderCopy(renderer, arrows_texture, &right_arrow_src, &right_arrow);
-            if (hover_right) SDL_SetTextureColorMod(arrows_texture, 255, 255, 255);
+            if (hover_left) SDL_SetTextureColorMod(arrows_texture, 220, 100, 100);
+            SDL_RenderCopyEx(renderer, arrows_texture, &arrow_src, &left_arrow, 0.0, nullptr, SDL_FLIP_HORIZONTAL);
+            if (hover_left) SDL_SetTextureColorMod(arrows_texture, 255,255,255);
+            if (hover_right) SDL_SetTextureColorMod(arrows_texture, 100, 220, 100);
+            SDL_RenderCopyEx(renderer, arrows_texture, &arrow_src, &right_arrow, 0.0, nullptr, SDL_FLIP_NONE);
+            if (hover_right) SDL_SetTextureColorMod(arrows_texture, 255,255,255);
         }
-        
+
         if (text) {
             SDL_Color text_color = {255,255,255,255};
-            int title_x = button.rect.x + (button.rect.w - button.title.length() * 6) / 2;
-            int title_y = button.rect.y + 10;
+            int title_y = button.rect.y + 6;
+            int est_title_width = static_cast<int>(button.title.size()) * 8;
+            int title_x = button.rect.x + (button.rect.w - est_title_width) / 2;
             text->render(renderer, button.title, title_x, title_y, text_color);
+            
+            int desc_y = button.rect.y + button.rect.h - 22;
+            SDL_Color desc_color = {200,200,200,255};
+            int est_desc_width = static_cast<int>(button.description.size()) * 7;
+            int desc_x = button.rect.x + (button.rect.w - est_desc_width) / 2;
+            text->render(renderer, button.description, desc_x, desc_y, desc_color);
         }
     }
 }
 
 void UpgradePhase::render_instructions() {
     if (!text) return;
-    
-    std::string instruction = "Haz click en una mejora para seleccionarla";
-    SDL_Color color = {180, 180, 180, 255};
-    
-    int x = (screen_width / 2) - 250;
-    int y = screen_height - 100;
-    
+    std::string instruction = "Use LEFT/RIGHT arrows to downgrade/upgrade";
+    SDL_Color color = {200, 200, 200, 255};
+    int est_width = static_cast<int>(instruction.size()) * 10;
+    int x = (screen_width - est_width) / 2;
+    int y = screen_height - 30;
     text->render(renderer, instruction, x, y, color);
 }
 
