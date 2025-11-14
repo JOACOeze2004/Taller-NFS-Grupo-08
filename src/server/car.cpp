@@ -3,6 +3,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "src/common/DTO.h"
+
 Car::Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking, int _car_id) : mass(_mass), handling(_handling + mass), acceleration(_acceleration - mass), braking(_braking - mass/2), car_id(_car_id){
     body = b2DefaultBodyDef();
     body.type = b2_dynamicBody;
@@ -134,6 +136,7 @@ void Car::apply_friction() {
     };
     b2Body_ApplyLinearImpulseToCenter(body_id, lateral_impulse, true);
 
+    //last_hit = NONE_COLLISION;
 }
 
 void Car::handle_hit(b2Vec2& normal, float& force, bool is_hitter) {
@@ -146,6 +149,14 @@ void Car::handle_hit(b2Vec2& normal, float& force, bool is_hitter) {
 
     b2Vec2 forward = b2Body_GetWorldVector(body_id, {1.0f, 0.0f});
     float angle_impact = fabs(b2Dot(normal, forward));
+
+    /*if (angle_impact == 1) {
+        last_hit = HEAVY_COLLISION;
+    }
+    else {
+        last_hit = CHILL_COLLISION;
+    }
+    */
     float angle_factor = 0.3f + 0.7f * angle_impact;
 
     if (is_hitter) {
@@ -212,8 +223,8 @@ void Car::update_nitro_usage(){
         }
     }else{
         nitro += NITRO_RECHARGE_RATE;        
-        if (nitro >= MAX_NITRO){
-            nitro = MAX_NITRO;
+        if (nitro >= NITRO){
+            nitro = NITRO;
         }        
     }
 }
@@ -250,3 +261,28 @@ void Car::set_spawn(float& x, float& y, float& angle) {
     nitro_activated = false;
     b2Body_SetTransform(body_id, {x,y}, rot);
 }
+
+void Car::accelerate_upgrade() {
+    acceleration = acceleration * ACCELERATION_UPGRADE_FACTOR;
+}
+
+void Car::handling_upgrade() {
+    handling = handling * HANDLING_UPGRADE_FACTOR;
+}
+
+void Car::nitro_upgrade() {
+    NITRO = NITRO * NITRO_UPGRADE_FACTOR;
+}
+
+void Car::life_upgrade() {
+    life = life * LIFE_UPGRADE_FACTOR;
+}
+
+void Car::brake_upgrade() {
+    braking = braking * BRAKE_UPGRADE_FACTOR;
+}
+
+void Car::mass_upgrade() {
+    mass = mass * MASS_UPGRADE_FACTOR;
+}
+

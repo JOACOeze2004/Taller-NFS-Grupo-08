@@ -34,8 +34,15 @@ public:
     void process_command(ClientCommand& client_command);
     void broadcast_in_game();
     void broadcast_lobby();
+    void broadcast_workshop();
     bool try_pop(ClientCommand& command);
     void update_positions();
+    void accelerate_upgrade(int& id);
+    void handling_upgrade(int& id);
+    void nitro_upgrade(int& id);
+    void life_upgrade(int& id);
+    void brake_upgrade(int& id);
+    void mass_upgrade(int& id);
 
     bool is_game_already_started() const;
 
