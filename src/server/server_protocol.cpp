@@ -7,15 +7,60 @@ uint8_t ServerProtocol::receive_standar_command() const {
     return protocol.receive_byte();
 }
 
+void ServerProtocol::send_cars(const Snapshot& snapshot){
+    protocol.send_big_endian_16(snapshot.cars.size());
+    for (const auto& [car_id, car] : snapshot.cars) {
+        protocol.send_big_endian_16(car_id);
+        send_car_state(car); 
+    }
+}
+
+void ServerProtocol::send_game_data(const Snapshot& snapshot){
+    protocol.send_byte(static_cast<uint8_t>(snapshot.game_id));
+    protocol.send_byte(static_cast<uint8_t>(snapshot.position));
+    protocol.send_byte(static_cast<uint8_t>(snapshot.map));
+    protocol.send_byte(static_cast<uint8_t>(snapshot.upgrade));
+    protocol.send_bool(snapshot.upgradeable);
+    protocol.send_byte(static_cast<uint8_t>(snapshot.collision));
+}
+
+void ServerProtocol::send_checkpoint_hint(const Snapshot& snapshot){
+    protocol.send_float(snapshot.checkpoint.x);
+    protocol.send_float(snapshot.checkpoint.y);
+    protocol.send_float(snapshot.hint.x);
+    protocol.send_float(snapshot.hint.y);
+    protocol.send_float(snapshot.hint.angle);
+    protocol.send_byte(static_cast<uint8_t>(snapshot.type_checkpoint));
+}
+
+void ServerProtocol::send_remaining_data(const Snapshot& snapshot){
+    protocol.send_big_endian_32(snapshot.time_ms);
+    protocol.send_byte(static_cast<uint8_t>(snapshot.state));
+    protocol.send_bool(snapshot.is_owner);
+}
+
+void ServerProtocol::send_lobby_cars(const Snapshot& snapshot){
+    protocol.send_big_endian_16(snapshot.lobby_cars.size());
+    for (const auto& [car_id, lobby_car] : snapshot.lobby_cars) {
+        send_lobby_car_state(lobby_car); 
+    }
+}
+
+void ServerProtocol::send_prices(const Snapshot& snapshot){
+    protocol.send_big_endian_16(snapshot.prices.size());
+    for (const auto& [upgrade, secs] : snapshot.prices) {
+        protocol.send_byte(static_cast<uint8_t>(upgrade));
+        protocol.send_big_endian_16(secs.count());
+    }
+}
+
 void ServerProtocol::send_car_state(const CarDTO& car){
     protocol.send_float(car.x);
     protocol.send_float(car.y);
     protocol.send_float(car.velocity);
     protocol.send_float(car.angle);
     protocol.send_big_endian_32(car.car_id);
-
-    //protocol.send_bool(car.under_bridge); VER SI QUEDA O SE VA
-
+    
     float life_percentage = (static_cast<float>(car.life) * 100.0f) / static_cast<float>(MAX_LIFE);
 
     protocol.send_float(life_percentage);
@@ -34,10 +79,6 @@ void ServerProtocol::send_lobby_car_state(const LobbyCarDTO& car) {
 }
 
 void ServerProtocol::send_games_list(const std::vector<std::string>& games) {
-    if (games.size() == 0){
-        return;
-    }
-    
     protocol.send_big_endian_16(games.size());
     for (const auto& g : games) {
         protocol.send_big_endian_16(g.size());
@@ -84,48 +125,12 @@ void ServerProtocol::receive_lobby_action(uint8_t& action, std::string& game_id)
 
 void ServerProtocol::send_game_state(const Snapshot& snapshot) {
     protocol.send_byte(static_cast<uint8_t>(snapshot.id));    
-    protocol.send_big_endian_16(snapshot.cars.size());
-    
-    for (const auto& [car_id, car] : snapshot.cars) {
-        protocol.send_big_endian_16(car_id);
-        send_car_state(car); 
-    }
-
-    protocol.send_byte(static_cast<uint8_t>(snapshot.game_id));
-
-    protocol.send_byte(static_cast<uint8_t>(snapshot.position));
-
-    protocol.send_byte(static_cast<uint8_t>(snapshot.map));
-
-    protocol.send_byte(static_cast<uint8_t>(snapshot.upgrade));
-    protocol.send_bool(snapshot.upgradeable);
-
-    protocol.send_byte(static_cast<uint8_t>(snapshot.collision));
-    
-    protocol.send_float(snapshot.checkpoint.x);
-    protocol.send_float(snapshot.checkpoint.y);
-
-    protocol.send_float(snapshot.hint.x);
-    protocol.send_float(snapshot.hint.y);
-    protocol.send_float(snapshot.hint.angle);
-
-    protocol.send_byte(static_cast<uint8_t>(snapshot.type_checkpoint));
-    
-    protocol.send_big_endian_32(snapshot.time_ms);
-
-    protocol.send_byte(static_cast<uint8_t>(snapshot.state));
-    protocol.send_bool(snapshot.is_owner);
-
-    protocol.send_big_endian_16(snapshot.lobby_cars.size());
-    for (const auto& [car_id, lobby_car] : snapshot.lobby_cars) {
-        send_lobby_car_state(lobby_car); 
-    }
-
-    protocol.send_big_endian_16(snapshot.prices.size());
-    for (const auto& [upgrade, secs] : snapshot.prices) {
-        protocol.send_byte(static_cast<uint8_t>(upgrade));
-        protocol.send_big_endian_16(secs.count());
-    }
+    send_cars(snapshot);
+    send_game_data(snapshot);
+    send_checkpoint_hint(snapshot);
+    send_remaining_data(snapshot);
+    send_lobby_cars(snapshot);
+    send_prices(snapshot);
 }
 
 void ServerProtocol::send_error_message(const std::string& msg) {

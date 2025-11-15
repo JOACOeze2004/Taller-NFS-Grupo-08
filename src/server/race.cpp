@@ -141,10 +141,15 @@ CheckpointCoords Race::get_checkpoint(const int& id) const {
 }
 
 HintCoords Race::get_hint(const int& id) const {
-    const int next_hint = car_next_hint.find(id)->second;
-    auto [x, y, rotation] = track.hints[next_hint];
-    const HintCoords hint = {x, y, rotation};
-    return hint;
+    auto it = car_next_hint.find(id);
+    int next_hint = it->second;
+
+    if (next_hint < 0 || next_hint >= static_cast<int>(track.hints.size())) {
+        return {0.f, 0.f, 0.f};
+    }
+
+    const auto& [x, y, rotation] = track.hints[next_hint];
+    return HintCoords{x, y, rotation};
 }
 
 Checkpoint Race::get_start() const {
