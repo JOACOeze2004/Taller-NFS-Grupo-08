@@ -11,9 +11,6 @@ class Workshop : public Phase {
 private:
     std::map<int, std::function<void(int&)>> car_upgrades;
     std::map<Upgrades, std::chrono::seconds> prices;
-    std::chrono::steady_clock::time_point start_time;
-    bool phase_started;
-
 
     void initialize_car_upgrades();
     void initialize_prices();
@@ -25,9 +22,8 @@ public:
     bool should_continue() override;
     void end() override;
     void update_phase() override;
-    void broadcast_phase() override;
-
-    int get_time_remaining_ms() const;
+    void broadcast_phase(int time_ms) override;
+    State get_current_phase_state() const override;
 };
 
 

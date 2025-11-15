@@ -4,7 +4,7 @@
 #include "gameloop.h"
 
 Workshop::Workshop(Gameloop* _gameloop, float _duration)
-    : Phase(_gameloop, _duration), phase_started(false) {
+    : Phase(_gameloop, _duration) {
     initialize_car_upgrades();
     initialize_prices();
 }
@@ -34,26 +34,14 @@ void Workshop::execute(ClientCommand& command) {
     }
 }
 
-bool Workshop::should_continue() { return gameloop->is_running() && get_time_remaining_ms() > 0; }
+bool Workshop::should_continue() { return gameloop->is_running(); }
 
-void Workshop::update_phase() {
-    if (!phase_started){
-        phase_started = true;
-        start_time = std::chrono::steady_clock::now();
-    }    
-} 
+void Workshop::update_phase() { } 
 
 void Workshop::end() { gameloop->change_phase(std::make_unique<InGame>(gameloop, MAX_TIME_PER_RACE)); }
 
-void Workshop::broadcast_phase() { gameloop->broadcast_workshop(this->get_prices(),this->get_time_remaining_ms());}
-
+void Workshop::broadcast_phase(int time_ms) { gameloop->broadcast_workshop(this->get_prices(),time_ms);}
 
 std::map<Upgrades, std::chrono::seconds> Workshop::get_prices() { return this->prices; }
 
-int Workshop::get_time_remaining_ms() const {
-    auto now = std::chrono::steady_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count();
-    return std::max(0, MAX_TIME_PER_WORKSHOP - static_cast<int>(elapsed));
-}
-
-
+State Workshop::get_current_phase_state() const { return IN_WORK_SHOP; }

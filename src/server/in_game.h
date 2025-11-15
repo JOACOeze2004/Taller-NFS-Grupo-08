@@ -8,7 +8,6 @@
 
 
 class InGame : public Phase {
-    std::chrono::steady_clock::time_point start_time;
     bool race_started;
     
 public:
@@ -18,8 +17,8 @@ public:
     void execute(ClientCommand& command) override;
     void end() override;
     void update_phase() override;
-    void broadcast_phase() override;
-    int get_time_remaining_ms() const;
+    void broadcast_phase(int time_ms) override;
+    State get_current_phase_state() const override;
 };
 
 
