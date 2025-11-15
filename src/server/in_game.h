@@ -9,25 +9,15 @@
 
 class InGame : public Phase {
     std::chrono::steady_clock::time_point start_time;
-    std::string& current_map;
-    Race race;
-    std::map<int, Car>* cars;
-
-
-    void delete_deads();
-    void set_start_race();
-    void check_end_race();
-
+    bool race_started;
 public:
-    explicit InGame(Gameloop* _gameloop, float _duration, std::string& map_name, const std::string& races_path, std::map<int, Car>* cars);
-    void run() override;
-    void execute() override;
-    StateRunning get_state(const int& id);
-    CheckpointCoords get_checkpoint(const int& id) const;
-    HintCoords get_hint(const int& id) const;
-    TypeCheckpoint get_cp_type(const int& id) const;
-    int get_position(const int& id) const;
-    void update_positions();
+    explicit InGame(Gameloop* _gameloop, float _duration);
+    
+    bool should_continue() override;
+    void execute(ClientCommand& command) override;
+    void end() override;
+    void update_phase() override;
+    void broadcast_phase() override;
     int get_time_remaining_ms() const;
 };
 
