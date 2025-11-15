@@ -17,7 +17,7 @@ void InGame::broadcast_phase() {
 }
 
 void InGame::end() {
-    gameloop->change_phase(std::make_unique<Workshop>(gameloop, 10.0f));
+    gameloop->change_phase(std::make_unique<Workshop>(gameloop, MAX_TIME_PER_WORKSHOP));
 }
 
 void InGame::update_phase() {

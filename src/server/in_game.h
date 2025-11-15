@@ -10,6 +10,7 @@
 class InGame : public Phase {
     std::chrono::steady_clock::time_point start_time;
     bool race_started;
+    
 public:
     explicit InGame(Gameloop* _gameloop, float _duration);
     
