@@ -33,11 +33,7 @@ public:
     bool is_username_taken(const int username_id) const;
     void process_command(ClientCommand& client_command);
     void broadcast_in_game(const int time_ms);
-<<<<<<< HEAD
-    void broadcast_lobby();
-=======
     void broadcast_lobby(const int time_ms);
->>>>>>> 0d07186f7ed78395937c80788ccdbc5499d36d01
     void broadcast_workshop(std::map<Upgrades, std::chrono::seconds> prices, const int time_ms);
     bool try_pop(ClientCommand& command);
     void update_positions();

@@ -10,9 +10,6 @@ void ClientReceiver::run(){
             Snapshot snapshot = protocol.receive_game_state();
             queue.push(snapshot);
         }
-        catch (const InvalidId& e) {
-
-        }
         catch(const std::exception& e) {
             this->stop();
             break;
