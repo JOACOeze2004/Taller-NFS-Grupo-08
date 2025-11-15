@@ -34,7 +34,7 @@ public:
     void process_command(ClientCommand& client_command);
     void broadcast_in_game(const int time_ms);
     void broadcast_lobby();
-    void broadcast_workshop();
+    void broadcast_workshop(std::map<Upgrades, std::chrono::seconds> prices, const int time_ms);
     bool try_pop(ClientCommand& command);
     void update_positions();
     void accelerate_upgrade(int& id);
