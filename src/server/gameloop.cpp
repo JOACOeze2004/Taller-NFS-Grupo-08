@@ -21,12 +21,12 @@ Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_nam
 
 std::string Gameloop::select_track_yaml(const std::string& map_name) {
     if (map_name == "San Andreas") {
-        return "../src/server/tracks/prueba.yaml";
+        return "../src/server/tracks/san_andreas_default.yaml";
     }
     else if (map_name == "Vice City") {
         return "../src/server/tracks/vice_city_default.yaml";
     }else {
-        return "../src/server/tracks/san_andreas_default.yaml"; 
+        return "../src/server/tracks/prueba.yaml"; 
     }
 }
 
