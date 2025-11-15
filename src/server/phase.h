@@ -7,12 +7,17 @@ class Phase {
 protected:
     Gameloop *gameloop;
     float duration;
-    bool cont;
 public:
     explicit Phase(Gameloop* _gameloop, float _duration);
-    virtual void run() = 0;
-    virtual bool should_continue();
-    virtual void execute() = 0;
+    
+    void run();
+
+    virtual bool should_continue() = 0;
+    virtual void execute(ClientCommand& command) = 0;
+    virtual void end() = 0;
+    virtual void update_phase() = 0;
+    virtual void broadcast_phase() = 0;
+
     virtual ~Phase();
 };
 
