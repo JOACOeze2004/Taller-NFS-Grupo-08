@@ -52,6 +52,7 @@ public:
     bool is_running() const;
     bool did_all_finish();
     void start_race();
+    std::string select_track_yaml(const std::string& map_name);
 
 private:
     Queue<ClientCommand> cmd_queue;
