@@ -16,7 +16,7 @@ Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_nam
     } else {
         current_map = LIBERTY_CITY;
     }
-    current_phase = std::make_unique<Lobby>(this, 9999999999.0f);
+    current_phase = std::make_unique<Lobby>(this, 1.0f);
 }
 
 void Gameloop::initialize_car_actions() {
@@ -35,8 +35,11 @@ void Gameloop::initialize_car_actions() {
 
 void Gameloop::run() {
     size_t cont = 0;
-    while (cont < 5/*MAX_RACES*/) {
+    while (this->should_keep_running()) {
         try {
+            if (cont > MAX_RACES){
+                break;
+            }            
             current_phase->run();
         }catch (...) {
             break; // deberia ser para cuando se queda sin jugadores la partida o algo asi
@@ -113,7 +116,7 @@ Snapshot Gameloop::initialize_DTO() {
     return dto;
 }
 
-void Gameloop::broadcast_lobby() {
+void Gameloop::broadcast_lobby(const int time_ms) {
     std::unordered_map<int, CarDTO> carsDTO;
     for  (auto& [id, car] : cars) {
         CarDTO car_dto = car.get_state();
@@ -125,6 +128,7 @@ void Gameloop::broadcast_lobby() {
         dto.cars = carsDTO;
         dto.state = IN_LOBBY;
         dto.is_owner = id == owner_id;
+        dto.time_ms = time_ms;
         monitor.broadcast(dto,this->game_id, id);
     }
 }

@@ -1,7 +1,6 @@
 #include "workshop.h"
 
 #include "../common/constants.h"
-
 #include "gameloop.h"
 
 Workshop::Workshop(Gameloop* _gameloop, float _duration)
@@ -9,7 +8,6 @@ Workshop::Workshop(Gameloop* _gameloop, float _duration)
     initialize_car_upgrades();
     initialize_prices();
 }
-
 void Workshop::initialize_car_upgrades() {
     car_upgrades[SEND_ACCELERATION_UPGRADE] = [this](int& id) { gameloop->accelerate_upgrade(id); };
     car_upgrades[SEND_HANDLING_UPGRADE] = [this](int& id) { gameloop->handling_upgrade(id); };
@@ -28,39 +26,22 @@ void Workshop::initialize_prices() {
     prices[MASS_UPGRADE] = std::chrono::seconds(MASS_PRICE);
 }
 
-void Workshop::run() {
-    auto rate = std::chrono::milliseconds(16);
-    auto t1 = std::chrono::steady_clock::now();
-    gameloop->broadcast_workshop();
-
-    while (should_continue()) {
-
-        execute();
-
-        auto t2 = std::chrono::steady_clock::now();
-        auto rest = rate - std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-        if (rest < std::chrono::milliseconds(0)) {
-            auto behind = -rest;
-            rest = rate - behind % rate;
-            auto lost = behind + rest;
-            t1 += lost;
-        }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(rest));
-        t1 += rate;
+void Workshop::execute(ClientCommand& command) {
+    gameloop->process_command(command);
+    auto it = car_upgrades.find(command.cmd_struct.cmd);
+    if (it != car_upgrades.end()) {
+        it->second(command.id);
     }
 }
 
-void Workshop::execute() {
-    ClientCommand command{};
-    while (gameloop->try_pop(command)) {
-        gameloop->process_command(command);
-        car_upgrades[command.cmd_struct.cmd];
-    }
-}
+bool Workshop::should_continue() { return gameloop->is_running(); }
 
-std::map<Upgrades, std::chrono::seconds> Workshop::get_prices() {
-    return prices;
-}
+void Workshop::update_phase() { } 
 
+void Workshop::end() { gameloop->change_phase(std::make_unique<InGame>(gameloop, MAX_TIME_PER_RACE)); }
 
+void Workshop::broadcast_phase(int time_ms) { gameloop->broadcast_workshop(this->get_prices(),time_ms);}
+
+std::map<Upgrades, std::chrono::seconds> Workshop::get_prices() { return this->prices; }
+
+State Workshop::get_current_phase_state() const { return IN_WORK_SHOP; }

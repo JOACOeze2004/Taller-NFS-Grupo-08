@@ -7,15 +7,15 @@ Phase::Phase(Gameloop* _gameloop, float _duration) : gameloop(_gameloop), durati
 void Phase::run() { 
     auto rate = std::chrono::milliseconds(16);
     auto t1 = std::chrono::steady_clock::now();
-    float elapsed = 0.0f;
+    start_time = std::chrono::steady_clock::now();
 
-    while (this->should_continue() && elapsed < duration){
+    while (this->should_continue() && this->get_time_remaining_ms(duration) > 0) {
         ClientCommand cmd;
         while (gameloop->try_pop(cmd)) {
             this->execute(cmd);
         }
         update_phase();
-        broadcast_phase();
+        broadcast_phase(this->get_time_remaining_ms(duration));
 
         auto t2 = std::chrono::steady_clock::now();
         auto rest = rate - std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
@@ -29,9 +29,17 @@ void Phase::run() {
 
         std::this_thread::sleep_for(rest);
         t1 += rate;
-        elapsed += std::chrono::duration<float>(rate).count();
     }
     this->end();
+}
+
+int Phase::get_time_remaining_ms(const float base_time) const {
+    if (this->get_current_phase_state() == IN_LOBBY){
+        return 1;
+    }    
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count();
+    return std::max(0, static_cast<int>(base_time) - static_cast<int>(elapsed));
 }
 
 Phase::~Phase() {}

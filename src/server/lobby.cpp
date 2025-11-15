@@ -11,14 +11,10 @@ void Lobby::execute(ClientCommand& command) {
 
 bool Lobby::should_continue() { return gameloop->is_running() && !gameloop->is_game_already_started(); }
 
-void Lobby::update_phase() {
-    gameloop->update_positions(); 
-}
+void Lobby::update_phase() {gameloop->update_positions(); }
 
-void Lobby::broadcast_phase() {
-    gameloop->broadcast_lobby();
-}
+void Lobby::broadcast_phase(int time_ms) {gameloop->broadcast_lobby(time_ms);}
 
-void Lobby::end() {
-    gameloop->change_phase(std::make_unique<InGame>(gameloop, MAX_TIME_PER_RACE));
-}
+void Lobby::end() { gameloop->change_phase(std::make_unique<InGame>(gameloop, MAX_TIME_PER_RACE + RACE_START_TIME)); }
+
+State Lobby::get_current_phase_state() const { return IN_LOBBY; }
