@@ -5,7 +5,7 @@
 #include <sstream>
 
 Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_name, const int client_id):
-        game_id(gid), monitor(_monitor), owner_id(client_id), ready_to_start(false), lobby(this, 0.0f, owner_id), in_game(this, 10.0f, map_name, "../src/server/prueba.yaml", &cars), workshop(this, 10.0f){
+        game_id(gid), monitor(_monitor), owner_id(client_id), ready_to_start(false), race("../src/server/prueba.yaml", &cars) {
     initialize_car_actions();
     world.generate_map(map_name);
 
@@ -16,6 +16,7 @@ Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_nam
     } else {
         current_map = LIBERTY_CITY;
     }
+    current_phase = std::make_unique<Lobby>(this, 9999999999.0f);
 }
 
 void Gameloop::initialize_car_actions() {
@@ -33,12 +34,10 @@ void Gameloop::initialize_car_actions() {
 }
 
 void Gameloop::run() {
-    lobby.run();
     size_t cont = 0;
-    while (cont < 1/*MAX_RACES*/) {
+    while (cont < 5/*MAX_RACES*/) {
         try {
-            in_game.run();
-            workshop.run();
+            current_phase->run();
         }catch (...) {
             break; // deberia ser para cuando se queda sin jugadores la partida o algo asi
         }
@@ -55,6 +54,10 @@ void Gameloop::process_command(ClientCommand& client_command) {
     }
 
     auto it = cars.find(client_command.id);
+    //auto& id = it->first;
+    /*if (race.car_finished(id) || race.car_dead(id)) {
+        return;
+    }*/
 
     Car& car = it->second;
     auto action = car_actions.find(client_command.cmd_struct.cmd);
@@ -126,23 +129,23 @@ void Gameloop::broadcast_lobby() {
     }
 }
 
-void Gameloop::broadcast_in_game() {
+void Gameloop::broadcast_in_game(const int time_ms) {
     std::unordered_map<int, CarDTO> carsDTO;
     for  (auto& [id, car] : cars) {
         CarDTO car_dto = car.get_state();
-        car_dto.state = in_game.get_state(id);
+        car_dto.state = race.get_state(id,time_ms);
         carsDTO.emplace(id, car_dto);
     }
     for (auto& [id, car] : cars) {
         Snapshot dto = initialize_DTO();
         dto.cars = carsDTO;
-        dto.checkpoint = in_game.get_checkpoint(id);
-        dto.hint = in_game.get_hint(id);
-        dto.position = in_game.get_position(id);
-        dto.type_checkpoint = in_game.get_cp_type(id);
+        dto.checkpoint = race.get_checkpoint(id);
+        dto.hint = race.get_hint(id);
+        dto.position = race.get_position(id);
+        dto.type_checkpoint = race.get_cp_type(id);
         dto.state = IN_RACE;
-        dto.is_owner = id == owner_id;
-        dto.time_ms = in_game.get_time_remaining_ms();
+        dto.is_owner = carsDTO[id].car_id == owner_id;
+        dto.time_ms = time_ms;
         monitor.broadcast(dto,this->game_id, id);
     }
 }
@@ -168,13 +171,9 @@ bool Gameloop::can_join_to_game(){ return cars.size() < MAX_PLAYERS_PER_GAME; }
 
 const std::string& Gameloop::get_game_id() const{ return this->game_id; }
 
-bool Gameloop::try_pop(ClientCommand& command) {
-    return cmd_queue.try_pop(command);
-}
+bool Gameloop::try_pop(ClientCommand& command) { return cmd_queue.try_pop(command); }
 
-bool Gameloop::is_game_already_started() const {
-    return this->ready_to_start;
-}
+bool Gameloop::is_game_already_started() const { return this->ready_to_start; }
 
 void Gameloop::accelerate_upgrade(int& id) {
     auto it = cars.find(id);

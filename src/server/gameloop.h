@@ -32,7 +32,7 @@ public:
     bool can_join_to_game();
     bool is_username_taken(const int username_id) const;
     void process_command(ClientCommand& client_command);
-    void broadcast_in_game();
+    void broadcast_in_game(const int time_ms);
     void broadcast_lobby();
     void broadcast_workshop();
     bool try_pop(ClientCommand& command);
@@ -45,6 +45,13 @@ public:
     void mass_upgrade(int& id);
 
     bool is_game_already_started() const;
+    void handle_lobby_command(const ClientCommand& cmd);
+    void change_phase(std::unique_ptr<Phase> new_phase);
+    void update_race_state();
+
+    bool is_running() const;
+    bool did_all_finish();
+    void start_race();
 
 private:
     Queue<ClientCommand> cmd_queue;
@@ -55,13 +62,12 @@ private:
     World world;
     int owner_id;
     bool ready_to_start;
-    Lobby lobby;
-    InGame in_game;
-    Workshop workshop;
     std::chrono::steady_clock::time_point start_time;
     Map current_map;
     ParserYaml parser;
     std::unordered_map<int, std::string> user_names;
+    Race race;
+    std::unique_ptr<Phase> current_phase;
 
 
     void initialize_car_actions();
