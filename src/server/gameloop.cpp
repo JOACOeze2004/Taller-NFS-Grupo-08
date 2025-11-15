@@ -150,7 +150,7 @@ void Gameloop::broadcast_in_game(const int time_ms) {
     }
 }
 
-void Gameloop::broadcast_workshop() {
+void Gameloop::broadcast_workshop(std::map<Upgrades, std::chrono::seconds> prices, const int time_ms ) {
     std::unordered_map<int, CarDTO> carsDTO;
     for  (auto& [id, car] : cars) {
         CarDTO car_dto = car.get_state();
@@ -162,7 +162,8 @@ void Gameloop::broadcast_workshop() {
         dto.cars = carsDTO;
         dto.is_owner = id == owner_id;
         dto.state = IN_WORK_SHOP;
-        dto.prices = workshop.get_prices();
+        dto.prices = prices;
+        dto.time_ms = time_ms;
         monitor.broadcast(dto,this->game_id, id);
     }
 }
@@ -209,4 +210,41 @@ void Gameloop::mass_upgrade(int& id) {
     auto it = cars.find(id);
     Car& car = it->second;
     car.mass_upgrade();
+}
+
+bool Gameloop::is_running() const { return should_keep_running(); }
+
+void Gameloop::handle_lobby_command(const ClientCommand& cmd) {
+    if (cmd.cmd_struct.cmd == SEND_READY_TO_PLAY && cmd.id == owner_id) {
+        ready_to_start = true;
+    }
+}
+
+void Gameloop::change_phase(std::unique_ptr<Phase> new_phase) {this->current_phase = std::move(new_phase); }
+
+
+bool Gameloop::did_all_finish() { //deberiamos validar q todos los jugadores vivoss lleguen  a al meta
+    int cars_finished = 0;
+    for (auto& [id, car] : cars) {
+        if (race.car_finished(id)) {
+            cars_finished++;
+        }
+    }
+    return cars_finished == (int)cars.size();
+}
+
+void Gameloop::start_race() {
+    Checkpoint start = race.get_start();
+    float start_angle = race.get_start_angle();
+    for (auto& [id, car] : cars) {
+        car.set_spawn(start.x,start.y, start_angle);
+    }
+    update_positions();
+    broadcast_in_game(MAX_TIME_PER_RACE);
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+}
+
+void Gameloop::update_race_state() {
+    race.update_checkpoints();
+    race.update_positions_order();
 }
