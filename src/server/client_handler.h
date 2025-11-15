@@ -35,6 +35,11 @@ private:
     std::string player_name;
     uint8_t car_id{};
     std::string map_name;
+
+    void receive_player_configuration();
+    std::shared_ptr<Gameloop> process_lobby_action();
+    void send_initial_data();
+
 public:
     explicit ClientHandler(Socket&& peer,Monitor& monitor, int _id);
     void run() override;
