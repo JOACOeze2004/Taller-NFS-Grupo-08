@@ -131,18 +131,22 @@ if(TALLER_CLIENT)
             src/client/input_parser.h
             src/client/client_car.cpp
             src/client/client_car.h
-            src/client/login/login_window.cpp
-            src/client/login/login_window.h
             src/client/graphic_client.cpp
             src/client/graphic_client.h
             src/client/ClientQuitException.h
-            src/client/final_results/final_results_windows.cpp
-            src/client/final_results/final_results_windows.h
             src/client/InvalidId.h
-            src/client/lobby/lobby_window.cpp
-            src/client/lobby/lobby_window.h
             src/client/upgrade_phase.cpp
             src/client/upgrade_phase.h
+            src/client/pantallas/car_selector_widget.cpp
+            src/client/pantallas/car_selector_widget.h
+            src/client/pantallas/final_results_windows.cpp
+            src/client/pantallas/final_results_windows.h
+            src/client/pantallas/login_window.cpp
+            src/client/pantallas/login_window.h
+            src/client/pantallas/results_table_widget.cpp
+            src/client/pantallas/results_table_widget.h
+            src/client/pantallas/style_manager.cpp
+            src/client/pantallas/style_manager.h
     )
 
     # Make them depend on taller_common lib
