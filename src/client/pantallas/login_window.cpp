@@ -96,6 +96,13 @@ void LoginWindow::setupGameActions() {
 
 void LoginWindow::setupConnections() {
     connect(createGameButton, &QPushButton::clicked, this, [this]() {
+        std::string playerName = nameInput->text().toStdString();
+
+        if (playerName.empty()) {
+            QMessageBox::warning(this, "Nombre requerido",
+                "Por favor, ingresa tu nombre antes de crear una partida.");
+            return;
+        }
         this->lobbyAction = SEND_CREATE_GAME;
         this->selectedGameId = "";
         emit startButtonClicked();

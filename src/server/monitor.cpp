@@ -96,9 +96,9 @@ std::vector<std::string> Monitor::get_active_games() {
     std::unique_lock<std::mutex> lock(mutex);
     std::vector<std::string> active_games;
     for(const auto& [id,game] : current_games){
-        if (game->is_running){
+        //if (game->is_running){
             active_games.push_back(id);
-        }
+        //}
     }
     return active_games;
 }
