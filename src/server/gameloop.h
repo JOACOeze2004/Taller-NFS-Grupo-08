@@ -34,9 +34,6 @@ public:
     bool is_username_taken(const int username_id) const;
     void process_command(ClientCommand& client_command);
     void broadcast_in_game(const int time_ms);
-
-    void broadcast_lobby();
-
     void broadcast_final_results(const FinalScoreList& results);
     void broadcast_lobby(const int time_ms);
     void broadcast_workshop(std::map<Upgrades, std::chrono::seconds> prices, const int time_ms);
@@ -57,6 +54,7 @@ public:
     bool is_running() const;
     bool did_all_finish();
     void start_race();
+    std::string select_track_yaml(const std::string& map_name);
 
     FinalScoreList calculate_final_results();
     void increment_race_counter();

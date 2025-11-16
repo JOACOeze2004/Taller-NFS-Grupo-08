@@ -4,6 +4,60 @@
 
 ClientProtocol::ClientProtocol(Socket& _socket) : protocol(_socket) {  }
 
+
+std::unordered_map<int, CarDTO> ClientProtocol::receive_cars(const uint16_t cars_count) const{
+    std::unordered_map<int, CarDTO> cars;
+   
+    for (auto i = 0; i < cars_count; ++i) {
+        int car_id = protocol.receive_big_endian_16(); 
+        cars[car_id] = this->receive_car_state();
+    }
+    return cars;
+}
+
+void ClientProtocol::receive_game_data(Snapshot& snapshot, const uint16_t cars_count) const {
+    snapshot.game_id = protocol.receive_byte();
+    snapshot.position = protocol.receive_byte();
+    snapshot.cars_count = cars_count;
+    snapshot.map = static_cast<Map>(protocol.receive_byte());
+    snapshot.upgrade = static_cast<Upgrades>(protocol.receive_byte());
+    snapshot.upgradeable = protocol.receive_bool();
+    snapshot.collision = static_cast<CollisionType>(protocol.receive_byte());
+}
+
+void ClientProtocol::receive_checkpoint_hint(Snapshot& snapshot) const {
+    snapshot.checkpoint.x = protocol.receive_float();
+    snapshot.checkpoint.y = protocol.receive_float();
+    snapshot.hint.x = protocol.receive_float();
+    snapshot.hint.y = protocol.receive_float();
+    snapshot.hint.angle = protocol.receive_float();
+    snapshot.type_checkpoint = static_cast<TypeCheckpoint>(protocol.receive_byte());
+}
+
+void ClientProtocol::receive_remaining_data(Snapshot& snapshot) const {
+    snapshot.time_ms = protocol.receive_big_endian_32();
+    snapshot.state = static_cast<State>(protocol.receive_byte());
+    snapshot.is_owner = protocol.receive_bool();
+}
+
+void ClientProtocol::receive_lobby_cars(Snapshot& snapshot) const {
+    uint16_t lobby_count = protocol.receive_big_endian_16();
+    for (size_t i = 0; i < lobby_count; i++){
+        int car_id = protocol.receive_big_endian_16(); 
+        LobbyCarDTO lobby_car = this->receive_lobby_car_state();
+        snapshot.lobby_cars[car_id] = lobby_car;
+    }
+}
+
+void ClientProtocol::receive_prices(Snapshot& snapshot) const {
+    uint16_t prices_count = protocol.receive_big_endian_16();
+    for (int i = 0; i < prices_count; i++) {
+        Upgrades upgrade = static_cast<Upgrades>(protocol.receive_byte());
+        int seconds = protocol.receive_big_endian_16();
+        snapshot.prices[upgrade] = std::chrono::seconds(seconds);
+    }
+}
+
 CarDTO ClientProtocol::receive_car_state() const {
     CarDTO car;
     car.x = protocol.receive_float();
@@ -90,51 +144,14 @@ void ClientProtocol::receive_game_init_data(std::string& map_path,
 Snapshot ClientProtocol::receive_game_state() const {
     Snapshot snapshot;
     snapshot.id = protocol.receive_byte();
-    if (snapshot.id == 0) {
-        throw InvalidId();
-    }
     uint16_t cars_count = protocol.receive_big_endian_16();
+    snapshot.cars = this->receive_cars(cars_count);
 
-    for (auto i = 0; i < cars_count; ++i) {
-        int car_id = protocol.receive_big_endian_16(); 
-        CarDTO car = this->receive_car_state();
-        snapshot.cars[car_id] = car;
-    }
-
-    snapshot.game_id = protocol.receive_byte();
-
-    snapshot.position = protocol.receive_byte();
-    
-    snapshot.cars_count = cars_count;
-
-    snapshot.map = static_cast<Map>(protocol.receive_byte());
-    snapshot.upgrade = static_cast<Upgrades>(protocol.receive_byte());
-    snapshot.upgradeable = protocol.receive_bool();
-    snapshot.collision = static_cast<CollisionType>(protocol.receive_byte());
-    snapshot.checkpoint.x = protocol.receive_float();
-    snapshot.checkpoint.y = protocol.receive_float();
-    snapshot.hint.x = protocol.receive_float();
-    snapshot.hint.y = protocol.receive_float();
-    snapshot.hint.angle = protocol.receive_float();
-    snapshot.type_checkpoint = static_cast<TypeCheckpoint>(protocol.receive_byte());
-    snapshot.time_ms = protocol.receive_big_endian_32();
-    snapshot.state = static_cast<State>(protocol.receive_byte());
-    snapshot.is_owner = protocol.receive_bool();
-    
-    uint16_t lobby_count = protocol.receive_big_endian_16();
-
-    for (size_t i = 0; i < lobby_count; i++){
-        int car_id = protocol.receive_big_endian_16(); 
-        LobbyCarDTO lobby_car = this->receive_lobby_car_state();
-        snapshot.lobby_cars[car_id] = lobby_car;
-    }
-
-    uint16_t prices_count = protocol.receive_big_endian_16();
-    for (int i = 0; i < prices_count; i++) {
-        Upgrades upgrade = static_cast<Upgrades>(protocol.receive_byte());
-        int seconds = protocol.receive_big_endian_16();
-        snapshot.prices[upgrade] = std::chrono::seconds(seconds);
-    }
+    receive_game_data(snapshot,cars_count);
+    receive_checkpoint_hint(snapshot);
+    receive_remaining_data(snapshot);
+    receive_lobby_cars(snapshot);
+    receive_prices(snapshot);
 
     return snapshot;
 }

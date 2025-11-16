@@ -5,7 +5,7 @@
 #include <sstream>
 
 Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_name, const int client_id):
-        game_id(gid), monitor(_monitor), owner_id(client_id), ready_to_start(false), race("../src/server/prueba.yaml", &cars) {
+        game_id(gid), monitor(_monitor), owner_id(client_id), ready_to_start(false), race(select_track_yaml(map_name), &cars) {
     initialize_car_actions();
     world.generate_map(map_name);
 
@@ -17,6 +17,17 @@ Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_nam
         current_map = LIBERTY_CITY;
     }
     current_phase = std::make_unique<Lobby>(this, 1.0f);
+}
+
+std::string Gameloop::select_track_yaml(const std::string& map_name) {
+    if (map_name == "San Andreas") {
+        return "../src/server/tracks/san_andreas_default.yaml";
+    }
+    else if (map_name == "Vice City") {
+        return "../src/server/tracks/vice_city_default.yaml";
+    }else {
+        return "../src/server/tracks/prueba.yaml"; 
+    }
 }
 
 void Gameloop::initialize_car_actions() {
