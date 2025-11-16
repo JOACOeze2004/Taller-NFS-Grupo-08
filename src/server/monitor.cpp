@@ -136,3 +136,12 @@ void Monitor::kill_games() {
     current_games.clear();
     players.clear();
 }
+void Monitor::broadcast_final_results(const FinalScoreList& results, const std::string& gid) {
+    std::unique_lock<std::mutex> lock(mutex);
+    for (auto& [id, client] : clients) {
+        if (client->get_game_id() == gid && !client->is_dead()) {
+            client->send_final_results(results);
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
+}

@@ -10,9 +10,8 @@
 #include <SDL2pp/SDL2pp.hh>
 
 #include "../common/constants.h"
-#include "final_results/final_results_windows.h"
-#include "lobby/lobby_window.h"
-#include "login/login_window.h"
+#include "pantallas/final_results_windows.h"
+#include "pantallas/login_window.h"
 
 #include "client.h"
 
@@ -26,22 +25,23 @@ int main(int argc, char *argv[]) try {
     const std::string host = argv[HOST];
     const std::string port = argv[PORT];
 
-    const QApplication app(argc, argv);
-    const auto loginWindow = new LoginWindow();
+    QApplication app(argc, argv);
+    auto loginWindow = new LoginWindow();
     bool startPressed = false;
     PlayerConfig playerConfig;
+    Client* client = nullptr;
 
     QObject::connect(loginWindow, &LoginWindow::startButtonClicked, [&]() {
         playerConfig = loginWindow->getPlayerConfig();
         try {
-            Client client(host, port);
-            client.send_config(playerConfig,loginWindow->getLobbyAction(), loginWindow->getSelectedGameId());
+            client = new Client(host, port);
+            client->send_config(playerConfig, loginWindow->getLobbyAction(), loginWindow->getSelectedGameId());
             loginWindow->close();
-            client.run();
+            client->run();
             startPressed = true;
             QApplication::quit();
         } catch (const std::exception& e) {
-            QMessageBox::warning(loginWindow, "No existe esa partida", e.what());
+            QMessageBox::warning(loginWindow, "Error de conexión", e.what());
         }
 
     });
@@ -49,17 +49,27 @@ int main(int argc, char *argv[]) try {
     loginWindow->show();
     QApplication::exec();
 
-    if (startPressed) {
+    if (startPressed && client) {
+        auto resultsWindow = new FinalResultsWindow();
 
-        auto results = new FinalResultsWindow();
-        results->setMockResults();
-        results->show();
+        if (client->has_final_results()) {
+            FinalScoreList results = client->get_final_results();
+            resultsWindow->displayResults(results);
+        } else {
+            resultsWindow->displayResults(FinalScoreList());
+        }
 
+        resultsWindow->show();
+        delete client;
         return app.exec();
     }
 
-	return 0;
+    if (client) {
+        delete client;
+    }
+
+    return 0;
 } catch (std::exception& e) {
-	std::cerr << e.what() << std::endl;
-	return EXIT_FAILURE;
+    std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
 }

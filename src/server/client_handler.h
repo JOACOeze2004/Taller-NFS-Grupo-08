@@ -44,7 +44,7 @@ public:
     bool is_dead() const;
     void set_game_id(const std::string& _game_id);
     const std::string& get_game_id() const;
-
+    void send_final_results(const FinalScoreList& results);
     ~ClientHandler();
 };
 

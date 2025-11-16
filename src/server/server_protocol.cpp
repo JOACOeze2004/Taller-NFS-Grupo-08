@@ -145,6 +145,18 @@ void ServerProtocol::send_ok() {
     protocol.send_byte(SEND_OK_MESSAGE);
 }
 
+void ServerProtocol::send_final_results(const FinalScoreList& results) {
+    protocol.send_big_endian_16(results.size());
+
+    for (const auto& result : results) {
+        uint16_t name_len = static_cast<uint16_t>(result.name.size());
+        protocol.send_big_endian_16(name_len);
+        protocol.send_string(result.name);
+        protocol.send_float(result.time);
+        protocol.send_byte(result.position);
+    }
+}
+
 void ServerProtocol::close(){
     protocol.close_socket();    
 }

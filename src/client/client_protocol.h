@@ -5,7 +5,6 @@
 #include "../common/protocol.h"
 #include "../common/DTO.h"
 
-
 class ClientProtocol {
     private:
         Protocol protocol;
@@ -26,6 +25,7 @@ class ClientProtocol {
         void send_byte(const uint8_t byte) const;
         uint8_t receive_byte() const;
         Snapshot receive_game_state() const;
+        FinalScoreList receive_final_results() const;
         void close();
 };
 

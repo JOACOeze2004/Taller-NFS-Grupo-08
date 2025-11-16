@@ -128,4 +128,13 @@ void ClientHandler::set_game_id(const std::string& _game_id) { game_id = _game_i
 
 const std::string& ClientHandler::get_game_id() const { return game_id; }
 
+void ClientHandler::send_final_results(const FinalScoreList& results) {
+    try {
+        protocol.send_final_results(results);
+        std::cout << "[SERVER CLIENT HANDLER] Final results sent successfully" << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "[SERVER] Error sending final results to client " << id << ": " << e.what() << std::endl;
+    }
+}
+
 ClientHandler::~ClientHandler() {}

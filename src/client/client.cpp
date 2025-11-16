@@ -10,7 +10,7 @@
 #include "graphic_client.h"
 
 Client::Client(const std::string& host, const std::string& port)
-    : host(host), port(port), client_socket(host.c_str(), port.c_str()), protocol(client_socket) {}
+    : host(host), port(port), client_socket(host.c_str(), port.c_str()), protocol(client_socket), final_results_received(false)  {}
 
 void Client::send_config(const PlayerConfig& config,uint8_t lobby_action, const std::string& game_id) {
     std::cout << "[CLIENT] Connected to " << host << ":" << port << std::endl;
@@ -70,6 +70,12 @@ void Client::run() {
     while (true) {
         Uint32 frame_start = SDL_GetTicks();
 
+        if (receiver.has_final_results()) {
+            std::cout << "[CLIENT] Final results received automatically!" << std::endl;
+            final_results = receiver.get_final_results();
+            final_results_received = true;
+            break;
+        }
         while (receiver.try_pop_car_state(snapshot)) {
             graphic_client.update_from_snapshot(snapshot);
         }
@@ -98,4 +104,12 @@ void Client::run() {
     sender.stop();
     sender.join();
     SDL_Quit();
+}
+
+bool Client::has_final_results() const {
+    return final_results_received;
+}
+
+FinalScoreList Client::get_final_results() const {
+    return final_results;
 }

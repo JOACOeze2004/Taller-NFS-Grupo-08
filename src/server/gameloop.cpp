@@ -34,18 +34,12 @@ void Gameloop::initialize_car_actions() {
 }
 
 void Gameloop::run() {
-    size_t cont = 0;
     while (this->should_keep_running()) {
         try {
-            if (cont > MAX_RACES){
-                break;
-            }            
             current_phase->run();
         }catch (...) {
             break; // deberia ser para cuando se queda sin jugadores la partida o algo asi
         }
-
-        cont++;
     }
 }
 
@@ -74,15 +68,15 @@ bool Gameloop::is_username_taken(const int username_id) const {
     return user_names.find(username_id) != user_names.end();
 }
 
-void Gameloop::add_car(const int client_id, const int car_id,  const std::string& player_name) {
+void Gameloop::add_car(const int client_id, const int car_id, const std::string& player_name) {
     auto [mass, handling, acceleration, braking] = parser.parse_car(car_id);
     user_names[client_id] = player_name;
+    player_total_times[client_id] = 0;
 
     cars.emplace(std::piecewise_construct,
     std::forward_as_tuple(client_id),
     std::forward_as_tuple(world.get_id(), mass, handling, acceleration, braking, car_id));
 }
-
 void Gameloop::push_command(const ClientCommand& cmd){
     this->cmd_queue.push(cmd);
 }
@@ -251,4 +245,62 @@ void Gameloop::start_race() {
 void Gameloop::update_race_state() {
     race.update_checkpoints();
     race.update_positions_order();
+}
+
+FinalScoreList Gameloop::calculate_final_results() {
+    FinalScoreList results;
+
+    for (const auto& [client_id, total_time] : player_total_times) {
+        playerDTO result;
+        result.name = user_names[client_id];
+        result.time = static_cast<float>(total_time) / 1000.0f;
+        result.position = 0;
+        results.push_back(result);
+    }
+    std::sort(results.begin(), results.end(),
+              [](const playerDTO& a, const playerDTO& b) { return a.time < b.time; });
+
+    for (size_t i = 0; i < results.size(); ++i) {
+        results[i].position = i + 1;
+    }
+
+    return results;
+}
+
+void Gameloop::broadcast_final_results(const FinalScoreList& results) {
+    std::unordered_map<int, CarDTO> carsDTO;
+    for (auto& [id, car] : cars) {
+        CarDTO car_dto = car.get_state();
+        car_dto.state = FINISHED;
+        carsDTO.emplace(id, car_dto);
+    }
+
+    for (auto& [id, car] : cars) {
+        Snapshot dto = initialize_DTO();
+        dto.cars = carsDTO;
+        dto.is_owner = id == owner_id;
+        dto.state = FINAL_RESULTS;
+        dto.time_ms = 0;
+        monitor.broadcast(dto, this->game_id, id);
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    monitor.broadcast_final_results(results, game_id);
+}
+
+void Gameloop::increment_race_counter() {
+    races_completed++;
+    std::cout << "[GAMELOOP] Races completed: " << races_completed << "/" << MAX_RACES << std::endl;
+}
+
+int Gameloop::get_races_completed() const {
+    return races_completed;
+}
+
+void Gameloop::reset_race() {
+    std::cout << "[GAMELOOP] Resetting race for next round" << std::endl;
+    race.reset_race();
+}
+
+bool Gameloop::has_active_players() const {
+    return !cars.empty();
 }

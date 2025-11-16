@@ -3,7 +3,7 @@
 
 #include "../common/protocol.h"
 #include "src/common/car_DTO.h"
-
+#include "src/common/DTO.h"
 #include "car_state.h"
 #include "../common/DTO.h"
 
@@ -33,6 +33,7 @@ public:
 
     void send_game_state(const Snapshot& snapshot);
     void send_error_message(const std::string& msg);
+    void send_final_results(const FinalScoreList& results);
     void send_ok();
     
     void close();

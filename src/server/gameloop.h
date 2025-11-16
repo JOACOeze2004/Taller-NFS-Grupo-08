@@ -7,6 +7,7 @@
 
 #include "../common/queue.h"
 #include "../common/thread.h"
+#include "src/common/DTO.h"
 
 #include "car.h"
 #include "client_command.h"
@@ -33,11 +34,11 @@ public:
     bool is_username_taken(const int username_id) const;
     void process_command(ClientCommand& client_command);
     void broadcast_in_game(const int time_ms);
-<<<<<<< HEAD
+
     void broadcast_lobby();
-=======
+
+    void broadcast_final_results(const FinalScoreList& results);
     void broadcast_lobby(const int time_ms);
->>>>>>> 0d07186f7ed78395937c80788ccdbc5499d36d01
     void broadcast_workshop(std::map<Upgrades, std::chrono::seconds> prices, const int time_ms);
     bool try_pop(ClientCommand& command);
     void update_positions();
@@ -57,6 +58,12 @@ public:
     bool did_all_finish();
     void start_race();
 
+    FinalScoreList calculate_final_results();
+    void increment_race_counter();
+    int get_races_completed() const;
+    void reset_race();
+    bool has_active_players() const;
+
 private:
     Queue<ClientCommand> cmd_queue;
     std::string game_id;
@@ -72,8 +79,8 @@ private:
     std::unordered_map<int, std::string> user_names;
     Race race;
     std::unique_ptr<Phase> current_phase;
-
-
+    std::map<int, long long> player_total_times;
+    int races_completed{};
     void initialize_car_actions();
     Snapshot initialize_DTO();
 };

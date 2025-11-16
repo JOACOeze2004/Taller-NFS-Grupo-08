@@ -144,6 +144,24 @@ std::string ClientProtocol::receive_error_message(){
     return protocol.receive_string(size);
 }
 
+FinalScoreList ClientProtocol::receive_final_results() const {
+    FinalScoreList results;
+    uint16_t count = protocol.receive_big_endian_16();
+
+    for (uint16_t i = 0; i < count; ++i) {
+        playerDTO result;
+
+        uint16_t name_len = protocol.receive_big_endian_16();
+        result.name = protocol.receive_string(name_len);
+        result.time = protocol.receive_float();
+        result.position = static_cast<int>(protocol.receive_byte());
+
+        results.push_back(result);
+    }
+
+    return results;
+}
+
 void ClientProtocol::close(){
     protocol.close_socket();
 }
