@@ -38,6 +38,7 @@ public:
     TypeCheckpoint get_cp_type(const int& id) const;
     Checkpoint get_start() const;
     float get_start_angle() const;
+    void reset_race();
 };
 
 

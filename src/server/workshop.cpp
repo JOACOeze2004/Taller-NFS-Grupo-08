@@ -34,11 +34,29 @@ void Workshop::execute(ClientCommand& command) {
     }
 }
 
-bool Workshop::should_continue() { return gameloop->is_running(); }
+bool Workshop::should_continue() {
+    if (!gameloop->has_active_players()) {
+        std::cout << "[WORKSHOP] No active players remaining, ending game" << std::endl;
+        return false;
+    }
+    return gameloop->is_running();
+}
 
 void Workshop::update_phase() { } 
 
-void Workshop::end() { gameloop->change_phase(std::make_unique<InGame>(gameloop, MAX_TIME_PER_RACE)); }
+void Workshop::end() {
+    if (!gameloop->has_active_players()) {
+        std::cout << "[WORKSHOP] No players left, ending game" << std::endl;
+        gameloop->stop();
+        return;
+    }
+
+    gameloop->reset_race();
+
+    std::cout << "[WORKSHOP] Starting next race (Race "
+              << (gameloop->get_races_completed() + 1) << ")" << std::endl;
+    gameloop->change_phase(std::make_unique<InGame>(gameloop, MAX_TIME_PER_RACE + RACE_START_TIME));
+}
 
 void Workshop::broadcast_phase(int time_ms) { gameloop->broadcast_workshop(this->get_prices(),time_ms);}
 

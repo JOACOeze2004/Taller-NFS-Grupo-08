@@ -159,3 +159,13 @@ Checkpoint Race::get_start() const {
 float Race::get_start_angle() const {
     return track.hints[0].rotation;
 }
+
+void Race::reset_race() {
+    std::cout << "[RACE] Resetting race for next round" << std::endl;
+    for (auto& [id, car] : *cars) {
+        finished[id] = false;
+        car_next_cp[id] = 0;
+        car_next_hint[id] = 0;
+    }
+    positions_order.clear();
+}
