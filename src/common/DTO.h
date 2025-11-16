@@ -19,7 +19,8 @@ struct LobbyCarDTO {
 enum State{
     IN_LOBBY,
     IN_RACE,
-    IN_WORK_SHOP
+    IN_WORK_SHOP,
+    FINAL_RESULTS
 };
 
 enum Map {
@@ -89,5 +90,5 @@ struct playerDTO {
     float time;
     int position;
 };
-
+using FinalScoreList = std::vector<playerDTO>;
 #endif  // TALLER_TP_DTO_H
