@@ -19,17 +19,6 @@ Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_nam
     current_phase = std::make_unique<Lobby>(this, 1.0f);
 }
 
-std::string Gameloop::select_track_yaml(const std::string& map_name) {
-    if (map_name == "San Andreas") {
-        return "../src/server/tracks/san_andreas_default.yaml";
-    }
-    else if (map_name == "Vice City") {
-        return "../src/server/tracks/vice_city_default.yaml";
-    }else {
-        return "../src/server/tracks/prueba.yaml"; 
-    }
-}
-
 void Gameloop::initialize_car_actions() {
     car_actions[SEND_ACCELERATE] = [](Car& car) { car.accelerate(); };
     car_actions[SEND_ROTATE_RIGHT] = [](Car& car) { car.turn_right(); };
@@ -249,9 +238,9 @@ bool Gameloop::did_all_finish() { //deberiamos validar q todos los jugadores viv
 void Gameloop::start_race() {
     game_started = true;
     Checkpoint start = race.get_start();
-    float start_angle = race.get_start_angle();
+    Checkpoint start_angle = race.get_start_angle();
     for (auto& [id, car] : cars) {
-        car.set_spawn(start.x,start.y, start_angle);
+        car.set_spawn(start.x,start.y, start_angle.x, start_angle.y);
     }
     update_positions();
     broadcast_in_game(MAX_TIME_PER_RACE);

@@ -5,7 +5,6 @@
 Race::Race(const std::string& map_name, std::map<int, Car> *_cars, const std::string& tracks_directory) : tracks(parser.parse_tracks(tracks_directory, map_name)), cars(_cars) {
     int indx = rand() % tracks.size();
     track = tracks[indx];
-    tracks.erase(tracks.begin() + indx);
     for (auto& [id, car] : *cars) {
         finished[id] = false;
         car_next_cp[id] = 0;
@@ -177,5 +176,4 @@ void Race::reset_race() {
     positions_order.clear();
     int indx = rand() % tracks.size();
     track = tracks[indx];
-    tracks.erase(tracks.begin() + indx);
 }
