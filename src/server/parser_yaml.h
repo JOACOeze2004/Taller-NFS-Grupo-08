@@ -38,7 +38,7 @@ public:
     explicit ParserYaml();
     std::vector<StaticBody> parse_map(std::string& map_name);
     CarStats parse_car(const int car_id);
-    Track parse_tracks(const std::string& tracks_file);
+    std::vector<Track> parse_tracks(const std::string& tracks_dir, const std::string& map_name);
 };
 
 

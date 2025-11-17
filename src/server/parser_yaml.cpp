@@ -1,5 +1,7 @@
 #include "parser_yaml.h"
 
+#include <filesystem>
+
 #include <yaml-cpp/yaml.h>
 
 #include "CarStats.h"
@@ -49,26 +51,47 @@ CarStats ParserYaml::parse_car(const int car_id) {
     return car_stats;
 }
 
-Track ParserYaml::parse_tracks(const std::string& tracks_file) {
-    Track track;
-    YAML::Node tracks = YAML::LoadFile(tracks_file);
-
-    track.city_id = tracks["cityId"].as<std::string>();
-    for (const auto& cp : tracks["checkpoints"]) {
-        Checkpoint c;
-        c.x = cp["x"].as<float>();
-        c.y = cp["y"].as<float>();
-        c.order = cp["order"].as<int>();
-        track.checkpoints.push_back(c);
+std::vector<Track> ParserYaml::parse_tracks(const std::string& tracks_dir, const std::string& map_name) {
+    std::vector<Track> tracks;
+    std::string map_id;
+    if (map_name == "Liberty City") {
+        map_id = "liberty_city";
+    }
+    else if (map_name == "San Andreas") {
+        map_id = "san_andreas";
+    }
+    else {
+        map_id = "vice_city";
     }
 
-    for (const auto& hnt : tracks["hints"]) {
-        Hint hint;
-        hint.x = hnt["x"].as<float>();
-        hint.y = hnt["y"].as<float>();
-        hint.rotation = hnt["rotation"].as<float>();
-        track.hints.push_back(hint);
+    for (const auto& file : std::filesystem::directory_iterator(tracks_dir)) {
+        std::string file_path = file.path();
+        YAML::Node node = YAML::LoadFile(file_path);
+        Track track;
+        std::string city_id = node["cityId"].as<std::string>();
+        if (city_id != map_id) {
+            continue;
+        }
+
+        track.city_id = city_id;
+        for (const auto& cp : node["checkpoints"]) {
+            Checkpoint c;
+            c.x = cp["x"].as<float>();
+            c.y = cp["y"].as<float>();
+            c.order = cp["order"].as<int>();
+            track.checkpoints.push_back(c);
+        }
+
+        for (const auto& hnt : node["hints"]) {
+            Hint hint;
+            hint.x = hnt["x"].as<float>();
+            hint.y = hnt["y"].as<float>();
+            hint.rotation = hnt["rotation"].as<float>();
+            track.hints.push_back(hint);
+        }
+
+        tracks.emplace_back(track);
     }
 
-    return track;
+    return tracks;
 }

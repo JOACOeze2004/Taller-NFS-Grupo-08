@@ -5,7 +5,7 @@
 #include <sstream>
 
 Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_name, const int client_id):
-        game_id(gid), monitor(_monitor), owner_id(client_id), ready_to_start(false), race(select_track_yaml(map_name), &cars), game_started(false) {
+        game_id(gid), monitor(_monitor), owner_id(client_id), ready_to_start(false), race(map_name, &cars, "../src/server/tracks"), game_started(false) {
     initialize_car_actions();
     world.generate_map(map_name);
 

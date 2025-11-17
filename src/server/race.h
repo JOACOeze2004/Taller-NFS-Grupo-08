@@ -12,8 +12,9 @@
 
 class Race {
     ParserYaml parser;
-    Track track;
+    std::vector<Track> tracks;
     std::map<int, Car> *cars;
+    Track track;
     std::map<int, int> car_next_cp;
     std::map<int, int> car_next_hint;
     std::map<int, bool> finished;
@@ -26,7 +27,7 @@ class Race {
 
 
 public:
-    explicit Race(const std::string& track_name, std::map<int, Car> *_cars);
+    explicit Race(const std::string& track_name, std::map<int, Car> *_cars, const std::string& tracks_directory);
 	bool car_finished(const int& id);
 	bool car_dead(const int& id) const;
 	void update_checkpoints();
