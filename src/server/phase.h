@@ -17,6 +17,7 @@ public:
     
     void run();
     int get_time_remaining_ms(const float base_time) const;
+    int get_time() const;
 
     virtual State get_current_phase_state() const = 0;
     virtual bool should_continue() = 0;

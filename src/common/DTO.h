@@ -63,6 +63,12 @@ enum TypeCheckpoint{
     FIRST
 };
 
+struct CarRacingInfo {
+    std::string name;
+    float time;
+    int position;
+};
+
 struct Snapshot { //deberia ser una clase
     int id;
     int game_id;
@@ -81,14 +87,9 @@ struct Snapshot { //deberia ser una clase
     std::unordered_map<int, LobbyCarDTO> lobby_cars; // el int es el car_id. al cliente no le importa el int igual
     bool is_owner;
     std::map<Upgrades, std::chrono::seconds> prices;
-    //std::unordered_map<int, playerDTO> players_info;
+    std::vector<CarRacingInfo> cars_finished;
 
 };
 
-struct playerDTO {
-    std::string name;
-    float time;
-    int position;
-};
-using FinalScoreList = std::vector<playerDTO>;
+using FinalScoreList = std::vector<CarRacingInfo>;
 #endif  // TALLER_TP_DTO_H

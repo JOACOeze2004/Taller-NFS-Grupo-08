@@ -153,6 +153,20 @@ Snapshot ClientProtocol::receive_game_state() const {
     receive_lobby_cars(snapshot);
     receive_prices(snapshot);
 
+
+    cars_count = protocol.receive_big_endian_16();
+    std::vector<CarRacingInfo> cars;
+    size_t size;
+    CarRacingInfo car;
+    for (int i =0; i < cars_count; i++) {
+        size = protocol.receive_big_endian_16();
+        car.name = protocol.receive_string(size);
+        car.time = protocol.receive_big_endian_32();
+        car.position = protocol.receive_big_endian_32();
+        cars.emplace_back(car);
+    }
+    snapshot.cars_finished = cars;
+
     return snapshot;
 }
 
@@ -166,7 +180,7 @@ FinalScoreList ClientProtocol::receive_final_results() const {
     uint16_t count = protocol.receive_big_endian_16();
 
     for (uint16_t i = 0; i < count; ++i) {
-        playerDTO result;
+        CarRacingInfo result;
 
         uint16_t name_len = protocol.receive_big_endian_16();
         result.name = protocol.receive_string(name_len);

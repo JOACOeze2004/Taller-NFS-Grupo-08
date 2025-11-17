@@ -13,7 +13,7 @@ public:
 
 private:
     void setupTable();
-    void populateRow(int row, const playerDTO& score);
+    void populateRow(int row, const CarRacingInfo& score);
 };
 
 #endif // RESULTS_TABLE_WIDGET_H

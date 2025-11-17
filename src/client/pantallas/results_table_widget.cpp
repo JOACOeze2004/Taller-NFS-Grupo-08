@@ -34,7 +34,7 @@ void ResultsTableWidget::displayResults(const FinalScoreList& scores) {
     qDebug() << "Resultados finales de " << scores.size() << " jugadores cargados con éxito.";
 }
 
-void ResultsTableWidget::populateRow(int row, const playerDTO& score) {
+void ResultsTableWidget::populateRow(int row, const CarRacingInfo& score) {
     QTableWidgetItem* posItem = new QTableWidgetItem(QString::number(score.position));
     posItem->setTextAlignment(Qt::AlignCenter);
 

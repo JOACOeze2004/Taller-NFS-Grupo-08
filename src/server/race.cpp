@@ -81,6 +81,10 @@ void Race::update_positions_order() {
 
 void Race::update_checkpoints() {
     for (auto& [id, car] : *cars) {
+        if (car_finished(id)) {
+            continue;
+        }
+
         int next_checkpoint = car_next_cp[id];
         if (next_checkpoint >= static_cast<int>(track.checkpoints.size())) continue;
 

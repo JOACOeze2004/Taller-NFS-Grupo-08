@@ -117,6 +117,7 @@ Snapshot Gameloop::initialize_DTO() {
     dto.time_ms = -1;
     dto.state = IN_LOBBY;
     dto.is_owner = false;
+    dto.cars_finished = finished;
 
     return dto;
 }
@@ -229,7 +230,10 @@ void Gameloop::handle_lobby_command(const ClientCommand& cmd) {
     }
 }
 
-void Gameloop::change_phase(std::unique_ptr<Phase> new_phase) {this->current_phase = std::move(new_phase); }
+void Gameloop::change_phase(std::unique_ptr<Phase> new_phase) {
+    this->current_phase = std::move(new_phase);
+    finished.clear();
+}
 
 
 bool Gameloop::did_all_finish() { //deberiamos validar q todos los jugadores vivoss lleguen  a al meta
@@ -256,20 +260,28 @@ void Gameloop::start_race() {
 void Gameloop::update_race_state() {
     race.update_checkpoints();
     race.update_positions_order();
+    for (auto& [id, car] : cars) {
+        auto it = std::ranges::find_if(
+                finished, [&] (const CarRacingInfo& player) { return player.name == user_names[id];});
+        bool not_added = it == finished.end();
+        if (race.car_finished(id) && not_added) {
+            finished.emplace_back(user_names[id], current_phase->get_time(), race.get_position(id));
+        }
+    }
 }
 
 FinalScoreList Gameloop::calculate_final_results() {
     FinalScoreList results;
 
     for (const auto& [client_id, total_time] : player_total_times) {
-        playerDTO result;
+        CarRacingInfo result;
         result.name = user_names[client_id];
         result.time = static_cast<float>(total_time) / 1000.0f;
         result.position = 0;
         results.push_back(result);
     }
     std::sort(results.begin(), results.end(),
-              [](const playerDTO& a, const playerDTO& b) { return a.time < b.time; });
+              [](const CarRacingInfo& a, const CarRacingInfo& b) { return a.time < b.time; });
 
     for (size_t i = 0; i < results.size(); ++i) {
         results[i].position = i + 1;
