@@ -53,7 +53,7 @@ public:
     void update_nitro_usage();
 
     CarDTO get_state() const;
-    void set_spawn(float& x, float& y, float& angle);
+    void set_spawn(float& x, float& y, float& angle_x, float& angle_y);
 
     void accelerate_upgrade();
     void handling_upgrade();

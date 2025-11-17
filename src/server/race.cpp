@@ -163,8 +163,8 @@ Checkpoint Race::get_start() const {
     return track.checkpoints[0];
 }
 
-float Race::get_start_angle() const {
-    return track.hints[0].rotation;
+Checkpoint Race::get_start_angle() const {
+    return track.checkpoints[1];
 }
 
 void Race::reset_race() {

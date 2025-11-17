@@ -252,10 +252,13 @@ void Car::delete_from_map() {
     }
 }
 
-void Car::set_spawn(float& x, float& y, float& angle) {
+void Car::set_spawn(float& x, float& y, float& angle_x, float& angle_y) {
+    float dx = x - angle_x;
+    float dy = -(y - angle_y);
+    float angle = atan2f(dx, dy);
     b2Body_SetLinearVelocity(body_id, {0,0});
     b2Body_SetAngularVelocity(body_id, 0);
-    b2Rot rot = b2MakeRot(angle*(static_cast<float>(std::numbers::pi)));
+    b2Rot rot = b2MakeRot(angle + std::numbers::pi/2);  //no pregunten
     life = MAX_LIFE;
     nitro = MAX_NITRO;
     nitro_activated = false;

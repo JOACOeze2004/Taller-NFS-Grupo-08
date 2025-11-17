@@ -38,7 +38,7 @@ public:
     HintCoords get_hint(const int& id) const;
     TypeCheckpoint get_cp_type(const int& id) const;
     Checkpoint get_start() const;
-    float get_start_angle() const;
+    Checkpoint get_start_angle() const;
     void reset_race();
 };
 
