@@ -32,7 +32,7 @@ class GraphicClient {
     UpgradePhase* upgrade_phase;
 
     public:
-    explicit GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot, ClientHandler* _handler);
+    explicit GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _handler);
     void draw(const Snapshot& snapshot);
     void update_from_snapshot(const Snapshot& snapshot);
     ~GraphicClient();

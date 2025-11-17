@@ -11,7 +11,7 @@
 
 constexpr float ZOOM_FACTOR = 2.0f;
 
-GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initial_snapshot, ClientHandler* _handler)
+GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _handler)
         : renderer(nullptr), bg_texture(nullptr), window(nullptr),
             player_car_id(-1), camera_x(0.0f), camera_y(0.0f), 
             screen_width(1200), screen_height(900), text(nullptr), handler(_handler), 
@@ -88,7 +88,14 @@ GraphicClient::GraphicClient(const std::string& map_path, const Snapshot& initia
         }
     }
 
-
+    std::string map_path;
+    if (initial_snapshot.map == LIBERTY_CITY) {
+        map_path = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - Liberty City.png";
+    } else if (initial_snapshot.map == SAN_ANDREAS) {
+        map_path = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - San Andreas.png";
+    } else if (initial_snapshot.map == VICE_CITY) {
+        map_path = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - Vice City.png";
+    }
 
     SDL_Surface* bg_surface = IMG_Load(map_path.c_str());
 
