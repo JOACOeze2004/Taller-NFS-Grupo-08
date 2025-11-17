@@ -107,6 +107,7 @@ Snapshot Gameloop::initialize_DTO() {
     dto.state = IN_LOBBY;
     dto.is_owner = false;
     dto.cars_finished = finished;
+    dto.cars_finished.insert(dto.cars_finished.end(), deads.begin(), deads.end());
 
     return dto;
 }
@@ -256,6 +257,13 @@ void Gameloop::update_race_state() {
         bool not_added = it == finished.end();
         if (race.car_finished(id) && not_added) {
             finished.emplace_back(user_names[id], current_phase->get_time(), race.get_position(id));
+            continue;
+        }
+        it = std::ranges::find_if(
+                deads, [&] (const CarRacingInfo& player) { return player.name == user_names[id];});
+        not_added = it == deads.end();
+        if (race.car_finished(id) && not_added) {
+            deads.emplace_back(user_names[id], current_phase->get_time(), -1);
         }
     }
 }
