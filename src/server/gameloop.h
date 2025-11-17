@@ -80,6 +80,7 @@ private:
     std::map<int, long long> player_total_times;
     int races_completed{};
     std::vector<CarRacingInfo> finished;
+    bool game_started;
     void initialize_car_actions();
     Snapshot initialize_DTO();
 };

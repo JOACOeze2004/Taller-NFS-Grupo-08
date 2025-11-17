@@ -5,7 +5,7 @@
 #include <sstream>
 
 Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_name, const int client_id):
-        game_id(gid), monitor(_monitor), owner_id(client_id), ready_to_start(false), race(select_track_yaml(map_name), &cars) {
+        game_id(gid), monitor(_monitor), owner_id(client_id), ready_to_start(false), race(select_track_yaml(map_name), &cars), game_started(false) {
     initialize_car_actions();
     world.generate_map(map_name);
 
@@ -178,7 +178,7 @@ void Gameloop::broadcast_workshop(std::map<Upgrades, std::chrono::seconds> price
     }
 }
 
-bool Gameloop::can_join_to_game(){ return cars.size() < MAX_PLAYERS_PER_GAME; }
+bool Gameloop::can_join_to_game(){ return cars.size() < MAX_PLAYERS_PER_GAME && !game_started; }
 
 const std::string& Gameloop::get_game_id() const{ return this->game_id; }
 
@@ -247,6 +247,7 @@ bool Gameloop::did_all_finish() { //deberiamos validar q todos los jugadores viv
 }
 
 void Gameloop::start_race() {
+    game_started = true;
     Checkpoint start = race.get_start();
     float start_angle = race.get_start_angle();
     for (auto& [id, car] : cars) {
