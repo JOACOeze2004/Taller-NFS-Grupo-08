@@ -9,6 +9,7 @@
 #include "text_renderer.h"
 #include "client_handler.h"
 #include "upgrade_phase.h"
+#include "resource_manager.h"
 
 constexpr int DEFAULT_SCREEN_WIDTH = 1200;
 constexpr int DEFAULT_SCREEN_HEIGHT = 900;
@@ -24,6 +25,7 @@ constexpr const char* VICE_CITY_MAP_PATH = "../assets/need-for-speed/cities/Game
 
 class GraphicClient {
     SDL_Renderer* renderer;
+    std::unique_ptr<ResourceManager> resources;
     SDL_Texture* bg_texture;
     SDL_Texture* checkpoint_texture;
     SDL_Texture* hint_texture;

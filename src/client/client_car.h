@@ -4,10 +4,11 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include "../common/car_DTO.h"
+#include "resource_manager.h"
 
 class Car {
 public:
-    Car(float x, float y, float angle, SDL_Renderer* renderer, int car_id = 0, float scale = 1.0f);
+    Car(float x, float y, float angle, SDL_Renderer* renderer, ResourceManager* resources, int car_id = 0, float scale = 1.0f);
     ~Car();
 
     void update_from_dto(const CarDTO& state);
@@ -70,9 +71,6 @@ private:
     SDL_Texture* nitro_texture = nullptr;
     SDL_Rect srcRect{0, 0, 0, 0};
     
-    void loadTextures(int car_id);
-    void loadCarTexture();
-    void loadNitroTexture();
     void loadSpriteConfig(int car_id);
     bool tryLoadYamlConfig(const std::string& yaml_path, int car_id);
     void setDefaultSprite();

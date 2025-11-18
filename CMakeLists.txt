@@ -133,6 +133,10 @@ if(TALLER_CLIENT)
             src/client/client_car.h
             src/client/graphic_client.cpp
             src/client/graphic_client.h
+            src/client/resource_manager.cpp
+            src/client/resource_manager.h
+            src/client/text_renderer.cpp
+            src/client/text_renderer.h
             src/client/ClientQuitException.h
             src/client/InvalidId.h
             src/client/upgrade_phase.cpp

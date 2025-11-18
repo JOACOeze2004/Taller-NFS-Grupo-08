@@ -38,6 +38,8 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
         return;
     }
 
+    resources = std::make_unique<ResourceManager>(renderer);
+
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
         std::cerr << "Error inicializando SDL_image: " << IMG_GetError() << std::endl;
     }
@@ -52,38 +54,9 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
         }
     }
 
-    SDL_Surface* checkpoint_surface = IMG_Load(CHECKPOINT_TEXTURE_PATH);
-    if (!checkpoint_surface) {
-        std::cerr << "[CLIENT] Error cargando textura de checkpoint: " << SDL_GetError() << std::endl;
-    } else {
-        checkpoint_texture = SDL_CreateTextureFromSurface(renderer, checkpoint_surface);
-        SDL_FreeSurface(checkpoint_surface);
-        if (!checkpoint_texture) {
-            std::cerr << "[CLIENT] Error creando textura de checkpoint: " << SDL_GetError() << std::endl;
-        }
-    }
-
-    SDL_Surface* hint_surface = IMG_Load(HINT_TEXTURE_PATH);
-    if (!hint_surface) {
-        std::cerr << "[CLIENT] Error cargando textura de hint: " << SDL_GetError() << std::endl;
-    } else {
-        hint_texture = SDL_CreateTextureFromSurface(renderer, hint_surface);
-        SDL_FreeSurface(hint_surface);
-        if (!hint_texture) {
-            std::cerr << "[CLIENT] Error creando textura de hint: " << SDL_GetError() << std::endl;
-        }
-    }
-
-    SDL_Surface* speedometer_surface = IMG_Load(SPEEDOMETER_TEXTURE_PATH);
-    if (!speedometer_surface) {
-        std::cerr << "[CLIENT] Error cargando textura de speedometer: " << SDL_GetError() << std::endl;
-    } else {
-        speedometer_texture = SDL_CreateTextureFromSurface(renderer, speedometer_surface);
-        SDL_FreeSurface(speedometer_surface);
-        if (!speedometer_texture) {
-            std::cerr << "[CLIENT] Error creando textura de speedometer: " << SDL_GetError() << std::endl;
-        }
-    }
+    checkpoint_texture = resources->load(CHECKPOINT_TEXTURE_PATH);
+    hint_texture = resources->load(HINT_TEXTURE_PATH);
+    speedometer_texture = resources->load(SPEEDOMETER_TEXTURE_PATH);
 
     std::string map_path;
     if (initial_snapshot.map == LIBERTY_CITY) {
@@ -95,20 +68,15 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
     }
 
     SDL_Surface* bg_surface = IMG_Load(map_path.c_str());
-
     if (!bg_surface) {
         std::cerr << "[CLIENT] Error cargando fondo: " << SDL_GetError() << std::endl;
     } else {
         map_width = static_cast<float>(bg_surface->w);
         map_height = static_cast<float>(bg_surface->h);
+        SDL_FreeSurface(bg_surface);
     }
     
-    bg_texture = SDL_CreateTextureFromSurface(renderer, bg_surface);
-    SDL_FreeSurface(bg_surface);
-
-    if (!bg_texture) {
-        std::cerr << "[CLIENT] Error creando textura: " << SDL_GetError() << std::endl;
-    }
+    bg_texture = resources->load(map_path.c_str());
 
     set_player_car(initial_snapshot.id);
 
@@ -149,7 +117,7 @@ void GraphicClient::set_player_car(int id) {
 void GraphicClient::update_car(int id, const CarDTO& car_state) {
     cars[id] = car_state;
     if (car_objects.find(id) == car_objects.end()) {
-        car_objects[id] = std::make_unique<Car>(0.0f, 0.0f, 0.0f, renderer, car_state.car_id, ZOOM_FACTOR);
+        car_objects[id] = std::make_unique<Car>(0.0f, 0.0f, 0.0f, renderer, resources.get(), car_state.car_id, ZOOM_FACTOR);
     }
 }
 
@@ -698,7 +666,7 @@ void GraphicClient::draw_cars() {
             auto it = car_objects.find(id);
             if (it == car_objects.end()) {
                 std::cout << "Creating new car object for car_id: " << car_dto_world.car_id << std::endl;
-                car_objects[id] = std::make_unique<Car>(adjusted.x, adjusted.y, adjusted.angle, renderer, car_dto_world.car_id, ZOOM_FACTOR);
+                car_objects[id] = std::make_unique<Car>(adjusted.x, adjusted.y, adjusted.angle, renderer, resources.get(), car_dto_world.car_id, ZOOM_FACTOR);
                 it = car_objects.find(id);
             }
             Car* car_obj = it->second.get();
@@ -711,24 +679,8 @@ void GraphicClient::draw_cars() {
 GraphicClient::~GraphicClient() {
     upgrade_phase.reset();
     text.reset();
+    resources.reset();
     
-    if (bg_texture) {
-        SDL_DestroyTexture(bg_texture);
-        bg_texture = nullptr;
-    }
-    if (speedometer_texture) {
-        SDL_DestroyTexture(speedometer_texture);
-        speedometer_texture = nullptr;
-    }
-    if (checkpoint_texture) {
-        SDL_DestroyTexture(checkpoint_texture);
-        checkpoint_texture = nullptr;
-    }
-    if (hint_texture) {
-        SDL_DestroyTexture(hint_texture);
-        hint_texture = nullptr;
-    }
-
     if (TTF_WasInit()) {
         TTF_Quit();
     }

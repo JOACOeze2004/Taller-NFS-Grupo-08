@@ -1,7 +1,7 @@
 #include "client_car.h"
+#include "resource_manager.h"
 #include <cmath>
 #include <string>
-#include <SDL2/SDL_image.h>
 #include <yaml-cpp/yaml.h>
 #include <iostream>
 #include <fstream>
@@ -12,49 +12,20 @@ namespace {
     const std::string NITRO_TEXTURE_PATH = "../assets/need-for-speed/sprits/nitro-fire.png";
 }
 
-Car::Car(float x, float y, float angle, SDL_Renderer* renderer, int car_id, float scale)
+Car::Car(float x, float y, float angle, SDL_Renderer* renderer, ResourceManager* resources, int car_id, float scale)
     : x(x), y(y), angle(angle), velocity(0.0f), nitro(0.0f), nitro_remaining(0.0f),
       life(100), render_scale(scale), renderer(renderer) {
     
-    if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) == 0) {
-        std::cerr << "Warning: Failed to initialize SDL_Image PNG support: " << IMG_GetError() << std::endl;
-    }
+    texture = resources->load(CAR_TEXTURE_PATH);
+    nitro_texture = resources->load(NITRO_TEXTURE_PATH);
     
-    loadTextures(car_id);
-}
-
-Car::~Car() {
-    if (texture) {
-        SDL_DestroyTexture(texture);
-        texture = nullptr;
-    }
-    if (nitro_texture) {
-        SDL_DestroyTexture(nitro_texture);
-        nitro_texture = nullptr;
-    }
-}
-
-void Car::loadTextures(int car_id) {
-    loadCarTexture();
-    loadNitroTexture();
     loadSpriteConfig(car_id);
 }
 
-void Car::loadCarTexture() {
-    texture = IMG_LoadTexture(renderer, CAR_TEXTURE_PATH.c_str());
-    if (!texture) {
-        std::cerr << "Warning: Could not load car texture from " << CAR_TEXTURE_PATH 
-                  << ": " << IMG_GetError() << std::endl;
-    }
+Car::~Car() {
 }
 
-void Car::loadNitroTexture() {
-    nitro_texture = IMG_LoadTexture(renderer, NITRO_TEXTURE_PATH.c_str());
-    if (!nitro_texture) {
-        std::cerr << "Warning: Could not load nitro texture from " << NITRO_TEXTURE_PATH 
-                  << ": " << IMG_GetError() << std::endl;
-    }
-}
+
 
 void Car::loadSpriteConfig(int car_id) {
     if (!texture) {
