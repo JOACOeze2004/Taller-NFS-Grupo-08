@@ -25,7 +25,7 @@ class Car {
     b2BodyId body_id;
     bool nitro_activated = false;
     int nitro_consuption = NITRO_CONSUMPTION;
-    b2BodyDef body;
+    int remaining_upgrades;
 
 public:
     explicit Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking, int _car_id);
@@ -61,6 +61,7 @@ public:
     void life_upgrade();
     void brake_upgrade();
     void mass_upgrade();
+    void upgrade(float& stat, float upgrade_factor);
 
 private:
     float calculate_torque() const;

@@ -19,6 +19,7 @@ struct CarDTO {
     bool nitro;
     float remaining_nitro;
     enum StateRunning state;
+    int remaining_upgrades;
 };
 
 #endif  // TALLER_TP_CAR_DTO_H

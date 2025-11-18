@@ -6,7 +6,7 @@
 #include "src/common/DTO.h"
 
 Car::Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking, int _car_id) : mass(_mass), handling(_handling + mass), acceleration(_acceleration - mass), braking(_braking - mass/2), car_id(_car_id){
-    body = b2DefaultBodyDef();
+    b2BodyDef body = b2DefaultBodyDef();
     body.type = b2_dynamicBody;
     body.linearDamping = 2.0f;
     body.angularDamping = 7.0f;
@@ -23,6 +23,8 @@ Car::Car(b2WorldId world, float _mass, float _handling, float _acceleration, flo
     b2ShapeId shape = b2CreatePolygonShape(body_id, &shape_def, &box);
     b2Shape_EnableContactEvents(shape, true);
     b2Shape_EnableHitEvents(shape, true);
+
+    remaining_upgrades = 3;
 }
 
 Car::~Car() {
@@ -235,7 +237,7 @@ CarDTO Car::get_state() const {
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME);  //cambiar el car id y el under bridge para que funcione
+    return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME, remaining_upgrades);
 }
 
 b2Vec2 Car::get_position() {
@@ -262,30 +264,36 @@ void Car::set_spawn(float& x, float& y, float& angle_x, float& angle_y) {
     life = MAX_LIFE;
     nitro = MAX_NITRO;
     nitro_activated = false;
+    upgrades_remaining = 3;
     b2Body_SetTransform(body_id, {x,y}, rot);
 }
 
 void Car::accelerate_upgrade() {
-    acceleration = acceleration * ACCELERATION_UPGRADE_FACTOR;
+    upgrade(acceleration, ACCELERATION_UPGRADE_FACTOR);
 }
 
 void Car::handling_upgrade() {
-    handling = handling * HANDLING_UPGRADE_FACTOR;
+    upgrade(handling, HANDLING_UPGRADE_FACTOR);
 }
 
 void Car::nitro_upgrade() {
-    NITRO = NITRO * NITRO_UPGRADE_FACTOR;
+    upgrade(NITRO, NITRO_UPGRADE_FACTOR);
 }
 
 void Car::life_upgrade() {
-    life = life * LIFE_UPGRADE_FACTOR;
+    upgrade((float&)life, LIFE_UPGRADE_FACTOR);
 }
 
 void Car::brake_upgrade() {
-    braking = braking * BRAKE_UPGRADE_FACTOR;
+    upgrade(braking, BRAKE_UPGRADE_FACTOR);
 }
 
 void Car::mass_upgrade() {
-    mass = mass * MASS_UPGRADE_FACTOR;
+    upgrade(mass, MASS_UPGRADE_FACTOR);
+}
+
+void Car::upgrade(float& stat, float upgrade_factor) {
+    stat *= upgrade_factor;
+    remaining_upgrades -= 1;
 }
 

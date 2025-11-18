@@ -72,6 +72,7 @@ CarDTO ClientProtocol::receive_car_state() const {
     car.nitro = protocol.receive_bool();
     car.remaining_nitro = protocol.receive_float();
     car.state = static_cast<StateRunning>(protocol.receive_byte());
+    car.remaining_upgrades = protocol.receive_big_endian_32();
     return car;
 }
 

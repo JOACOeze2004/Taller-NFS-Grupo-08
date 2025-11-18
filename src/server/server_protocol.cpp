@@ -67,6 +67,7 @@ void ServerProtocol::send_car_state(const CarDTO& car){
     protocol.send_bool(car.nitro);
     protocol.send_float(car.remaining_nitro);
     protocol.send_byte(static_cast<uint8_t>(car.state));
+    protocol.send_big_endian_32(car.remaining_upgrades);
 }
 
 void ServerProtocol::send_lobby_car_state(const LobbyCarDTO& car) {
