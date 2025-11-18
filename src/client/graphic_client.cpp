@@ -231,48 +231,55 @@ void GraphicClient::clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dt
 }
 
 void GraphicClient::draw(const Snapshot& snapshot) {
-    std::cout << snapshot.state << std::endl;
-    if (snapshot.state == IN_WORK_SHOP) { 
-        auto player_it = snapshot.cars.find(player_car_id);
-        int remaining_upgrades = (player_it != snapshot.cars.end()) ? player_it->second.remaining_upgrades : 0;
-        upgrade_phase->render(remaining_upgrades);
-        SDL_RenderPresent(renderer);
-
-        return;
+    switch (snapshot.state) {
+        case IN_WORK_SHOP:
+            draw_workshop_state(snapshot);
+            break;
+        case IN_LOBBY:
+            draw_lobby_state(snapshot);
+            break;
+        case IN_RACE:
+            draw_race_state(snapshot);
+            break;
+        default:
+            break;
     }
+    SDL_RenderPresent(renderer);
+}
+
+void GraphicClient::draw_workshop_state(const Snapshot& snapshot) {
+    auto player_it = snapshot.cars.find(player_car_id);
+    int remaining_upgrades = (player_it != snapshot.cars.end()) ? player_it->second.remaining_upgrades : 0;
+    upgrade_phase->render(remaining_upgrades);
+}
+
+void GraphicClient::draw_lobby_state(const Snapshot& snapshot) {
+    draw_camera();
+    draw_cars();
+    draw_minimap(snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
+    draw_speedometer(cars[player_car_id].velocity);
+    draw_game_id(snapshot.game_id);
     
-    if (snapshot.state == IN_RACE || snapshot.state == IN_LOBBY){ 
+    if (snapshot.is_owner) {
+        draw_ready_btn(static_cast<int>(snapshot.cars.size()), ready_sent);
+    }
+}
 
-        draw_camera();
-        
-        draw_minimap(snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
-        
-        draw_speedometer(cars[player_car_id].velocity);
-        
-        if (snapshot.state == IN_RACE) {
-            draw_position(snapshot.position, snapshot.cars.size());
-            draw_time(snapshot.time_ms);
-            draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint);
-            draw_hint(snapshot.hint);
-        } else if (snapshot.state == IN_LOBBY && snapshot.is_owner) {
-            draw_ready_btn(static_cast<int>(snapshot.cars.size()), ready_sent);
-        }
-        
-
-
-        draw_game_id(snapshot.game_id);
-        
-        draw_cars();
-
-        auto player_it = snapshot.cars.find(player_car_id);
-        if (player_it != snapshot.cars.end() && player_it->second.state != IN_GAME) {
-            draw_state(player_it->second.state);
-            draw_results(snapshot.cars_finished);
-
-        }
-
-
-        SDL_RenderPresent(renderer);
+void GraphicClient::draw_race_state(const Snapshot& snapshot) {
+    draw_camera();
+    draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint);
+    draw_hint(snapshot.hint);
+    draw_minimap(snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
+    draw_speedometer(cars[player_car_id].velocity);
+    draw_position(snapshot.position, snapshot.cars.size());
+    draw_time(snapshot.time_ms);
+    draw_game_id(snapshot.game_id);
+    draw_cars();
+    
+    auto player_it = snapshot.cars.find(player_car_id);
+    if (player_it != snapshot.cars.end() && player_it->second.state != IN_GAME) {
+        draw_state(player_it->second.state);
+        draw_results(snapshot.cars_finished);
     }
 } 
 

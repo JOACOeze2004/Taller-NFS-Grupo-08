@@ -50,6 +50,10 @@ class GraphicClient {
     ~GraphicClient();
     
     private:
+    void draw_workshop_state(const Snapshot& snapshot);
+    void draw_lobby_state(const Snapshot& snapshot);
+    void draw_race_state(const Snapshot& snapshot);
+    
     void clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dto);
     void draw_cars();
     void draw_camera();
