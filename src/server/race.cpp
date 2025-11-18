@@ -140,14 +140,24 @@ StateRunning Race::get_state(const int& id, const int& time_remaining) {
 }
 
 CheckpointCoords Race::get_checkpoint(const int& id) const {
-    const int next_cp = car_next_cp.find(id)->second;
-    const Checkpoint checkpoint = track.checkpoints[next_cp];
-    const CheckpointCoords cp = {checkpoint.x, checkpoint.y};
-    return cp;
+    auto it = car_next_cp.find(id);
+    if (it == car_next_cp.end()) {
+        return {0,0};
+    }
+    size_t next_cp = it->second;
+    if (next_cp >= track.checkpoints.size()) {
+        const Checkpoint& last = track.checkpoints.back();
+        return {last.x, last.y};
+    }
+    const Checkpoint& checkpoint = track.checkpoints[next_cp];
+    return {checkpoint.x, checkpoint.y};
 }
 
 HintCoords Race::get_hint(const int& id) const {
     auto it = car_next_hint.find(id);
+    if (it == car_next_hint.end()){
+        return {0.f, 0.f, 0.f};
+    }
     int next_hint = it->second;
 
     if (next_hint < 0 || next_hint >= static_cast<int>(track.hints.size())) {
