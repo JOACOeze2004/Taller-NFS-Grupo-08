@@ -271,13 +271,13 @@ void Gameloop::change_phase(std::unique_ptr<Phase> new_phase) {
 
 
 bool Gameloop::did_all_finish() {
-    int cars_finished = 0;
+    int cars_finished_or_dead = 0;
     for (auto& [id, car] : cars) {
-        if (race.car_finished(id)) {
-            cars_finished++;
+        if (race.car_finished(id) || race.car_dead(id)) {
+            cars_finished_or_dead++;
         }
     }
-    return cars_finished == (int)cars.size();
+    return cars_finished_or_dead == (int)cars.size();
 }
 
 void Gameloop::start_race() {
