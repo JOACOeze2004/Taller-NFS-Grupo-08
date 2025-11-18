@@ -33,7 +33,7 @@ void ClientReceiver::run(){
     }    
 }
 
-bool ClientReceiver::try_pop_car_state(Snapshot& snapshot) {
+bool ClientReceiver::try_pop_snapshot(Snapshot& snapshot) {
     return queue.try_pop(snapshot);
 }
 

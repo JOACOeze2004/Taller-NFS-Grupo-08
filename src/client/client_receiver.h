@@ -17,7 +17,7 @@ class ClientReceiver : public Thread  {
 public:
     explicit ClientReceiver(ClientProtocol& protocol);
     void run() override;
-    bool try_pop_car_state(Snapshot& snapshot);
+    bool try_pop_snapshot(Snapshot& snapshot);
     bool has_final_results();
     FinalScoreList get_final_results();
 };

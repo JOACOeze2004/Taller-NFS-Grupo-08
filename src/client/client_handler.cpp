@@ -4,9 +4,8 @@
 
 ClientHandler::ClientHandler(InputParser& _parser): parser(_parser), mouse_was_down(false) {
     initialize_key_map();
-    for (auto& [key, state] : key_state) {
-        key_state[key] = false;
-    }
+    initialize_button_map();
+    initialize_cheat_map();
 }
 
 void ClientHandler::handle_event() {
@@ -32,115 +31,92 @@ void ClientHandler::clear_buttons() {
 }
 
 void ClientHandler::handle_button_action(ButtonType type) {
-    switch (type) {
-        case BUTTON_READY:
-            parser.parse_command(SEND_READY_TO_PLAY);
-            break;
-        case BUTTON_LIFE_UP:
-            std::cout << "Clicked: BUTTON_LIFE_UP" << std::endl;
-            parser.parse_command(SEND_LIFE_UPGRADE);
-            break;
-        case BUTTON_VELOCITY_UP:
-            std::cout << "Clicked: BUTTON_VELOCITY_UP" << std::endl;
-            parser.parse_command(SEND_BRAKE_UPGRADE);
-            break;
-        case BUTTON_ACCELERATION_UP:
-            std::cout << "Clicked: BUTTON_ACCELERATION_UP" << std::endl;
-            parser.parse_command(SEND_ACCELERATION_UPGRADE);
-            break;
-        case BUTTON_HANDLING_UP:
-            std::cout << "Clicked: BUTTON_HANDLING_UP" << std::endl;
-            parser.parse_command(SEND_HANDLING_UPGRADE);
-            break;
-        case BUTTON_CONTROL_UP:
-            std::cout << "Clicked: BUTTON_CONTROL_UP" << std::endl;
-            parser.parse_command(SEND_MASS_UPGRADE);
-            break;
-        case BUTTON_NITRO_UP:
-            std::cout << "Clicked: BUTTON_NITRO_UP" << std::endl;
-            parser.parse_command(SEND_NITRO_UPGRADE);
-            break;
-        case BUTTON_LIFE_DOWN:
-            std::cout << "Clicked: BUTTON_LIFE_DOWN" << std::endl;
-            parser.parse_command(SEND_LIFE_DOWNGRADE);
-            break;
-        case BUTTON_VELOCITY_DOWN:
-            std::cout << "Clicked: BUTTON_VELOCITY_DOWN" << std::endl;
-            parser.parse_command(SEND_BRAKE_DOWNGRADE);
-            break;
-        case BUTTON_ACCELERATION_DOWN:
-            std::cout << "Clicked: BUTTON_ACCELERATION_DOWN" << std::endl;
-            parser.parse_command(SEND_ACCELERATION_DOWNGRADE);
-            break;
-        case BUTTON_HANDLING_DOWN:
-            std::cout << "Clicked: BUTTON_HANDLING_DOWN" << std::endl;
-            parser.parse_command(SEND_HANDLING_DOWNGRADE);
-            break;
-        case BUTTON_CONTROL_DOWN:
-            std::cout << "Clicked: BUTTON_CONTROL_DOWN" << std::endl;
-            parser.parse_command(SEND_MASS_DOWNGRADE);
-            break;
-        case BUTTON_NITRO_DOWN:
-            std::cout << "Clicked: BUTTON_NITRO_DOWN" << std::endl;
-            parser.parse_command(SEND_NITRO_DOWNGRADE);
-            break;
-        default:
-            break;
+    auto it = button_command_map.find(type);
+    if (it != button_command_map.end()) {
+        parser.parse_command(it->second);
     }
+}
+
+void ClientHandler::initialize_button_map() {
+    button_command_map[BUTTON_READY] = SEND_READY_TO_PLAY;
+    button_command_map[BUTTON_LIFE_UP] = SEND_LIFE_UPGRADE;
+    button_command_map[BUTTON_LIFE_DOWN] = SEND_LIFE_DOWNGRADE;
+    button_command_map[BUTTON_VELOCITY_UP] = SEND_BRAKE_UPGRADE;
+    button_command_map[BUTTON_VELOCITY_DOWN] = SEND_BRAKE_DOWNGRADE;
+    button_command_map[BUTTON_ACCELERATION_UP] = SEND_ACCELERATION_UPGRADE;
+    button_command_map[BUTTON_ACCELERATION_DOWN] = SEND_ACCELERATION_DOWNGRADE;
+    button_command_map[BUTTON_HANDLING_UP] = SEND_HANDLING_UPGRADE;
+    button_command_map[BUTTON_HANDLING_DOWN] = SEND_HANDLING_DOWNGRADE;
+    button_command_map[BUTTON_CONTROL_UP] = SEND_MASS_UPGRADE;
+    button_command_map[BUTTON_CONTROL_DOWN] = SEND_MASS_DOWNGRADE;
+    button_command_map[BUTTON_NITRO_UP] = SEND_NITRO_UPGRADE;
+    button_command_map[BUTTON_NITRO_DOWN] = SEND_NITRO_DOWNGRADE;
+}
+
+void ClientHandler::initialize_cheat_map() {
+    cheat_command_map[SDLK_z] = SEND_WIN_RACE_CHEAT;
+    cheat_command_map[SDLK_x] = SEND_RESTORE_LIFE_CHEAT;
+    cheat_command_map[SDLK_c] = SEND_INFINITE_LIFE_CHEAT;
+    cheat_command_map[SDLK_v] = SEND_LOSE_RACE_CHEAT;
+    cheat_command_map[SDLK_b] = SEND_INFINITE_NITRO_CHEAT;
+    cheat_command_map[SDLK_q] = SEND_DISCONNECT;
+}
+
+bool ClientHandler::is_point_in_rect(int x, int y, const SDL_Rect& rect) const {
+    return (x >= rect.x && x <= rect.x + rect.w &&
+            y >= rect.y && y <= rect.y + rect.h);
 }
 
 void ClientHandler::process_mouse_click(int x, int y) {
     for (auto& button : buttons) {
-        if (button.enabled && 
-            x >= button.rect.x && x <= button.rect.x + button.rect.w &&
-            y >= button.rect.y && y <= button.rect.y + button.rect.h) {
+        if (button.enabled && is_point_in_rect(x, y, button.rect)) {
             handle_button_action(button.type);  
             return;
         }
     }
 }
 
-void ClientHandler::process_event(const SDL_Event& event) {
+void ClientHandler::process_mouse_event(const SDL_Event& event) {
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
         if (!mouse_was_down) {
             process_mouse_click(event.button.x, event.button.y);
             mouse_was_down = true;
         }
+        return;
     }
-    else if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT) {
+    
+    if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT) {
         mouse_was_down = false;
     }
-    else if (event.type == SDL_KEYDOWN) {
+}
+
+void ClientHandler::process_keyboard_event(const SDL_Event& event) {
+    if (event.type == SDL_KEYDOWN) {
         SDL_Keymod mod = SDL_GetModState();
         if (mod & KMOD_CTRL) {
-            switch (event.key.keysym.sym) {
-                case SDLK_z:
-                    parser.parse_command(SEND_WIN_RACE_CHEAT);
-                    break;
-                case SDLK_x:
-                    parser.parse_command(SEND_RESTORE_LIFE_CHEAT);
-                    break;
-                case SDLK_c:
-                    parser.parse_command(SEND_INFINITE_LIFE_CHEAT);
-                    break;
-                case SDLK_v:
-                    parser.parse_command(SEND_LOSE_RACE_CHEAT);
-                    break;
-                case SDLK_b:
-                    parser.parse_command(SEND_INFINITE_NITRO_CHEAT);
-                    break;
-                case SDLK_q:
-                    parser.parse_command(SEND_DISCONNECT);
-                    break;
-                default:
-                    break;
+            auto it = cheat_command_map.find(event.key.keysym.sym);
+            if (it != cheat_command_map.end()) {
+                parser.parse_command(it->second);
             }
             return;
         }
         key_state[event.key.keysym.sym] = true;
+        return;
     }
-    else if (event.type == SDL_KEYUP) {
+    
+    if (event.type == SDL_KEYUP) {
         key_state[event.key.keysym.sym] = false;
+    }
+}
+
+void ClientHandler::process_event(const SDL_Event& event) {
+    if (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP) {
+        process_mouse_event(event);
+        return;
+    }
+    
+    if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+        process_keyboard_event(event);
     }
 }
 
@@ -162,9 +138,7 @@ void ClientHandler::update() {
 bool ClientHandler::is_mouse_over_button(const SDL_Rect& rect) const {
     int mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
-    
-    return (mouse_x >= rect.x && mouse_x <= rect.x + rect.w &&
-            mouse_y >= rect.y && mouse_y <= rect.y + rect.h);
+    return is_point_in_rect(mouse_x, mouse_y, rect);
 }
 
 ClientHandler::~ClientHandler() {
