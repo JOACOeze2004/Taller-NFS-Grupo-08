@@ -23,8 +23,8 @@ void ClientAcceptor::reap() {
 }
 
 void ClientAcceptor::clear() {
-    monitor.clear_clients();
     monitor.kill_games();
+    monitor.clear_clients();
 }
 
 void ClientAcceptor::close_acceptor_socket(){

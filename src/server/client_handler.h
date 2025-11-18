@@ -25,7 +25,7 @@ class ClientHandler: public Thread {
 private:
     Socket peer; 
     ServerProtocol protocol;
-    Queue<DTO> client_queue;
+    Queue<Snapshot  > client_queue;
     Monitor& monitor;
     std::string game_id;
     int id;
@@ -35,16 +35,21 @@ private:
     std::string player_name;
     uint8_t car_id{};
     std::string map_name;
+
+    void receive_player_configuration();
+    std::shared_ptr<Gameloop> process_lobby_action();
+    void send_initial_data();
+
 public:
     explicit ClientHandler(Socket&& peer,Monitor& monitor, int _id);
     void run() override;
-    void send_state(DTO dto);
+    void send_state(Snapshot snapshot);
     void kill();
     void kill_threads();
     bool is_dead() const;
     void set_game_id(const std::string& _game_id);
     const std::string& get_game_id() const;
-
+    void send_final_results(const FinalScoreList& results);
     ~ClientHandler();
 };
 

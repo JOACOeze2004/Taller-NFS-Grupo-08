@@ -7,13 +7,12 @@ void ClientReceiver::run() {
     while (should_keep_running()) {
         try {
             uint8_t request = protocol.receive_standar_command();
-            if (request != 0) {
-                ClientCommand client_command;
-                client_command.id = this->reciver_id;
-                client_command.cmd_struct.cmd = request;
-                game_loop->push_command(client_command);
-            }
-            else {
+            ClientCommand client_command;
+            client_command.id = this->reciver_id;
+            client_command.cmd_struct.cmd = request;
+            game_loop->push_command(client_command);
+            if (request == 0) {
+                this->stop();
                 break;
             }
         } catch (const std::exception& e) {

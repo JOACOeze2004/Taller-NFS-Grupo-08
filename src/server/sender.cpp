@@ -1,15 +1,13 @@
 #include "sender.h"
 
-ClientSender::ClientSender(ServerProtocol& prot, Queue<DTO>& queue):
+ClientSender::ClientSender(ServerProtocol& prot, Queue<Snapshot>& queue):
         protocol(prot), client_queue(queue) {}
 
 void ClientSender::run() {
     while (should_keep_running()) {
         try {
-            DTO dto = client_queue.pop();
-            if (dto.id != 0){
-                protocol.send_game_state(dto);
-            }           
+            Snapshot snapshot = client_queue.pop();
+            protocol.send_game_state(snapshot);         
         } catch (const ClosedQueue&) {
             this->stop();
             break;

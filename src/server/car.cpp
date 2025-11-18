@@ -2,9 +2,10 @@
 
 #include <cmath>
 #include <iostream>
-#include <ostream>
 
-Car::Car(b2WorldId world){
+#include "src/common/DTO.h"
+
+Car::Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking, int _car_id) : mass(_mass), handling(_handling + mass), acceleration(_acceleration - mass), braking(_braking - mass/2), car_id(_car_id){
     b2BodyDef body = b2DefaultBodyDef();
     body.type = b2_dynamicBody;
     body.linearDamping = 2.0f;
@@ -14,11 +15,21 @@ Car::Car(b2WorldId world){
     b2Body_EnableContactEvents(body_id, true);
     b2Body_EnableHitEvents(body_id, true);
 
+    b2Body_SetUserData(body_id, this);
+
     b2Polygon box = b2MakeBox(10.0f, 5.0f);
     b2ShapeDef shape_def = b2DefaultShapeDef();
+    shape_def.density = 0.0006f;
     b2ShapeId shape = b2CreatePolygonShape(body_id, &shape_def, &box);
     b2Shape_EnableContactEvents(shape, true);
     b2Shape_EnableHitEvents(shape, true);
+
+    remaining_upgrades = 3;
+
+    base_mass = mass;
+    base_handling = handling;
+    base_acceleration = acceleration;
+    base_braking = braking;
 }
 
 Car::~Car() {
@@ -30,37 +41,64 @@ Car::~Car() {
 void Car::accelerate() {
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    if (speed < max_speed) {
+
+    float accel = acceleration;
+    float limit = max_speed;
+    
+    if (speed < limit) {
         b2Vec2 velocity = b2Body_GetWorldVector(body_id, {1,0});
-        b2Vec2 force = {velocity.x * acceleration, velocity.y * acceleration};
+        b2Vec2 force = {velocity.x * accel, velocity.y * accel};
         b2Body_ApplyForceToCenter(body_id, force, true);
     }
-    update_position();
+    apply_friction();
 }
 
 void Car::brake() {
-    b2Vec2 vel = b2Body_GetWorldVector(body_id, {1,0});
-    b2Vec2 brake = {-vel.x * braking, -vel.y * braking};
+    b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
+    b2Vec2 vec = b2Body_GetWorldVector(body_id, {1, 0});
+    float speed = b2Dot(vel, vec);
+    b2Vec2 brake;
+
+    if (speed < 0) {
+        brake = {-vec.x * braking * 2, -vec.y * braking * 2};
+    }else{
+        brake = {-vec.x * braking, -vec.y * braking};
+    }
+
     b2Body_ApplyForceToCenter(body_id, brake, true);
-    update_position();
+    apply_friction();
 }
 
 void Car::turn_right() {
-    b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
-    float speed = b2Length(vel);
-    if (speed > 1.0f) {
-        b2Body_ApplyTorque(body_id, handling, true);
-        update_position();
-    }
+    float torque  = calculate_torque();
+
+    b2Body_ApplyTorque(body_id, torque, true);
+    apply_friction();
 }
 
 void Car::turn_left() {
+    float torque  = calculate_torque();
+
+    b2Body_ApplyTorque(body_id, -torque, true);
+    apply_friction();
+}
+
+float Car::calculate_torque() const {
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    if (speed > 1.0f) {
-        b2Body_ApplyTorque(body_id, -handling, true);
-        update_position();
+    float torque  = 0;
+
+    if (speed > 50.0f) {
+        torque = handling;
     }
+    else if (speed > 25.0f) {
+        torque = handling * 0.7f;
+    }
+    else if (speed > 10.0f) {
+        torque = handling * 0.4f;
+    }
+
+    return torque;
 }
 
 void Car::activate_win_race() {
@@ -72,7 +110,11 @@ void Car::restore_life() {
 }
 
 void Car::activate_infinite_life() {
-    life = MAX_LIFE; //hacer un valor muy grande o alguno que sepamos representa la vida infinita
+    if (life >= MAX_LIFE + 1)
+        life = MAX_LIFE;
+    else {
+        life = MAX_LIFE + 1;
+    }
 }
 
 void Car::activate_lose_race() {
@@ -80,16 +122,19 @@ void Car::activate_lose_race() {
 }
 
 void Car::activate_infinite_nitro() {
-    nitro = MAX_NITRO; //hacer un valor muy grande o alguno que sepamos representa el nitro infinito
+    if (nitro >= MAX_NITRO+1) {
+        nitro = MAX_NITRO;
+    }
+    else {
+        nitro = MAX_NITRO + 1;
+    }
 }
 
-void Car::update_position() {
-    //b2Vec2 forward = b2Body_GetWorldVector(body_id, {1,0});
+void Car::apply_friction() {
     b2Vec2 right = b2Body_GetWorldVector(body_id, {0,1});
 
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
 
-    //float forward_speed = b2Dot(forward, vel); es de friccion lineal pero no se si box2d ya se encarga
     float lateral_speed = b2Dot(right, vel);
 
     b2Vec2 lateral_impulse = {
@@ -97,7 +142,89 @@ void Car::update_position() {
         -lateral_speed*right.y*b2Body_GetMass(body_id),
     };
     b2Body_ApplyLinearImpulseToCenter(body_id, lateral_impulse, true);
+}
 
+void Car::handle_hit(b2Vec2& normal, float& force, bool is_hitter) {
+    b2Vec2 impulse = {normal.x * force / MASS, normal.y * force / MASS};
+    b2Body_ApplyForceToCenter(body_id, impulse, true);
+
+    if (life > MAX_LIFE) {
+        return;
+    }
+
+    b2Vec2 forward = b2Body_GetWorldVector(body_id, {1.0f, 0.0f});
+    float angle_impact = fabs(b2Dot(normal, forward));
+
+    float angle_factor = 0.3f + 0.7f * angle_impact;
+
+    if (is_hitter) {
+        life -= static_cast<int>((force / (MASS*0.2)) * angle_factor);
+    }
+    else {
+        life -= static_cast<int>((force / (MASS * 0.1f)) * angle_factor);
+    }
+
+    if (life < 0) {
+        life = 0;
+    }
+}
+
+void Car::toggle_nitro_status(){
+    if (nitro < MAX_NITRO && !nitro_activated){
+        return;
+    }
+    nitro_activated = true;
+}
+
+void Car::apply_nitro_force() {
+    if (!nitro_activated){
+        return;
+    }
+
+    b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
+    float speed = b2Length(vel);
+    float limit = max_speed * 3.0f;
+
+    float speed_factor = 1.0f; 
+    if (speed > 50.0f) {
+        speed_factor = 0.9f;
+    } else if (speed > 25.0f) {
+        speed_factor = 1.4f;
+    } else if (speed > 10.0f) {
+        speed_factor = 1.8f;
+    }
+
+    if (speed < 1.0f) {
+        b2Vec2 forward = b2Body_GetWorldVector(body_id, {1,0});
+        b2Vec2 boost = {forward.x * acceleration * 2.5f, forward.y * acceleration * 2.5f};
+        b2Body_ApplyLinearImpulseToCenter(body_id, boost, true);
+        return;
+    }
+
+    if (speed < limit) {
+        b2Vec2 forward = b2Body_GetWorldVector(body_id, {1,0});
+        b2Vec2 force = {forward.x * acceleration * speed_factor, forward.y * acceleration * speed_factor};
+        b2Body_ApplyForceToCenter(body_id, force, true);
+    }
+}
+
+void Car::update_nitro_usage(){
+    if (nitro > MAX_NITRO) {
+        return;
+    }
+
+    if (nitro_activated){
+        nitro -= nitro_consuption;
+        if (nitro <= 0){
+            nitro = 0;
+            nitro_activated = false;
+        }
+    }else{
+        nitro += NITRO_RECHARGE_RATE;        
+        if (nitro >= NITRO){
+            nitro = NITRO;
+        }        
+    }
 }
 
 CarDTO Car::get_state() const {
@@ -106,5 +233,139 @@ CarDTO Car::get_state() const {
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    return CarDTO(pos.x, pos.y, speed, angle);
+    return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME, remaining_upgrades);
 }
+
+b2Vec2 Car::get_position() {
+    return b2Body_GetPosition(body_id);
+}
+
+bool Car::is_dead() {
+    return life == 0;
+}
+
+void Car::delete_from_map() {
+    if (b2Body_IsValid(body_id)) {
+        b2Body_Disable(body_id);
+    }
+}
+
+void Car::set_spawn(float& x, float& y, float& angle_x, float& angle_y) {
+    float dx = x - angle_x;
+    float dy = -(y - angle_y);
+    float angle = atan2f(dx, dy);
+    b2Body_SetLinearVelocity(body_id, {0,0});
+    b2Body_SetAngularVelocity(body_id, 0);
+    b2Rot rot = b2MakeRot(angle + std::numbers::pi/2);
+    life = MAX_LIFE;
+    nitro = MAX_NITRO;
+    nitro_activated = false;
+    remaining_upgrades = 3;
+    b2Body_SetTransform(body_id, {x,y}, rot);
+}
+
+void Car::reset_stats_and_upgrades() {
+    mass = base_mass;
+    handling = base_handling;
+    acceleration = base_acceleration;
+    braking = base_braking;
+    
+    life = MAX_LIFE;
+    nitro = MAX_NITRO;
+    nitro_activated = false;
+    
+    remaining_upgrades = 3;
+    acceleration_upgrades_applied = 0;
+    handling_upgrades_applied = 0;
+    nitro_upgrades_applied = 0;
+    life_upgrades_applied = 0;
+    brake_upgrades_applied = 0;
+    mass_upgrades_applied = 0;
+}
+
+void Car::accelerate_upgrade() {
+    if (upgrade(acceleration, ACCELERATION_UPGRADE_FACTOR)) {
+        acceleration_upgrades_applied++;
+    }
+}
+
+void Car::handling_upgrade() {
+    if (upgrade(handling, HANDLING_UPGRADE_FACTOR)) {
+        handling_upgrades_applied++;
+    }
+}
+
+void Car::nitro_upgrade() {
+    if (upgrade(NITRO, NITRO_UPGRADE_FACTOR)) {
+        nitro_upgrades_applied++;
+    }
+}
+
+void Car::life_upgrade() {
+    float life_casted = static_cast<float>(life);
+    if (upgrade(life_casted, LIFE_UPGRADE_FACTOR)) {
+        life = static_cast<int>(life_casted);
+        life_upgrades_applied++;
+    }
+}
+
+void Car::brake_upgrade() {
+    if (upgrade(braking, BRAKE_UPGRADE_FACTOR)) {
+        brake_upgrades_applied++;
+    }
+}
+
+void Car::mass_upgrade() {
+    if (upgrade(mass, MASS_UPGRADE_FACTOR)) {
+        mass_upgrades_applied++;
+    }
+}
+
+bool Car::upgrade(float& stat, float upgrade_factor) {
+    if (remaining_upgrades <= 0) {
+        return false;
+    }
+    stat *= upgrade_factor;
+    remaining_upgrades -= 1;
+    return true;
+}
+
+void Car::accelerate_downgrade() {
+    downgrade(acceleration, ACCELERATION_UPGRADE_FACTOR, acceleration_upgrades_applied);
+}
+
+void Car::handling_downgrade() {
+    downgrade(handling, HANDLING_UPGRADE_FACTOR, handling_upgrades_applied);
+}
+
+void Car::nitro_downgrade() {
+    downgrade(NITRO, NITRO_UPGRADE_FACTOR, nitro_upgrades_applied);
+}
+
+void Car::life_downgrade() {
+    float life_casted = static_cast<float>(life);
+    if (downgrade(life_casted, LIFE_UPGRADE_FACTOR, life_upgrades_applied)) {
+        life = static_cast<int>(life_casted);
+    }
+}
+
+void Car::brake_downgrade() {
+    downgrade(braking, BRAKE_UPGRADE_FACTOR, brake_upgrades_applied);
+}
+
+void Car::mass_downgrade() {
+    downgrade(mass, MASS_UPGRADE_FACTOR, mass_upgrades_applied);
+}
+
+bool Car::downgrade(float& stat, float upgrade_factor, int& upgrades_applied) {
+    if (upgrades_applied <= 0) {
+        return false;
+    }
+    
+    stat /= upgrade_factor;
+    
+    remaining_upgrades += 1;
+    upgrades_applied -= 1;
+    return true;
+}
+

@@ -11,19 +11,119 @@
 #define SERVER_PORT 1
 #define SERVER_CLOSE 'q'
 #define CLIENT_QUEUE_LEN 100
-#define MIN_PLAYERS_TO_START 2
+#define MIN_PLAYERS_TO_START 2 //CAMBIAR A 2 AL ENTREGAR TP!
 #define MAX_PLAYERS_PER_GAME 8
+#define MAX_TIME_PER_RACE 600000 // en ms creo
+#define MIN_NAME_LEN 3
+#define MAX_NAME_LEN 16
+#define MAX_RACES 8
+#define RACE_START_TIME 3000
+
+// WORKSHOP
+#define ACCELERATION_PRICE 30
+#define HANDLING_PRICE 10
+#define NITRO_PRICE 40
+#define LIFE_PRICE 25
+#define MASS_PRICE 25
+#define BRAKE_PRICE 25
+#define MAX_TIME_PER_WORKSHOP 15000
+
+// CAR
 #define MAX_SPEED 10000
 #define MAX_LIFE 1000
 #define MAX_NITRO 500
+#define NITRO_CONSUMPTION 5
+#define NITRO_RECHARGE_RATE 2
+#define NITRO_MULTIPLIER 2
+#define ACCELERATION_UPGRADE_FACTOR 1.15
+#define HANDLING_UPGRADE_FACTOR 1.3
+#define NITRO_UPGRADE_FACTOR 1.1
+#define LIFE_UPGRADE_FACTOR 1.5
+#define BRAKE_UPGRADE_FACTOR 1.15
+#define MASS_UPGRADE_FACTOR 0.9
+#define LINEAR_DAMPING 2.0f
+#define ANGULAR_DAMPING 7.0f
+#define DEFAULT_SPAWN {300.0f, 300.0f}
+#define CAR_HALF_WIDTH 10.0f
+#define CAR_HALF_HEIGHT 5.0f
+#define CAR_DENSITY 0.0006f
+#define LOW_SPEED 10.0f
+#define MID_SPEED 25.0f
+#define HIGH_SPEED 50.0f
+#define MID_FRICTION 0.7f
+#define LOW_FRICTION 0.4f
+#define HALF_LIFE MAX_LIFE/2
+#define ZERO_LIFE 0
+#define HITTER_FACTOR 0.2f
+#define HITTED_FACTOR 0.1f
+#define NITRO_FACTOR 1.0f
+#define HIGH_NITRO_FACTOR 0.9f
+#define MID_NITRO_FACTOR 1.4f
+#define LOW_NITRO_FACTOR 1.8f
+#define BOOST_FACTOR 2.5f
+#define EMPTY_NITRO 0
+#define MIN_ANGLE_FACTOR 0.3f
+#define ANGLE_FACTOR 0.7f
+#define REVERSE_FACTOR 2
+#define SPEED_ZERO 0
+
+// PARSER YAML
+#define LIBERTY_CITY_STR "Liberty City"
+#define SAN_ANDREAS_STR "San Andreas"
+#define VICE_CITY_STR "Vice City"
+#define LIBERTY_CITY_PATH "../src/server/libertycity.yaml"
+#define SAN_ANDREAS_PATH "../src/server/sanandreas.yaml"
+#define VICE_CITY_PATH "../src/server/vicecity.yaml"
+#define MAPS_PATH "../src/server/car_states.yaml"
+#define UNKNOWN_PATH "Unknown map name"
+
+
+// RACE
+#define FIRST_CHECKPOINT 0
+#define FIRST_HINT 0
+#define CHECKPOINT_RADIUS 50.0f
+
+// WORLD
+#define TIME_STEP 1.0f / 60.0f
+#define SUB_STEP_COUNT 4
+#define HALF 2
+#define NO_GRAVITY {0.0f, 0.0f}
+
+// MONITOR
+#define FIRST_GAME_ID 0
+
+// RECEIVER
+#define NO_RESPONSE 0
 
 //MENU INITIAL COMMANDS
+#define SEND_DISCONNECT 0x00
 #define SEND_CONNECT 0x01
 #define SEND_SELECT_CAR 0x02
 #define SEND_READY_TO_PLAY 0x03
 #define SEND_QUIT 0x04
 #define SEND_CREATE_GAME 0x05
 #define SEND_JOIN_GAME 0x06
+#define SEND_AVAILABLE_GAMES 0x07
+#define RECIVE_AVAILABLE_GAMES 0x08
+
+// USAGE ERROR
+#define USAGE_ERROR "Usage: ./server [PORT]"
+#define ERROR "[SERVER] Error: "
+#define NAME_LEN_ERROR "the name must be between 3 and 16 characters"
+
+// SERVER PROTOCOL
+#define ZERO_GAMES 0
+#define PERCENTAGE 100.0f
+
+// SERVER
+#define LISTENING "[SERVER] Listening on port "
+#define ACCEPTOR_STARTED "[SERVER] Acceptor started "
+#define FIRST_CHARACTER 0
+#define ACCEPTOR_CLOSING "[SERVER] Acceptor closing"
+#define ACCEPTOR_CLOSED "[SERVER] Acceptor closed"
+#define CONNECTION_CLOSED "[SERVER] Connection closed"
+#define TRACKS_PATH "../src/server/tracks"
+
 
 //CAR CONTROLS COMMANDS
 #define SEND_ACCELERATE 0x10
@@ -34,11 +134,19 @@
 
 //UPGRADES COMMANDS
 #define SEND_LIFE_UPGRADE 0x20
-#define SEND_VELOCITY_UPGRADE 0x21
+#define SEND_BRAKE_UPGRADE 0x21
 #define SEND_ACCELERATION_UPGRADE 0x22
 #define SEND_HANDLING_UPGRADE 0x23
-#define SEND_CONTROL_UPGRADE 0x24
+#define SEND_MASS_UPGRADE 0x24
 #define SEND_NITRO_UPGRADE 0x25
+
+// DOWNGRADES COMMAND
+#define SEND_LIFE_DOWNGRADE 0x26
+#define SEND_BRAKE_DOWNGRADE 0x27
+#define SEND_ACCELERATION_DOWNGRADE 0x28
+#define SEND_HANDLING_DOWNGRADE 0x29
+#define SEND_MASS_DOWNGRADE 0x2A
+#define SEND_NITRO_DOWNGRADE 0x2B
 
 //CHEATS COMMANDS
 #define SEND_WIN_RACE_CHEAT 0x30
@@ -47,6 +155,9 @@
 #define SEND_LOSE_RACE_CHEAT 0x33
 #define SEND_INFINITE_NITRO_CHEAT 0x34
 
-
+// STATUS CONSTS
+#define SEND_OK_MESSAGE 0x98
+#define SEND_ERROR_MESSAGE 0x99
+#define SEND_FINAL_RESULTS 0x9A
 
 #endif  // CONSTANTS_H

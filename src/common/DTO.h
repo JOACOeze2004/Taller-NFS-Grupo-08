@@ -1,20 +1,27 @@
 #ifndef TALLER_TP_DTO_H
 #define TALLER_TP_DTO_H
 
-#include "car_DTO.h"
+#include <chrono>
+#include <string>
 #include <unordered_map>
+#include <map>
 #include <vector>
+#include "car_DTO.h"
 
-struct DTO {
-    int id;
-    std::unordered_map<int, CarDTO> cars;
+struct LobbyCarDTO {
+    int car_id;
+    float acceleration;
+    float brake;
+    float handling;
+    float life;
+    float mass;
 };
 
-enum StateRunning {
-    IN_GAME,
-    FINISHED,
-    DEAD, 
-    TIMEOUTED
+enum State{
+    IN_LOBBY,
+    IN_RACE,
+    IN_WORK_SHOP,
+    FINAL_RESULTS
 };
 
 enum Map {
@@ -25,11 +32,12 @@ enum Map {
 
 enum Upgrades {
     NONE_UPGRADE,
-    SPEED,
     ACCELERATION_UPGRADE,
     HANDLING_UPGRADE,
-    NITRO,
-    LIFE
+    NITRO_UPGRADE,
+    LIFE_UPGRADE,
+    BRAKE_UPGRADE,
+    MASS_UPGRADE
 };
 
 enum CollisionType {
@@ -44,27 +52,45 @@ struct CheckpointCoords{
     float y;
 };
 
+struct HintCoords{
+    float x;
+    float y;
+    float angle;
+};
+
 enum TypeCheckpoint{
     REGULAR,
     FINAL,
     FIRST
 };
 
-struct Snapshot { //deberia ser una clase
-    enum StateRunning state;
+struct CarRacingInfo {
+    std::string name;
+    float time;
+    int position;
+};
+
+struct Snapshot {
+    int id;
+    int game_id;
+    std::unordered_map<int, CarDTO> cars;
     int position;
     int cars_count;
-    int id;
-    std::vector<CarDTO> cars; // capaz es un map
     enum Map map;
     enum Upgrades upgrade;
     bool upgradeable;
     enum CollisionType collision;
-    bool under_bridge;
     CheckpointCoords checkpoint;
+    HintCoords hint;
     enum TypeCheckpoint type_checkpoint;
+    int time_ms;
+    State state;
+    std::unordered_map<int, LobbyCarDTO> lobby_cars;
+    bool is_owner;
+    std::map<Upgrades, std::chrono::seconds> prices;
+    std::vector<CarRacingInfo> cars_finished;
+    std::map<int, long long> player_total_times;
 };
 
-
-
+using FinalScoreList = std::vector<CarRacingInfo>;
 #endif  // TALLER_TP_DTO_H

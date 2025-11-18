@@ -7,6 +7,7 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGraphicsPolygonItem>
+#include <QMenu>
 
 #include "checkpoint_manager.h"
 #include "hint_manager.h"
@@ -29,9 +30,12 @@ public:
     bool handleMousePress(QMouseEvent* event);
     bool handleMouseMove(QMouseEvent* event);
     bool handleMouseRelease(QMouseEvent* event);
+    bool handleContextMenu(QContextMenuEvent* event);
 
-    signals:
-        void checkpointAdded(const QPointF& pos);
+signals:
+    void checkpointAdded(const QPointF& pos);
+    void checkpointRemoved();
+    void checkpointMoved(const QPointF& newPos);
     void hintAdded(const QPointF& pos, qreal rotation);
     void modeCancelled();
     void hintDragStarted();
@@ -44,15 +48,19 @@ private:
     HintManager* hintManager;
 
     EditMode currentMode;
-    bool isDraggingHint;
+    bool isDraggingHint{};
     QPointF hintStartPos;
-    QGraphicsPolygonItem* tempArrow;
+    QGraphicsPolygonItem* tempArrow{};
+
+    bool isDraggingCheckpoint;
+    QGraphicsEllipseItem* draggedCheckpoint;
+    QPointF dragStartPos;
 
     void handleCheckpointClick(const QPointF& scenePos);
-    void handleHintStart(const QPointF& scenePos);
-    void handleHintDrag(const QPointF& scenePos);
-    void handleHintEnd(const QPointF& scenePos);
-    void cancelHintDrag();
+    void handleCheckpointDragStart(QGraphicsEllipseItem* checkpoint, const QPointF& scenePos);
+    void handleCheckpointDrag(const QPointF& scenePos);
+    void handleCheckpointDragEnd(const QPointF& scenePos);
+    void showCheckpointContextMenu(QGraphicsEllipseItem* checkpoint, const QPoint& screenPos);
 };
 
 #endif // TALLER_TP_EDITOR_INPUT_HANDLER_H

@@ -5,33 +5,69 @@
 #include <QDebug>
 #include <QLabel>
 #include <QMessageBox>
+#include <QScreen>
+#include <QApplication>
+#include <QGraphicsDropShadowEffect>
 
 CitySelection::CitySelection(QWidget *parent)
     : QDialog(parent), selectedCity("") {
 
     setWindowTitle("Need for Speed - Selección de Mapa");
     setModal(true);
-    setFixedSize(700, 500);
+    showMaximized();
+
+    setStyleSheet(
+        "QDialog {"
+        "   background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
+        "       stop:0 #1a1a2e, stop:0.5 #16213e, stop:1 #0f3460);"
+        "}"
+    );
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setSpacing(20);
-    mainLayout->setContentsMargins(40, 40, 40, 40);
+    mainLayout->setSpacing(30);
+    mainLayout->setContentsMargins(60, 50, 60, 50);
 
-    QLabel *titleLabel = new QLabel("Selecciona tu Mapa");
-    QFont titleFont;
-    titleFont.setPointSize(24);
-    titleFont.setBold(true);
+    QLabel *titleLabel = new QLabel("SELECCIONA TU CIUDAD");
+    QFont titleFont("Arial", 42, QFont::Bold);
     titleLabel->setFont(titleFont);
     titleLabel->setAlignment(Qt::AlignCenter);
-    titleLabel->setStyleSheet("color: #2c3e50; margin-bottom: 30px;");
+    titleLabel->setStyleSheet(
+        "color: #00d4ff;"
+        "background: transparent;"
+        "padding: 30px;"
+        "letter-spacing: 3px;"
+    );
+
+    QGraphicsDropShadowEffect *titleShadow = new QGraphicsDropShadowEffect();
+    titleShadow->setBlurRadius(20);
+    titleShadow->setColor(QColor(0, 212, 255, 180));
+    titleShadow->setOffset(0, 0);
+    titleLabel->setGraphicsEffect(titleShadow);
+
     mainLayout->addWidget(titleLabel);
+
+    QWidget *cardsContainer = new QWidget();
+    QVBoxLayout *cardsLayout = new QVBoxLayout(cardsContainer);
+    cardsLayout->setSpacing(25);
 
     QVector<CityInfo> cities = CityConfig::getAllCities();
     for (const auto& city : cities) {
-        createCityCard(mainLayout, city);
+        createCityCard(cardsLayout, city);
     }
 
+    mainLayout->addWidget(cardsContainer);
     mainLayout->addStretch();
+
+    QLabel *footerLabel = new QLabel("Presiona ESC para salir");
+    footerLabel->setAlignment(Qt::AlignCenter);
+    footerLabel->setStyleSheet(
+        "color: #718096;"
+        "background: transparent;"
+        "font-size: 12px;"
+        "margin-top: 10px;"
+    );
+    mainLayout->addWidget(footerLabel);
+
     setLayout(mainLayout);
 }
 
@@ -45,22 +81,35 @@ QPixmap CitySelection::loadCityThumbnail(const QString &imagePath) {
         qCritical() << "ERROR: No se pudo cargar la imagen:" << imagePath;
         return QPixmap();
     }
-    return thumbnail.scaled(120, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    return thumbnail.scaled(250, 170, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 }
 
 void CitySelection::createCityCard(QLayout *parentLayout, const CityInfo& city) {
     QWidget *cardWidget = new QWidget();
+    cardWidget->setFixedHeight(200);
     cardWidget->setStyleSheet(
         "QWidget {"
-        "   background-color: #ecf0f1;"
-        "   border: 2px solid #bdc3c7;"
-        "   border-radius: 10px;"
+        "   background: qlineargradient(x1:0, y1:0, x2:1, y2:0,"
+        "       stop:0 rgba(30, 30, 46, 200), stop:1 rgba(40, 40, 60, 200));"
+        "   border: 2px solid #00d4ff;"
+        "   border-radius: 15px;"
+        "}"
+        "QWidget:hover {"
+        "   background: qlineargradient(x1:0, y1:0, x2:1, y2:0,"
+        "       stop:0 rgba(40, 40, 60, 220), stop:1 rgba(50, 50, 80, 220));"
+        "   border: 3px solid #00f5ff;"
         "}"
     );
 
+    QGraphicsDropShadowEffect *cardShadow = new QGraphicsDropShadowEffect();
+    cardShadow->setBlurRadius(25);
+    cardShadow->setColor(QColor(0, 212, 255, 100));
+    cardShadow->setOffset(0, 5);
+    cardWidget->setGraphicsEffect(cardShadow);
+
     QHBoxLayout *cardLayout = new QHBoxLayout(cardWidget);
-    cardLayout->setSpacing(20);
-    cardLayout->setContentsMargins(15, 15, 15, 15);
+    cardLayout->setSpacing(40);
+    cardLayout->setContentsMargins(30, 25, 30, 25);
 
     QPixmap cityImage = loadCityThumbnail(city.imagePath);
     if (cityImage.isNull()) {
@@ -71,33 +120,48 @@ void CitySelection::createCityCard(QLayout *parentLayout, const CityInfo& city) 
 
     QLabel *imageLabel = new QLabel();
     imageLabel->setPixmap(cityImage);
-    imageLabel->setFixedSize(120, 80);
+    imageLabel->setFixedSize(250, 170);
     imageLabel->setAlignment(Qt::AlignCenter);
+    imageLabel->setStyleSheet(
+        "border: 3px solid #00d4ff;"
+        "border-radius: 10px;"
+        "background-color: #000;"
+        "padding: 2px;"
+    );
     cardLayout->addWidget(imageLabel);
 
     QLabel *nameLabel = new QLabel(city.displayName);
-    QFont nameFont;
-    nameFont.setPointSize(16);
-    nameFont.setBold(true);
+    QFont nameFont("Arial", 32, QFont::Bold);
     nameLabel->setFont(nameFont);
     nameLabel->setAlignment(Qt::AlignCenter);
-    nameLabel->setStyleSheet("color: #2c3e50;");
+    nameLabel->setStyleSheet(
+        "color: #ffffff;"
+        "background: transparent;"
+        "letter-spacing: 2px;"
+    );
     cardLayout->addWidget(nameLabel, 1);
 
-    QPushButton *selectButton = new QPushButton("Seleccionar");
-    selectButton->setFixedSize(120, 40);
+    QPushButton *selectButton = new QPushButton("SELECCIONAR");
+    selectButton->setFixedSize(200, 60);
     selectButton->setCursor(Qt::PointingHandCursor);
     selectButton->setStyleSheet(
         "QPushButton {"
-        "   background-color: #3498db;"
-        "   color: white;"
+        "   background: qlineargradient(x1:0, y1:0, x2:1, y2:0,"
+        "       stop:0 #00d4ff, stop:1 #0099cc);"
+        "   color: #000000;"
         "   border: none;"
-        "   border-radius: 8px;"
+        "   border-radius: 10px;"
         "   font-weight: bold;"
-        "   font-size: 14px;"
+        "   font-size: 18px;"
+        "   letter-spacing: 2px;"
         "}"
-        "QPushButton:hover { background-color: #2980b9; }"
-        "QPushButton:pressed { background-color: #21618c; }"
+        "QPushButton:hover {"
+        "   background: qlineargradient(x1:0, y1:0, x2:1, y2:0,"
+        "       stop:0 #00f5ff, stop:1 #00bfff);"
+        "}"
+        "QPushButton:pressed {"
+        "   background: #008fb3;"
+        "}"
     );
 
     connect(selectButton, &QPushButton::clicked, [this, city]() {

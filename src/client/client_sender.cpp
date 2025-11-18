@@ -8,9 +8,7 @@ void ClientSender::run() {
     try {
         while (should_keep_running()) {
             Command cmd = command_queue.pop();
-            
             protocol.send_byte(cmd.cmd);
-
         }
     } catch (const std::exception& e) {
         this->stop();

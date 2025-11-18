@@ -1,15 +1,14 @@
 #ifndef TALLER_TP_LOGIN_WINDOW_H
 #define TALLER_TP_LOGIN_WINDOW_H
 
+#include <QWidget>
 #include <QComboBox>
-#include <QHBoxLayout>
 #include <QLineEdit>
-#include <QPainter>
 #include <QPushButton>
+#include <QVBoxLayout>
+#include <QPixmap>
+#include "car_selector_widget.h"
 #include "../../common/constants.h"
-#include <iostream> 
-
-#include <qlabel.h>
 
 struct PlayerConfig {
     std::string playerName;
@@ -21,19 +20,11 @@ class LoginWindow final: public QWidget {
     Q_OBJECT
 
 public:
-    void styleButton(QPushButton* btn);
-    void applyGlowEffect(QPushButton* btn);
-    void styleInput(QLineEdit* input);
-    void styleCombo(QComboBox* combo);
-    void player_name(QLabel*& nameLabel);
-    void car_sellec(QLabel*& carLabel);
-    void map_sellec(QLabel*& mapLabel);
     explicit LoginWindow(QWidget *parent = nullptr);
     ~LoginWindow() override;
 
     uint8_t getLobbyAction() const;
     std::string getSelectedGameId() const;
-
     PlayerConfig getPlayerConfig() const;
     signals:
         void startButtonClicked();
@@ -42,19 +33,26 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
-    QPushButton *startButton;
-    QVBoxLayout *layout;
+    QVBoxLayout* layout;
     QPixmap backgroundImage;
     QLineEdit* nameInput;
-    QComboBox* carSelector;
+    CarSelectorWidget* carSelector;
     QComboBox* mapSelector;
-
-    QPushButton *createGameButton;
-    QPushButton *joinGameButton;
+    QPushButton* createGameButton;
+    QPushButton* joinGameButton;
     QLineEdit* gameIdInput;
-    
+
+    // State
     uint8_t lobbyAction;
     std::string selectedGameId;
+
+    // Setup methods
+    void setupUI();
+    void setupNameSection();
+    void setupCarSection();
+    void setupMapSection();
+    void setupGameActions();
+    void setupConnections();
 };
 
 #endif  // TALLER_TP_LOGIN_WINDOW_H

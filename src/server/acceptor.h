@@ -18,8 +18,6 @@ class ClientHandler;
 
 class ClientAcceptor: public Thread {
     Socket acceptor;
-    std::vector<ClientHandler*> clients;
-    Queue<ClientCommand> command_queue;
     Monitor& monitor;
     int next_id;
 

@@ -48,11 +48,11 @@ QGraphicsPolygonItem* HintManager::createTempArrow(const QPointF& pos) const {
         QPen(Qt::black, 2),
         QBrush(Qt::yellow)
     );
-    
+
     tempArrow->setPos(pos);
     tempArrow->setOpacity(0.5);
     tempArrow->setZValue(15);
-    
+
     return tempArrow;
 }
 

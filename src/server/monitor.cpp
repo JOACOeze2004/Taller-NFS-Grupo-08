@@ -1,5 +1,9 @@
 #include "monitor.h"
 #include "gameloop.h"
+#include "exceptions/GameFullException.h"
+#include "exceptions/InvalidGameIDException.h"
+#include "exceptions/InvalidPlayerNameException.h"
+#include "exceptions/GameAlreadyStartedException.h"
 
 Monitor::Monitor() { game_id = 0; }
 
@@ -21,17 +25,11 @@ std::string Monitor:: get_client_game_id(int client_id){
 
 void Monitor::add_client(const int client_id, std::unique_ptr<ClientHandler> client) {
     std::unique_lock<std::mutex> lock(mutex);
-    std::string g_id = client->get_game_id();
-    std::cout << "game id: " << g_id << std::endl;
     clients[client_id] = std::move(client);
-    auto i = current_games.find(g_id);
-    if (i != current_games.end()){
-        i->second->add_car(client_id);
-    }
 }
 
 void Monitor::reap() {
-    std::unique_lock lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex);
     std::vector<int> to_remove;
     for ( auto& [id, client] : clients) {
         if (client->is_dead()) {
@@ -50,50 +48,59 @@ void Monitor::reap() {
 void Monitor::clear_clients() {
     std::unique_lock<std::mutex> lock(mutex);
     for ( auto& [id, client] : clients) {
-        std::string g_id = client->get_game_id();
         client->kill();
         client->join();
     }
     clients.clear();
 }
 
-void Monitor::broadcast(DTO& dto, const std::string& gid) {
+void Monitor::broadcast(const Snapshot& snapshot, const std::string& gid, const int client_id) {
     std::unique_lock<std::mutex> lock(mutex);
-    for (auto& [id, client] : clients) {
-        if (client->get_game_id() == gid) {
-            client->send_state(dto);
-        }
+    auto& client = clients[client_id];
+    if (client->get_game_id() == gid && !client->is_dead()) {
+        client->send_state(snapshot);
     }
 }
 
-std::shared_ptr<Gameloop> Monitor::create_game(std::string map_name, const int client_id) {
+std::shared_ptr<Gameloop> Monitor::create_game(std::string map_name, const int client_id, const int car_id, const std::string& username) {
     std::unique_lock<std::mutex> lock(mutex);
     std::string id = generate_game_id();
-    auto game_loop = std::make_shared<Gameloop>(*this, id, map_name);
+    auto game_loop = std::make_shared<Gameloop>(*this, id, map_name, client_id);
     current_games[id] = game_loop;
-    game_loop->add_car(client_id);
+    game_loop->add_car(client_id, car_id,username);    
     return game_loop;
 }
 
-std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const std::string& _game_id, const int client_id) {
+std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const std::string& _game_id, const int client_id, const int car_id) {
     std::unique_lock<std::mutex> lock(mutex);
     auto game_i = current_games.find(_game_id);
     if (game_i == current_games.end()){
-        return nullptr;
+        throw InvalidGameIDException();
     }
-    //quizas handelear si el game esta muerto, tirar una excepcion de q la palmo la partida.
     auto game = game_i->second;
+    // if (game->is_game_already_started()){
+    //     throw GameAlreadyStartedException();
+    // }    
     if (!game->can_join_to_game()){
-        return nullptr;
-    }    
+        throw GameFullException();
+    }
+    // if (game->is_username_taken(client_id)) {
+    //     throw InvalidPlayerNameException("name already in use");
+    // }          
     players[username] = _game_id;
-    game->add_car(client_id);
+    game->add_car(client_id, car_id,username);
     return game;
 }
 
-Gameloop& Monitor::get_game(const std::string& _game_id) {
+std::vector<std::string> Monitor::get_active_games() {
     std::unique_lock<std::mutex> lock(mutex);
-    return *(current_games.at(_game_id));
+    std::vector<std::string> active_games;
+    for(const auto& [id,game] : current_games){
+        //if (game->is_running){
+            active_games.push_back(id);
+        //}
+    }
+    return active_games;
 }
 
 void Monitor::remove_player(const std::string& username){
@@ -102,7 +109,6 @@ void Monitor::remove_player(const std::string& username){
 }
 
 void Monitor::remove_game(const std::string& _game_id){
-    std::unique_lock<std::mutex> lock(mutex);
     auto game_to_remove = current_games.find(_game_id);
     if (game_to_remove != current_games.end()) {
         auto game_loop = game_to_remove->second;
@@ -130,4 +136,13 @@ void Monitor::kill_games() {
     }
     current_games.clear();
     players.clear();
+}
+void Monitor::broadcast_final_results(const FinalScoreList& results, const std::string& gid) {
+    std::unique_lock<std::mutex> lock(mutex);
+    for (auto& [id, client] : clients) {
+        if (client->get_game_id() == gid && !client->is_dead()) {
+            client->send_final_results(results);
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
 }

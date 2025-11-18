@@ -27,11 +27,17 @@ public:
     void send_big_endian_32(const uint32_t value) const;
     uint32_t receive_big_endian_32() const;
 
+    void send_big_endian_64(uint64_t value) const;
+    uint64_t receive_big_endian_64() const;
+
     void send_string(const std::string& str) const;
     std::string receive_string(size_t size) const;
 
     void send_float(const float value) const;
     float receive_float() const;
+
+    void send_bool(const bool value) const;
+    bool receive_bool() const;
 
     void close_socket();
 private:

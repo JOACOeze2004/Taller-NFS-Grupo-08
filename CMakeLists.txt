@@ -59,6 +59,7 @@ include_directories(src/libs/box2d/include)
 # sudo apt-get install qt5-qmake qtbase5-dev
 # sudo apt-get install libsdl2-image-dev
 # sudo apt install libyaml-cpp-dev
+# sudo apt install libsdl2-ttf-dev  // creo que todo el sdl hay que bajar pero este se me quejaba
 
 # Install libSDL2 and libSDL2pp (for client or editor)
 # HEY!! TODO XXX: add more dependendies (either for client, server or editor)
@@ -130,14 +131,26 @@ if(TALLER_CLIENT)
             src/client/input_parser.h
             src/client/client_car.cpp
             src/client/client_car.h
-            src/client/login/login_window.cpp
-            src/client/login/login_window.h
             src/client/graphic_client.cpp
             src/client/graphic_client.h
+            src/client/resource_manager.cpp
+            src/client/resource_manager.h
+            src/client/text_renderer.cpp
+            src/client/text_renderer.h
             src/client/ClientQuitException.h
-            src/client/final_results/final_results_windows.cpp
-            src/client/final_results/final_results_windows.h
             src/client/InvalidId.h
+            src/client/upgrade_phase.cpp
+            src/client/upgrade_phase.h
+            src/client/pantallas/car_selector_widget.cpp
+            src/client/pantallas/car_selector_widget.h
+            src/client/pantallas/final_results_windows.cpp
+            src/client/pantallas/final_results_windows.h
+            src/client/pantallas/login_window.cpp
+            src/client/pantallas/login_window.h
+            src/client/pantallas/results_table_widget.cpp
+            src/client/pantallas/results_table_widget.h
+            src/client/pantallas/style_manager.cpp
+            src/client/pantallas/style_manager.h
     )
 
     # Make them depend on taller_common lib
@@ -153,7 +166,7 @@ if(TALLER_CLIENT)
     target_include_directories(taller_client PRIVATE ${libSDL2pp_SOURCE_DIR})
 
     # Link the taller_common lib target
-    target_link_libraries(taller_client taller_common SDL2_image::SDL2_image SDL2pp::SDL2pp Qt5::Widgets)
+    target_link_libraries(taller_client taller_common SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2pp::SDL2pp Qt5::Widgets yaml-cpp)
 endif()
 
 if(TALLER_SERVER)
@@ -183,7 +196,18 @@ if(TALLER_SERVER)
             src/server/world.cpp
             src/server/world.h
             src/server/parser_yaml.cpp
-            src/server/parser_yaml.h)
+            src/server/parser_yaml.h
+            src/server/CarStats.h
+            src/server/race.h
+            src/server/race.cpp
+            src/server/phase.cpp
+            src/server/phase.h
+            src/server/lobby.cpp
+            src/server/lobby.h
+            src/server/in_game.cpp
+            src/server/in_game.h
+            src/server/workshop.cpp
+            src/server/workshop.h)
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)
@@ -224,7 +248,12 @@ if(TALLER_EDITOR)
             src/editor/city_config.cpp
             src/editor/city_config.h
             src/editor/city_selec.cpp
-            src/editor/city_selec.h)
+            src/editor/city_selec.h
+            src/editor/hint_generator.cpp
+            src/editor/hint_generator.h
+            src/editor/collision_validator.cpp
+            src/editor/collision_validator.h
+    )
 
     # Make them depend on taller_common lib
     add_dependencies(taller_editor taller_common SDL2pp::SDL2pp)
@@ -239,7 +268,7 @@ if(TALLER_EDITOR)
     target_include_directories(taller_editor PRIVATE ${libSDL2pp_SOURCE_DIR})
 
     # Link the taller_common lib target
-    target_link_libraries(taller_editor taller_common SDL2pp::SDL2pp)
+    target_link_libraries(taller_editor taller_common SDL2pp::SDL2pp Qt5::Widgets yaml-cpp)
 endif()
 
 
