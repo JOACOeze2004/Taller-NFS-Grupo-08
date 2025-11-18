@@ -4,9 +4,12 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>
+#include <memory>
 #include "../common/DTO.h"
 #include "text_renderer.h"
 #include "client_handler.h"
+#include "resource_manager.h"
+#include "config.h"
 
 class UpgradePhase {
 private:
@@ -14,8 +17,9 @@ private:
     SDL_Window* window;
     int screen_width;
     int screen_height;
-    TextRenderer* text;
+    std::unique_ptr<TextRenderer> text;
     ClientHandler* handler;
+    ResourceManager* resources;
     
     SDL_Texture* icons_texture;
     SDL_Texture* arrows_texture;
@@ -52,7 +56,8 @@ private:
     void render_remaining_upgrades(int remaining_upgrades);
 
 public:
-    UpgradePhase(SDL_Renderer* renderer, SDL_Window* window, int screen_width, int screen_height, ClientHandler* _handler);
+    UpgradePhase(SDL_Renderer* renderer, SDL_Window* window, int screen_width, int screen_height, 
+                 ClientHandler* _handler, ResourceManager* res);
     ~UpgradePhase();
     
     Upgrades show_and_wait_selection();

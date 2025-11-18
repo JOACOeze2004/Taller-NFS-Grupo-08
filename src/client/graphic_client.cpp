@@ -9,120 +9,131 @@
 #include "text_renderer.h"
 #include "upgrade_phase.h"
 
-constexpr float ZOOM_FACTOR = 2.0f;
-
 GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _handler)
         : renderer(nullptr), bg_texture(nullptr), window(nullptr),
             player_car_id(-1), camera_x(0.0f), camera_y(0.0f), 
-            screen_width(1200), screen_height(900), text(nullptr), handler(_handler), 
+            screen_width(DEFAULT_SCREEN_WIDTH), screen_height(DEFAULT_SCREEN_HEIGHT), 
+            text(nullptr), handler(_handler), 
             ready_sent(false), upgrade_phase(nullptr) {
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        std::cerr << "[CLIENT] Error inicializando SDL: " << SDL_GetError() << std::endl;
-        return;
-    }
-
-    window = SDL_CreateWindow("Client Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-                              screen_width, screen_height, SDL_WINDOW_SHOWN | SDL_WINDOW_MAXIMIZED);
-
-    if (!window) {
-        std::cerr << "[CLIENT] Error creando ventana: " << SDL_GetError() << std::endl;
-        SDL_Quit();
-        return;
-    }
-
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!renderer) {
-        std::cerr << "[CLIENT] Error creando renderer: " << SDL_GetError() << std::endl;
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return;
-    }
-
-    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
-        std::cerr << "Error inicializando SDL_image: " << IMG_GetError() << std::endl;
-    }
-
-    if (TTF_Init() == -1) {
-        std::cerr << "[CLIENT] Error inicializando SDL_ttf: " << TTF_GetError() << std::endl;
-    } else {
-        const char* default_font_path = "../assets/fonts/DejaVuSans.ttf";
-        text = new TextRenderer();
-        if (!text->load(default_font_path, 20) || !text->ok()) {
-            std::cerr << "[CLIENT] Fuente no disponible, no se renderizará texto en pantalla." << std::endl;
-            delete text;
-            text = nullptr;
-        }
-    }
-
-    SDL_Surface* checkpoint_surface = IMG_Load("../assets/need-for-speed/sprits/checkpoints.png");
-    if (!checkpoint_surface) {
-        std::cerr << "[CLIENT] Error cargando textura de checkpoint: " << SDL_GetError() << std::endl;
-    } else {
-        checkpoint_texture = SDL_CreateTextureFromSurface(renderer, checkpoint_surface);
-        SDL_FreeSurface(checkpoint_surface);
-        if (!checkpoint_texture) {
-            std::cerr << "[CLIENT] Error creando textura de checkpoint: " << SDL_GetError() << std::endl;
-        }
-    }
-
-    SDL_Surface* hint_surface = IMG_Load("../assets/need-for-speed/sprits/Hints.png");
-    if (!hint_surface) {
-        std::cerr << "[CLIENT] Error cargando textura de hint: " << SDL_GetError() << std::endl;
-    } else {
-        hint_texture = SDL_CreateTextureFromSurface(renderer, hint_surface);
-        SDL_FreeSurface(hint_surface);
-        if (!hint_texture) {
-            std::cerr << "[CLIENT] Error creando textura de hint: " << SDL_GetError() << std::endl;
-        }
-    }
-
-    SDL_Surface* speedometer_surface = IMG_Load("../assets/need-for-speed/sprits/Speedmeter.png");
-    if (!speedometer_surface) {
-        std::cerr << "[CLIENT] Error cargando textura de speedometer: " << SDL_GetError() << std::endl;
-    } else {
-        speedometer_texture = SDL_CreateTextureFromSurface(renderer, speedometer_surface);
-        SDL_FreeSurface(speedometer_surface);
-        if (!speedometer_texture) {
-            std::cerr << "[CLIENT] Error creando textura de speedometer: " << SDL_GetError() << std::endl;
-        }
-    }
-
-    std::string map_path;
-    if (initial_snapshot.map == LIBERTY_CITY) {
-        map_path = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - Liberty City.png";
-    } else if (initial_snapshot.map == SAN_ANDREAS) {
-        map_path = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - San Andreas.png";
-    } else if (initial_snapshot.map == VICE_CITY) {
-        map_path = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - Vice City.png";
-    }
-
-    SDL_Surface* bg_surface = IMG_Load(map_path.c_str());
-
-    if (!bg_surface) {
-        std::cerr << "[CLIENT] Error cargando fondo: " << SDL_GetError() << std::endl;
-    } else {
-        map_width = static_cast<float>(bg_surface->w);
-        map_height = static_cast<float>(bg_surface->h);
-    }
+    initialize_sdl();
+    initialize_window();
+    initialize_renderer();
+    initialize_image_and_ttf();
+    initialize_resource_manager();
+    load_core_textures();
+    load_map_texture(initial_snapshot.map);
+    initialize_text_renderer();
     
-    bg_texture = SDL_CreateTextureFromSurface(renderer, bg_surface);
-    SDL_FreeSurface(bg_surface);
-
-    if (!bg_texture) {
-        std::cerr << "[CLIENT] Error creando textura: " << SDL_GetError() << std::endl;
-    }
-
     set_player_car(initial_snapshot.id);
-
     update_from_snapshot(initial_snapshot);
-    
     camera_id = player_car_id;
     
-
-    upgrade_phase = new UpgradePhase(renderer, window, screen_width, screen_height, handler); 
-
+    initialize_upgrade_phase();
     draw(initial_snapshot);
+}
+
+void GraphicClient::initialize_sdl() {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        throw std::runtime_error(
+            std::string("[CLIENT] Error inicializando SDL: ") + SDL_GetError()
+        );
+    }
+}
+
+void GraphicClient::initialize_window() {
+    window = SDL_CreateWindow("Client Game", 
+                              SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                              screen_width, screen_height, 
+                              SDL_WINDOW_SHOWN | SDL_WINDOW_MAXIMIZED);
+    
+    if (!window) {
+        SDL_Quit();
+        throw std::runtime_error(
+            std::string("[CLIENT] Error creando ventana: ") + SDL_GetError()
+        );
+    }
+}
+
+void GraphicClient::initialize_renderer() {
+    renderer = SDL_CreateRenderer(window, -1, 
+                                  SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!renderer) {
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        throw std::runtime_error(
+            std::string("[CLIENT] Error creando renderer: ") + SDL_GetError()
+        );
+    }
+}
+
+void GraphicClient::initialize_image_and_ttf() {
+    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
+        std::cerr << "[CLIENT] Warning: SDL_image PNG support: " 
+                  << IMG_GetError() << std::endl;
+    }
+    
+    if (TTF_Init() == -1) {
+        throw std::runtime_error(
+            std::string("[CLIENT] Error inicializando SDL_ttf: ") + TTF_GetError()
+        );
+    }
+}
+
+void GraphicClient::initialize_resource_manager() {
+    resources = std::make_unique<ResourceManager>(renderer);
+}
+
+void GraphicClient::load_core_textures() {
+    checkpoint_texture = resources->load(CHECKPOINT_TEXTURE_PATH);
+    hint_texture = resources->load(HINT_TEXTURE_PATH);
+    speedometer_texture = resources->load(SPEEDOMETER_TEXTURE_PATH);
+}
+
+void GraphicClient::load_map_texture(int map_id) {
+    std::string map_path;
+    switch (map_id) {
+        case LIBERTY_CITY:
+            map_path = LIBERTY_CITY_MAP_PATH;
+            break;
+        case SAN_ANDREAS:
+            map_path = SAN_ANDREAS_MAP_PATH;
+            break;
+        case VICE_CITY:
+            map_path = VICE_CITY_MAP_PATH;
+            break;
+        default:
+            throw std::runtime_error(
+                "[CLIENT] Invalid map ID: " + std::to_string(map_id)
+            );
+    }
+    
+    SDL_Surface* bg_surface = IMG_Load(map_path.c_str());
+    if (!bg_surface) {
+        throw std::runtime_error(
+            std::string("[CLIENT] Error cargando fondo: ") + SDL_GetError()
+        );
+    }
+    
+    map_width = static_cast<float>(bg_surface->w);
+    map_height = static_cast<float>(bg_surface->h);
+    SDL_FreeSurface(bg_surface);
+    
+    bg_texture = resources->load(map_path.c_str());
+}
+
+void GraphicClient::initialize_text_renderer() {
+    text = std::make_unique<TextRenderer>(DEFAULT_FONT_PATH, DEFAULT_FONT_SIZE);
+    if (!text->ok()) {
+        std::cerr << "[CLIENT] Fuente no disponible, no se renderizará texto en pantalla." << std::endl;
+        text.reset();
+    }
+}
+
+void GraphicClient::initialize_upgrade_phase() {
+    upgrade_phase = std::make_unique<UpgradePhase>(
+        renderer, window, screen_width, screen_height, handler, resources.get()
+    );
 }
 
 void GraphicClient::update_from_snapshot(const Snapshot& snapshot) {
@@ -152,7 +163,7 @@ void GraphicClient::set_player_car(int id) {
 void GraphicClient::update_car(int id, const CarDTO& car_state) {
     cars[id] = car_state;
     if (car_objects.find(id) == car_objects.end()) {
-        car_objects[id] = std::make_unique<Car>(0.0f, 0.0f, 0.0f, renderer, car_state.car_id, ZOOM_FACTOR);
+        car_objects[id] = std::make_unique<Car>(0.0f, 0.0f, 0.0f, renderer, resources.get(), car_state.car_id, ZOOM_FACTOR);
     }
 }
 
@@ -234,48 +245,55 @@ void GraphicClient::clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dt
 }
 
 void GraphicClient::draw(const Snapshot& snapshot) {
-    std::cout << snapshot.state << std::endl;
-    if (snapshot.state == IN_WORK_SHOP) { 
-        auto player_it = snapshot.cars.find(player_car_id);
-        int remaining_upgrades = (player_it != snapshot.cars.end()) ? player_it->second.remaining_upgrades : 0;
-        upgrade_phase->render(remaining_upgrades);
-        SDL_RenderPresent(renderer);
-
-        return;
+    switch (snapshot.state) {
+        case IN_WORK_SHOP:
+            draw_workshop_state(snapshot);
+            break;
+        case IN_LOBBY:
+            draw_lobby_state(snapshot);
+            break;
+        case IN_RACE:
+            draw_race_state(snapshot);
+            break;
+        default:
+            break;
     }
+    SDL_RenderPresent(renderer);
+}
+
+void GraphicClient::draw_workshop_state(const Snapshot& snapshot) {
+    auto player_it = snapshot.cars.find(player_car_id);
+    int remaining_upgrades = (player_it != snapshot.cars.end()) ? player_it->second.remaining_upgrades : 0;
+    upgrade_phase->render(remaining_upgrades);
+}
+
+void GraphicClient::draw_lobby_state(const Snapshot& snapshot) {
+    draw_camera();
+    draw_cars();
+    draw_minimap(snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
+    draw_speedometer(cars[player_car_id].velocity);
+    draw_game_id(snapshot.game_id);
     
-    if (snapshot.state == IN_RACE || snapshot.state == IN_LOBBY){ 
+    if (snapshot.is_owner) {
+        draw_ready_btn(static_cast<int>(snapshot.cars.size()), ready_sent);
+    }
+}
 
-        draw_camera();
-        
-        draw_minimap(snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
-        
-        draw_speedometer(cars[player_car_id].velocity);
-        
-        if (snapshot.state == IN_RACE) {
-            draw_position(snapshot.position, snapshot.cars.size());
-            draw_time(snapshot.time_ms);
-            draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint);
-            draw_hint(snapshot.hint);
-        } else if (snapshot.state == IN_LOBBY && snapshot.is_owner) {
-            draw_ready_btn(static_cast<int>(snapshot.cars.size()), ready_sent);
-        }
-        
-
-
-        draw_game_id(snapshot.game_id);
-        
-        draw_cars();
-
-        auto player_it = snapshot.cars.find(player_car_id);
-        if (player_it != snapshot.cars.end() && player_it->second.state != IN_GAME) {
-            draw_state(player_it->second.state);
-            draw_results(snapshot.cars_finished);
-
-        }
-
-
-        SDL_RenderPresent(renderer);
+void GraphicClient::draw_race_state(const Snapshot& snapshot) {
+    draw_camera();
+    draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint);
+    draw_hint(snapshot.hint);
+    draw_minimap(snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
+    draw_speedometer(cars[player_car_id].velocity);
+    draw_position(snapshot.position, snapshot.cars.size());
+    draw_time(snapshot.time_ms);
+    draw_game_id(snapshot.game_id);
+    draw_cars();
+    
+    auto player_it = snapshot.cars.find(player_car_id);
+    if (player_it != snapshot.cars.end() && player_it->second.state != IN_GAME) {
+        draw_state(player_it->second.state);
+        draw_results(snapshot.cars_finished);
     }
 } 
 
@@ -309,7 +327,7 @@ void GraphicClient::draw_results(const std::vector<CarRacingInfo>& cars_finished
 
     int row_y = panel_y + 120;
     const int row_height = 40;
-    const size_t max_rows = 15;
+    const size_t max_rows = 15; 
 
     for (size_t i = 0; i < cars_finished.size() && i < max_rows; ++i) {
         const auto& car_info = cars_finished[i];
@@ -693,8 +711,7 @@ void GraphicClient::draw_cars() {
 
             auto it = car_objects.find(id);
             if (it == car_objects.end()) {
-                std::cout << "Creating new car object for car_id: " << car_dto_world.car_id << std::endl;
-                car_objects[id] = std::make_unique<Car>(adjusted.x, adjusted.y, adjusted.angle, renderer, car_dto_world.car_id, ZOOM_FACTOR);
+                car_objects[id] = std::make_unique<Car>(adjusted.x, adjusted.y, adjusted.angle, renderer, resources.get(), car_dto_world.car_id, ZOOM_FACTOR);
                 it = car_objects.find(id);
             }
             Car* car_obj = it->second.get();
@@ -705,31 +722,10 @@ void GraphicClient::draw_cars() {
 }
 
 GraphicClient::~GraphicClient() {
-    if (bg_texture) {
-        SDL_DestroyTexture(bg_texture);
-        bg_texture = nullptr;
-    }
-    if (speedometer_texture) {
-        SDL_DestroyTexture(speedometer_texture);
-        speedometer_texture = nullptr;
-    }
-    if (checkpoint_texture) {
-        SDL_DestroyTexture(checkpoint_texture);
-        checkpoint_texture = nullptr;
-    }
-    if (hint_texture) {
-        SDL_DestroyTexture(hint_texture);
-        hint_texture = nullptr;
-    }
-
-    if (upgrade_phase) {
-        delete upgrade_phase;
-        upgrade_phase = nullptr;
-    }
-    if (text) {
-        delete text;
-        text = nullptr;
-    }
+    upgrade_phase.reset();
+    text.reset();
+    resources.reset();
+    
     if (TTF_WasInit()) {
         TTF_Quit();
     }

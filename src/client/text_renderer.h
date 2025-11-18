@@ -8,6 +8,10 @@
 
 class TextRenderer {
     TTF_Font* font;
+    SDL_Texture* current_texture;
+    
+    void clearTexture();
+    
 public:
     TextRenderer();
     explicit TextRenderer(const std::string& font_path, int ptsize);

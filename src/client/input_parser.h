@@ -12,7 +12,6 @@ class InputParser {
 
 public:
     explicit InputParser(ClientSender& _sender, Queue<Command>& _command_queue);
-    void parse(std::string& input);
     void parse_command(int command); 
 };
 

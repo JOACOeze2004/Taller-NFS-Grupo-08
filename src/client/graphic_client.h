@@ -2,16 +2,19 @@
 #define TALLER_TP_GRAPHIC_CLIENT_H
 #include <SDL2/SDL.h>
 #include <string>
-#include "client_car.h"
-#include <unordered_map>
 #include <memory>
+#include <unordered_map>
+#include "client_car.h"
 #include "../common/DTO.h"
 #include "text_renderer.h"
 #include "client_handler.h"
 #include "upgrade_phase.h"
+#include "resource_manager.h"
+#include "config.h"
 
 class GraphicClient {
     SDL_Renderer* renderer;
+    std::unique_ptr<ResourceManager> resources;
     SDL_Texture* bg_texture;
     SDL_Texture* checkpoint_texture;
     SDL_Texture* hint_texture;
@@ -24,12 +27,12 @@ class GraphicClient {
     float camera_x, camera_y;
     int screen_width, screen_height;
     float map_width, map_height;
-    TextRenderer* text;
+    std::unique_ptr<TextRenderer> text;
 
     int camera_id;
     ClientHandler* handler;
     bool ready_sent;
-    UpgradePhase* upgrade_phase;
+    std::unique_ptr<UpgradePhase> upgrade_phase;
 
     public:
     explicit GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _handler);
@@ -38,6 +41,20 @@ class GraphicClient {
     ~GraphicClient();
     
     private:
+    void draw_workshop_state(const Snapshot& snapshot);
+    void draw_lobby_state(const Snapshot& snapshot);
+    void draw_race_state(const Snapshot& snapshot);
+    
+    void initialize_sdl();
+    void initialize_window();
+    void initialize_renderer();
+    void initialize_image_and_ttf();
+    void initialize_resource_manager();
+    void load_core_textures();
+    void load_map_texture(int map_id);
+    void initialize_text_renderer();
+    void initialize_upgrade_phase();
+    
     void clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dto);
     void draw_cars();
     void draw_camera();

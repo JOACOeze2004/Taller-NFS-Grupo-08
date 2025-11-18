@@ -4,18 +4,18 @@
 #include <SDL2/SDL_image.h>
 
 UpgradePhase::UpgradePhase(SDL_Renderer* renderer, SDL_Window* window, 
-                           int screen_width, int screen_height, ClientHandler* _handler)
+                           int screen_width, int screen_height, ClientHandler* _handler,
+                           ResourceManager* res)
     : renderer(renderer), window(window), 
-      screen_width(screen_width), screen_height(screen_height), text(nullptr),
-      handler(_handler), icons_texture(nullptr), arrows_texture(nullptr),
+      screen_width(screen_width), screen_height(screen_height), 
+      handler(_handler), resources(res),
+      icons_texture(nullptr), arrows_texture(nullptr),
       selected_upgrade(NONE_UPGRADE), upgrade_selected(false) {
     
-    const char* default_font_path = "../assets/fonts/DejaVuSans.ttf";
-    text = new TextRenderer();
-    if (!text->load(default_font_path, 18) || !text->ok()) {
+    text = std::make_unique<TextRenderer>(DEFAULT_FONT_PATH, UPGRADE_FONT_SIZE);
+    if (!text->ok()) {
         std::cerr << "[UPGRADE_PHASE] Fuente no disponible" << std::endl;
-        delete text;
-        text = nullptr;
+        text.reset();
     }
     
     load_textures();
@@ -30,28 +30,8 @@ UpgradePhase::UpgradePhase(SDL_Renderer* renderer, SDL_Window* window,
 }
 
 void UpgradePhase::load_textures() {
-    SDL_Surface* icons_surface = IMG_Load("../assets/need-for-speed/sprits/Workshop_icons_1.png");
-    
-    if (!icons_surface) {
-        std::cerr << "[UPGRADE_PHASE] Error loading Workshop_icons.webp: " << IMG_GetError() << std::endl;
-    } else {
-        icons_texture = SDL_CreateTextureFromSurface(renderer, icons_surface);
-        SDL_FreeSurface(icons_surface);
-        if (!icons_texture) {
-            std::cerr << "[UPGRADE_PHASE] Error creating icons texture: " << SDL_GetError() << std::endl;
-        }
-    }
-    
-    SDL_Surface* arrows_surface = IMG_Load("../assets/need-for-speed/sprits/workshop_arrow_spritesheet.png");
-    if (!arrows_surface) {
-        std::cerr << "[UPGRADE_PHASE] Error loading workshop_arrow_spritesheet.png: " << IMG_GetError() << std::endl;
-    } else {
-        arrows_texture = SDL_CreateTextureFromSurface(renderer, arrows_surface);
-        SDL_FreeSurface(arrows_surface);
-        if (!arrows_texture) {
-            std::cerr << "[UPGRADE_PHASE] Error creating arrows texture: " << SDL_GetError() << std::endl;
-        }
-    }
+    icons_texture = resources->load(WORKSHOP_ICONS_PATH);
+    arrows_texture = resources->load(WORKSHOP_ARROWS_PATH);
 }
 
 void UpgradePhase::addUpgrade(int order, const char* title, const char* desc, SDL_Rect icon_src,
@@ -81,37 +61,37 @@ void UpgradePhase::init_upgrade_buttons() {
     upgrade_buttons.clear();
     arrow_buttons.clear();
     
-    const int button_width = 380;
-    const int button_height = 120;
-    const int spacing = 10;
-    const int start_y = 80;
-    const int icon_size = 64;
-    const int arrow_size = 40;
-    
-    int start_x = (screen_width - button_width) / 2;
+    int start_x = (screen_width - UPGRADE_BUTTON_WIDTH) / 2;
     
     addUpgrade(3, "NITRO", "Temporary speed boost", SDL_Rect{372, 175,135,140},
                BUTTON_NITRO_DOWN, BUTTON_NITRO_UP,
-               start_x, start_y, button_width, button_height, spacing, icon_size, arrow_size);
+               start_x, UPGRADE_START_Y, UPGRADE_BUTTON_WIDTH, UPGRADE_BUTTON_HEIGHT, 
+               UPGRADE_BUTTON_SPACING, UPGRADE_ICON_SIZE, UPGRADE_ARROW_SIZE);
     addUpgrade(4, "LIFE", "Increases car durability", SDL_Rect{355,10, 180, 170},
                BUTTON_LIFE_DOWN, BUTTON_LIFE_UP,
-               start_x, start_y, button_width, button_height, spacing, icon_size, arrow_size);
+               start_x, UPGRADE_START_Y, UPGRADE_BUTTON_WIDTH, UPGRADE_BUTTON_HEIGHT, 
+               UPGRADE_BUTTON_SPACING, UPGRADE_ICON_SIZE, UPGRADE_ARROW_SIZE);
     addUpgrade(1, "ACCELERATION", "Improves acceleration", SDL_Rect{350, 310, 180, 110},
                BUTTON_ACCELERATION_DOWN, BUTTON_ACCELERATION_UP,
-               start_x, start_y, button_width, button_height, spacing, icon_size, arrow_size);
+               start_x, UPGRADE_START_Y, UPGRADE_BUTTON_WIDTH, UPGRADE_BUTTON_HEIGHT, 
+               UPGRADE_BUTTON_SPACING, UPGRADE_ICON_SIZE, UPGRADE_ARROW_SIZE);
     addUpgrade(0, "MASS", "Increases car mass", SDL_Rect{305,430,275,140},
                BUTTON_CONTROL_DOWN, BUTTON_CONTROL_UP,
-               start_x, start_y, button_width, button_height, spacing, icon_size, arrow_size);
+               start_x, UPGRADE_START_Y, UPGRADE_BUTTON_WIDTH, UPGRADE_BUTTON_HEIGHT, 
+               UPGRADE_BUTTON_SPACING, UPGRADE_ICON_SIZE, UPGRADE_ARROW_SIZE);
     addUpgrade(5, "BRAKES", "Improves braking ability", SDL_Rect{350,565,180,145},
                BUTTON_VELOCITY_DOWN, BUTTON_VELOCITY_UP,
-               start_x, start_y, button_width, button_height, spacing, icon_size, arrow_size);
+               start_x, UPGRADE_START_Y, UPGRADE_BUTTON_WIDTH, UPGRADE_BUTTON_HEIGHT, 
+               UPGRADE_BUTTON_SPACING, UPGRADE_ICON_SIZE, UPGRADE_ARROW_SIZE);
     addUpgrade(2, "HANDLING", "Improves car handling", SDL_Rect{360,710,170,170},
                BUTTON_HANDLING_DOWN, BUTTON_HANDLING_UP,
-               start_x, start_y, button_width, button_height, spacing, icon_size, arrow_size);
+               start_x, UPGRADE_START_Y, UPGRADE_BUTTON_WIDTH, UPGRADE_BUTTON_HEIGHT, 
+               UPGRADE_BUTTON_SPACING, UPGRADE_ICON_SIZE, UPGRADE_ARROW_SIZE);
 }
 
 void UpgradePhase::render_background() {
-    SDL_SetRenderDrawColor(renderer, 20, 20, 40, 100);
+    SDL_SetRenderDrawColor(renderer, COLOR_UPGRADE_BG.r, COLOR_UPGRADE_BG.g, 
+                          COLOR_UPGRADE_BG.b, COLOR_UPGRADE_BG.a);
     SDL_Rect fullscreen = {0, 0, screen_width, screen_height};
     SDL_RenderFillRect(renderer, &fullscreen);
 }
@@ -119,11 +99,10 @@ void UpgradePhase::render_background() {
 void UpgradePhase::render_title() {
     if (!text) return;
     std::string title = "AVAILABLE UPGRADES";
-    SDL_Color title_color = {255, 215, 0, 255};
     int title_y = 30;
     int est_width = static_cast<int>(title.size()) * 10;
     int title_x = (screen_width - est_width) / 2;
-    text->render(renderer, title, title_x, title_y, title_color);
+    text->render(renderer, title, title_x, title_y, COLOR_UPGRADE_TITLE);
 }
 
 void UpgradePhase::render_remaining_upgrades(int remaining_upgrades) {
@@ -138,11 +117,10 @@ void UpgradePhase::render_remaining_upgrades(int remaining_upgrades) {
         info = "You have " + std::to_string(remaining_upgrades) + " upgrade points to spend";
     }
     
-    SDL_Color info_color = {200, 200, 200, 255};
     int est_width = static_cast<int>(info.size()) * 9;
     int info_x = (screen_width - est_width) / 2;
     int info_y = 50;
-    text->render(renderer, info, info_x, info_y, info_color);
+    text->render(renderer, info, info_x, info_y, COLOR_UPGRADE_INFO);
 }
 
 void UpgradePhase::render_upgrade_buttons() {
@@ -157,10 +135,11 @@ void UpgradePhase::render_upgrade_buttons() {
     SDL_Rect arrow_src = {550, 340, 240, 230};
     for (size_t i = 0; i < upgrade_buttons.size(); ++i) {
         auto& button = upgrade_buttons[i];
-        SDL_Color bg_color = {60, 90, 150, 220};
-        SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
+        SDL_SetRenderDrawColor(renderer, COLOR_UPGRADE_BUTTON_BG.r, COLOR_UPGRADE_BUTTON_BG.g, 
+                              COLOR_UPGRADE_BUTTON_BG.b, COLOR_UPGRADE_BUTTON_BG.a);
         SDL_RenderFillRect(renderer, &button.rect);
-        SDL_SetRenderDrawColor(renderer, 140, 170, 210, 255);
+        SDL_SetRenderDrawColor(renderer, COLOR_UPGRADE_BUTTON_BORDER.r, COLOR_UPGRADE_BUTTON_BORDER.g, 
+                              COLOR_UPGRADE_BUTTON_BORDER.b, COLOR_UPGRADE_BUTTON_BORDER.a);
         SDL_RenderDrawRect(renderer, &button.rect);
 
         
@@ -175,18 +154,16 @@ void UpgradePhase::render_upgrade_buttons() {
             if (src.x + src.w > tex_w) src.w = tex_w - src.x;
             if (src.y + src.h > tex_h) src.h = tex_h - src.y;
 
-            int padding = 12;
-            int max_h = button.rect.h - padding * 2;
+            int max_h = button.rect.h - UPGRADE_ICON_PADDING * 2;
             if (max_h < 8) max_h = button.rect.h;
             
-            const int ICON_MAX_H = 64;
-            int dest_h = (ICON_MAX_H < max_h ? ICON_MAX_H : max_h);
+            int dest_h = (UPGRADE_ICON_SIZE < max_h ? UPGRADE_ICON_SIZE : max_h);
             
             double aspect = (src.h == 0) ? 1.0 : (double)src.w / (double)src.h;
             int dest_w = static_cast<int>(aspect * dest_h);
             
-            if (dest_w > button.rect.w - padding * 2) {
-                dest_w = button.rect.w - padding * 2;
+            if (dest_w > button.rect.w - UPGRADE_ICON_PADDING * 2) {
+                dest_w = button.rect.w - UPGRADE_ICON_PADDING * 2;
                 dest_h = static_cast<int>( (double)dest_w / (aspect == 0 ? 1.0 : aspect) );
             }
             SDL_Rect icon_dst = {
@@ -214,17 +191,15 @@ void UpgradePhase::render_upgrade_buttons() {
         }
 
         if (text) {
-            SDL_Color text_color = {255,255,255,255};
-            int title_y = button.rect.y + 6;
+            int title_y = button.rect.y + UPGRADE_TITLE_Y_OFFSET;
             int est_title_width = static_cast<int>(button.title.size()) * 8;
             int title_x = button.rect.x + (button.rect.w - est_title_width) / 2;
-            text->render(renderer, button.title, title_x, title_y, text_color);
+            text->render(renderer, button.title, title_x, title_y, COLOR_WHITE);
             
-            int desc_y = button.rect.y + button.rect.h - 22;
-            SDL_Color desc_color = {200,200,200,255};
+            int desc_y = button.rect.y + button.rect.h - UPGRADE_DESC_Y_OFFSET;
             int est_desc_width = static_cast<int>(button.description.size()) * 7;
             int desc_x = button.rect.x + (button.rect.w - est_desc_width) / 2;
-            text->render(renderer, button.description, desc_x, desc_y, desc_color);
+            text->render(renderer, button.description, desc_x, desc_y, COLOR_UPGRADE_DESC);
         }
     }
 }
@@ -232,11 +207,10 @@ void UpgradePhase::render_upgrade_buttons() {
 void UpgradePhase::render_instructions() {
     if (!text) return;
     std::string instruction = "Use LEFT/RIGHT arrows to downgrade/upgrade";
-    SDL_Color color = {200, 200, 200, 255};
     int est_width = static_cast<int>(instruction.size()) * 10;
     int x = (screen_width - est_width) / 2;
     int y = screen_height - 30;
-    text->render(renderer, instruction, x, y, color);
+    text->render(renderer, instruction, x, y, COLOR_UPGRADE_INFO);
 }
 
 void UpgradePhase::render(int remaining_upgrades) {
@@ -253,20 +227,5 @@ void UpgradePhase::render(int remaining_upgrades) {
 UpgradePhase::~UpgradePhase() {
     if (handler) {
         handler->clear_buttons();
-    }
-
-    if (icons_texture) {
-        SDL_DestroyTexture(icons_texture);
-        icons_texture = nullptr;
-    }
-    
-    if (arrows_texture) {
-        SDL_DestroyTexture(arrows_texture);
-        arrows_texture = nullptr;
-    }
-
-    if (text) {
-        delete text;
-        text = nullptr;
     }
 }
