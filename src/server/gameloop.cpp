@@ -219,6 +219,42 @@ void Gameloop::mass_upgrade(int& id) {
     car.mass_upgrade();
 }
 
+void Gameloop::accelerate_downgrade(int& id) {
+    auto it = cars.find(id);
+    Car& car = it->second;
+    car.accelerate_downgrade();
+}
+
+void Gameloop::handling_downgrade(int& id) {
+    auto it = cars.find(id);
+    Car& car = it->second;
+    car.handling_downgrade();
+}
+
+void Gameloop::nitro_downgrade(int& id) {
+    auto it = cars.find(id);
+    Car& car = it->second;
+    car.nitro_downgrade();
+}
+
+void Gameloop::life_downgrade(int& id) {
+    auto it = cars.find(id);
+    Car& car = it->second;
+    car.life_downgrade();
+}
+
+void Gameloop::brake_downgrade(int& id) {
+    auto it = cars.find(id);
+    Car& car = it->second;
+    car.brake_downgrade();
+}
+
+void Gameloop::mass_downgrade(int& id) {
+    auto it = cars.find(id);
+    Car& car = it->second;
+    car.mass_downgrade();
+}
+
 bool Gameloop::is_running() const { return should_keep_running(); }
 
 void Gameloop::handle_lobby_command(const ClientCommand& cmd) {

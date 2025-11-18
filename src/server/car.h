@@ -26,6 +26,14 @@ class Car {
     bool nitro_activated = false;
     int nitro_consuption = NITRO_CONSUMPTION;
     int remaining_upgrades;
+    
+    // Rastrear upgrades aplicados por categoría
+    int acceleration_upgrades_applied = 0;
+    int handling_upgrades_applied = 0;
+    int nitro_upgrades_applied = 0;
+    int life_upgrades_applied = 0;
+    int brake_upgrades_applied = 0;
+    int mass_upgrades_applied = 0;
 
 public:
     explicit Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking, int _car_id);
@@ -60,7 +68,16 @@ public:
     void life_upgrade();
     void brake_upgrade();
     void mass_upgrade();
-    void upgrade(float& stat, float upgrade_factor);
+    
+        void accelerate_downgrade();
+        void handling_downgrade();
+        void nitro_downgrade();
+        void life_downgrade();
+        void brake_downgrade();
+        void mass_downgrade();
+    
+    bool upgrade(float& stat, float upgrade_factor);
+    bool downgrade(float& stat, float upgrade_factor, int& upgrades_applied);
 
 private:
     float calculate_torque() const;

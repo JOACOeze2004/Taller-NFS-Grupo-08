@@ -45,6 +45,13 @@ public:
     void life_upgrade(int& id);
     void brake_upgrade(int& id);
     void mass_upgrade(int& id);
+    
+    void accelerate_downgrade(int& id);
+    void handling_downgrade(int& id);
+    void nitro_downgrade(int& id);
+    void life_downgrade(int& id);
+    void brake_downgrade(int& id);
+    void mass_downgrade(int& id);
 
     bool is_game_already_started() const;
     void handle_lobby_command(const ClientCommand& cmd);

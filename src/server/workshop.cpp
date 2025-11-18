@@ -15,6 +15,13 @@ void Workshop::initialize_car_upgrades() {
     car_upgrades[SEND_LIFE_UPGRADE] = [this](int& id) { gameloop->life_upgrade(id); };
     car_upgrades[SEND_BRAKE_UPGRADE] = [this](int& id) { gameloop->brake_upgrade(id); };
     car_upgrades[SEND_MASS_UPGRADE] = [this](int& id) { gameloop->mass_upgrade(id); };
+    
+    car_upgrades[SEND_ACCELERATION_DOWNGRADE] = [this](int& id) { gameloop->accelerate_downgrade(id); };
+    car_upgrades[SEND_HANDLING_DOWNGRADE] = [this](int& id) { gameloop->handling_downgrade(id); };
+    car_upgrades[SEND_NITRO_DOWNGRADE] = [this](int& id) { gameloop->nitro_downgrade(id); };
+    car_upgrades[SEND_LIFE_DOWNGRADE] = [this](int& id) { gameloop->life_downgrade(id); };
+    car_upgrades[SEND_BRAKE_DOWNGRADE] = [this](int& id) { gameloop->brake_downgrade(id); };
+    car_upgrades[SEND_MASS_DOWNGRADE] = [this](int& id) { gameloop->mass_downgrade(id); };
 }
 
 void Workshop::initialize_prices() {

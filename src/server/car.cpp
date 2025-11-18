@@ -260,36 +260,88 @@ void Car::set_spawn(float& x, float& y, float& angle_x, float& angle_y) {
 }
 
 void Car::accelerate_upgrade() {
-    upgrade(acceleration, ACCELERATION_UPGRADE_FACTOR);
+    if (upgrade(acceleration, ACCELERATION_UPGRADE_FACTOR)) {
+        acceleration_upgrades_applied++;
+    }
 }
 
 void Car::handling_upgrade() {
-    upgrade(handling, HANDLING_UPGRADE_FACTOR);
+    if (upgrade(handling, HANDLING_UPGRADE_FACTOR)) {
+        handling_upgrades_applied++;
+    }
 }
 
 void Car::nitro_upgrade() {
-    upgrade(NITRO, NITRO_UPGRADE_FACTOR);
+    if (upgrade(NITRO, NITRO_UPGRADE_FACTOR)) {
+        nitro_upgrades_applied++;
+    }
 }
 
 void Car::life_upgrade() {
     float life_casted = static_cast<float>(life);
-    upgrade(life_casted, LIFE_UPGRADE_FACTOR);
-    life = static_cast<int>(life_casted);
+    if (upgrade(life_casted, LIFE_UPGRADE_FACTOR)) {
+        life = static_cast<int>(life_casted);
+        life_upgrades_applied++;
+    }
 }
 
 void Car::brake_upgrade() {
-    upgrade(braking, BRAKE_UPGRADE_FACTOR);
+    if (upgrade(braking, BRAKE_UPGRADE_FACTOR)) {
+        brake_upgrades_applied++;
+    }
 }
 
 void Car::mass_upgrade() {
-    upgrade(mass, MASS_UPGRADE_FACTOR);
+    if (upgrade(mass, MASS_UPGRADE_FACTOR)) {
+        mass_upgrades_applied++;
+    }
 }
 
-void Car::upgrade(float& stat, float upgrade_factor) {
+bool Car::upgrade(float& stat, float upgrade_factor) {
     if (remaining_upgrades <= 0) {
-        return;
+        return false;
     }
     stat *= upgrade_factor;
     remaining_upgrades -= 1;
+    return true;
+}
+
+void Car::accelerate_downgrade() {
+    downgrade(acceleration, ACCELERATION_UPGRADE_FACTOR, acceleration_upgrades_applied);
+}
+
+void Car::handling_downgrade() {
+    downgrade(handling, HANDLING_UPGRADE_FACTOR, handling_upgrades_applied);
+}
+
+void Car::nitro_downgrade() {
+    downgrade(NITRO, NITRO_UPGRADE_FACTOR, nitro_upgrades_applied);
+}
+
+void Car::life_downgrade() {
+    float life_casted = static_cast<float>(life);
+    if (downgrade(life_casted, LIFE_UPGRADE_FACTOR, life_upgrades_applied)) {
+        life = static_cast<int>(life_casted);
+    }
+}
+
+void Car::brake_downgrade() {
+    downgrade(braking, BRAKE_UPGRADE_FACTOR, brake_upgrades_applied);
+}
+
+void Car::mass_downgrade() {
+    downgrade(mass, MASS_UPGRADE_FACTOR, mass_upgrades_applied);
+}
+
+bool Car::downgrade(float& stat, float upgrade_factor, int& upgrades_applied) {
+    if (upgrades_applied <= 0) {
+        return false;
+    }
+    
+    stat /= upgrade_factor;
+    
+    remaining_upgrades += 1;
+    upgrades_applied -= 1;
+    return true;
 }
 
