@@ -40,11 +40,11 @@ void LoginWindow::setupUI() {
 }
 
 void LoginWindow::setupNameSection() {
-    QLabel* nameLabel = new QLabel("Nombre del jugador:");
+    QLabel* nameLabel = new QLabel("Player name");
     nameLabel->setStyleSheet("color: #00eaff; font-size: 22px; font-weight: bold;");
 
     nameInput = new QLineEdit();
-    nameInput->setPlaceholderText("Ingresá tu nombre...");
+    nameInput->setPlaceholderText("Enter your name...");
     StyleManager::styleInput(nameInput);
 
     layout->addWidget(nameLabel);
