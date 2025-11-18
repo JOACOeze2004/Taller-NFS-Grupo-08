@@ -27,7 +27,11 @@ class Car {
     int nitro_consuption = NITRO_CONSUMPTION;
     int remaining_upgrades;
     
-    // Rastrear upgrades aplicados por categoría
+    float base_mass;
+    float base_handling;
+    float base_acceleration;
+    float base_braking;
+    
     int acceleration_upgrades_applied = 0;
     int handling_upgrades_applied = 0;
     int nitro_upgrades_applied = 0;
@@ -61,6 +65,8 @@ public:
 
     CarDTO get_state() const;
     void set_spawn(float& x, float& y, float& angle_x, float& angle_y);
+    
+    void reset_stats_and_upgrades();
 
     void accelerate_upgrade();
     void handling_upgrade();
@@ -69,12 +75,12 @@ public:
     void brake_upgrade();
     void mass_upgrade();
     
-        void accelerate_downgrade();
-        void handling_downgrade();
-        void nitro_downgrade();
-        void life_downgrade();
-        void brake_downgrade();
-        void mass_downgrade();
+    void accelerate_downgrade();
+    void handling_downgrade();
+    void nitro_downgrade();
+    void life_downgrade();
+    void brake_downgrade();
+    void mass_downgrade();
     
     bool upgrade(float& stat, float upgrade_factor);
     bool downgrade(float& stat, float upgrade_factor, int& upgrades_applied);

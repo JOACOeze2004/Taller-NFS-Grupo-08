@@ -182,6 +182,7 @@ void Race::reset_race() {
         finished[id] = false;
         car_next_cp[id] = 0;
         car_next_hint[id] = 0;
+        car.reset_stats_and_upgrades();
     }
     positions_order.clear();
     int indx = rand() % tracks.size();

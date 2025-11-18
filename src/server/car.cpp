@@ -25,6 +25,11 @@ Car::Car(b2WorldId world, float _mass, float _handling, float _acceleration, flo
     b2Shape_EnableHitEvents(shape, true);
 
     remaining_upgrades = 3;
+
+    base_mass = mass;
+    base_handling = handling;
+    base_acceleration = acceleration;
+    base_braking = braking;
 }
 
 Car::~Car() {
@@ -257,6 +262,25 @@ void Car::set_spawn(float& x, float& y, float& angle_x, float& angle_y) {
     nitro_activated = false;
     remaining_upgrades = 3;
     b2Body_SetTransform(body_id, {x,y}, rot);
+}
+
+void Car::reset_stats_and_upgrades() {
+    mass = base_mass;
+    handling = base_handling;
+    acceleration = base_acceleration;
+    braking = base_braking;
+    
+    life = MAX_LIFE;
+    nitro = MAX_NITRO;
+    nitro_activated = false;
+    
+    remaining_upgrades = 3;
+    acceleration_upgrades_applied = 0;
+    handling_upgrades_applied = 0;
+    nitro_upgrades_applied = 0;
+    life_upgrades_applied = 0;
+    brake_upgrades_applied = 0;
+    mass_upgrades_applied = 0;
 }
 
 void Car::accelerate_upgrade() {
