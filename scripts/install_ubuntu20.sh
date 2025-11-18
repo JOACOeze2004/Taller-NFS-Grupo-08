@@ -14,11 +14,12 @@ DESKTOP_DIR="${HOME}/Desktop"
 
 GREEN='\033[0;32m'
 BLUE='\033[94m'
+YELLOW='\033[1;33m'
 NC='\033[0m'
 
 log()  { echo -e "${GREEN}[install]${NC} $*"; }
 info() { echo -e "${BLUE}[info]${NC}  $*"; }
-warn() { echo -e "\e[1;33m[warn]\e[0m $*"; }
+warn() { echo -e "${YELLOW}[warn]${NC} $*"; }
 
 log "Starting installer for '${GAME_NAME}'"
 info "Root dir: $ROOT_DIR"
@@ -61,8 +62,6 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
   libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0 \
   libxcb-shape0 || true
 
-log "All declared packages installed (or already present)."
-
 log "Configuring and building project (Release)"
 mkdir -p "$BUILD_DIR"
 if [[ ! -f "$BUILD_DIR/Makefile" && ! -f "$BUILD_DIR/build.ninja" ]]; then
@@ -72,7 +71,6 @@ fi
 cmake --build "$BUILD_DIR" -j"$(nproc)"
 
 log "Installing executables into ${BIN_DIR}"
-
 SRC_CLIENT_BIN="$BUILD_DIR/taller_client"
 SRC_SERVER_BIN="$BUILD_DIR/taller_server"
 
@@ -95,57 +93,54 @@ if [[ -f "$SRC_SERVER_BIN" ]]; then
 fi
 
 log "Preparing configuration and data directories"
-
-sudo mkdir -p "$CFG_DIR"
-sudo mkdir -p "$VAR_DIR"
+sudo mkdir -p "$CFG_DIR" "$VAR_DIR"
 sudo chown -R "$(id -u):$(id -g)" "$CFG_DIR" "$VAR_DIR" || true
 
 if [[ -d "$ROOT_DIR/config" ]]; then
   info "Copying config files from repo/config -> $CFG_DIR"
   sudo cp -r "$ROOT_DIR/config/"* "$CFG_DIR/" || true
 else
-  info "No repo config/ folder found. Creating placeholder in $CFG_DIR"
-  echo "# Placeholder client config" | sudo tee "$CFG_DIR/client_config.yaml" >/dev/null
-  echo "# Placeholder server config" | sudo tee "$CFG_DIR/server_config.yaml" >/dev/null
+  info "No config/ folder found. Creating placeholder"
+  echo "# Placeholder client config" > "$CFG_DIR/client_config.yaml"
+  echo "# Placeholder server config" > "$CFG_DIR/server_config.yaml"
 fi
 
 if [[ -d "$ROOT_DIR/assets" ]]; then
   info "Copying assets from repo/assets -> $VAR_DIR"
   sudo cp -r "$ROOT_DIR/assets/"* "$VAR_DIR/" || true
 else
-  info "No repo assets/ folder found. Creating placeholder in $VAR_DIR"
+  info "No assets/ folder found. Creating placeholder"
   echo "placeholder asset" > "$VAR_DIR/README.txt"
 fi
 
-log "Copying launchers from repo to Desktop"
-
+log "Creating launchers on Desktop"
 mkdir -p "$DESKTOP_DIR"
 
-CLIENT_DESKTOP="$DESKTOP_DIR/run_client.sh"
-SERVER_DESKTOP="$DESKTOP_DIR/run_server.sh"
+cat > "$DESKTOP_DIR/run_client.sh" <<EOF
+#!/usr/bin/env bash
+cd "$ROOT_DIR"
+export NEED_FOR_SPEED_CLIENT_CONFIG_FILE="$CFG_DIR/client_config.yaml"
+exec "$BIN_DIR/$BIN_CLIENT_NAME" "\$@"
+EOF
 
-if [[ -f "$ROOT_DIR/run_client.sh" ]]; then
-  cp "$ROOT_DIR/run_client.sh" "$CLIENT_DESKTOP"
-  chmod +x "$CLIENT_DESKTOP"
-  log "Copied: $CLIENT_DESKTOP"
-else
-  warn "run_client.sh not found in repo!"
-fi
+chmod +x "$DESKTOP_DIR/run_client.sh"
+log "Client launcher created -> $DESKTOP_DIR/run_client.sh"
 
-if [[ -f "$ROOT_DIR/run_server.sh" ]]; then
-  cp "$ROOT_DIR/run_server.sh" "$SERVER_DESKTOP"
-  chmod +x "$SERVER_DESKTOP"
-  log "Copied: $SERVER_DESKTOP"
-else
-  warn "run_server.sh not found in repo!"
-fi
+cat > "$DESKTOP_DIR/run_server.sh" <<EOF
+#!/usr/bin/env bash
+cd "$ROOT_DIR"
+export NEED_FOR_SPEED_SERVER_CONFIG_FILE="$CFG_DIR/server_config.yaml"
+exec "$BIN_DIR/$BIN_SERVER_NAME" "\$@"
+EOF
+
+chmod +x "$DESKTOP_DIR/run_server.sh"
+log "Server launcher created -> $DESKTOP_DIR/run_server.sh"
 
 log "Installation finished successfully."
-
 echo
 info "Summary:"
 echo " - Client executable: ${BIN_DIR}/${BIN_CLIENT_NAME}"
 echo " - Server executable: ${BIN_DIR}/${BIN_SERVER_NAME}"
 echo " - Config directory: ${CFG_DIR}"
 echo " - Data directory: ${VAR_DIR}"
-echo " - Desktop launchers: ${CLIENT_DESKTOP}, ${SERVER_DESKTOP}"
+echo " - Desktop launchers: ${DESKTOP_DIR}/run_client.sh, ${DESKTOP_DIR}/run_server.sh"

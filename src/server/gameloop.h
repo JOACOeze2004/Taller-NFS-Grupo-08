@@ -72,7 +72,6 @@ private:
     World world;
     int owner_id;
     bool ready_to_start;
-    std::chrono::steady_clock::time_point start_time;
     Map current_map;
     ParserYaml parser;
     std::unordered_map<int, std::string> user_names;
