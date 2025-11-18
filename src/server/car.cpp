@@ -286,6 +286,9 @@ void Car::mass_upgrade() {
 }
 
 void Car::upgrade(float& stat, float upgrade_factor) {
+    if (remaining_upgrades <= 0) {
+        return;
+    }
     stat *= upgrade_factor;
     remaining_upgrades -= 1;
 }
