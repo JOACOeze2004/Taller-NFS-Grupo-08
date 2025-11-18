@@ -89,7 +89,7 @@ struct Snapshot {
     bool is_owner;
     std::map<Upgrades, std::chrono::seconds> prices;
     std::vector<CarRacingInfo> cars_finished;
-
+    std::map<int, long long> player_total_times;
 };
 
 using FinalScoreList = std::vector<CarRacingInfo>;

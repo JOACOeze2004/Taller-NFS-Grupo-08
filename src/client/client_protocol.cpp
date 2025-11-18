@@ -166,6 +166,14 @@ Snapshot ClientProtocol::receive_game_state() const {
     }
     snapshot.cars_finished = cars;
 
+    uint16_t total_times_count = protocol.receive_big_endian_16();
+    for (uint16_t i = 0; i < total_times_count; i++) {
+        int player_id = protocol.receive_big_endian_16();
+        long long total_time = protocol.receive_big_endian_64();
+        snapshot.player_total_times[player_id] = total_time;
+    }
+
+
     return snapshot;
 }
 

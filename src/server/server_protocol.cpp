@@ -133,13 +133,18 @@ void ServerProtocol::send_game_state(const Snapshot& snapshot) {
     send_lobby_cars(snapshot);
     send_prices(snapshot);
 
-
     protocol.send_big_endian_16(snapshot.cars_finished.size());
     for (const auto& [player_name, time, position] : snapshot.cars_finished) {
         protocol.send_big_endian_16(static_cast<uint16_t>(player_name.size()));
         protocol.send_string(player_name);
         protocol.send_big_endian_32(time);
         protocol.send_big_endian_32(position);
+    }
+
+    protocol.send_big_endian_16(snapshot.player_total_times.size());
+    for (const auto& [player_id, total_time] : snapshot.player_total_times) {
+        protocol.send_big_endian_16(player_id);
+        protocol.send_big_endian_64(total_time);
     }
 }
 

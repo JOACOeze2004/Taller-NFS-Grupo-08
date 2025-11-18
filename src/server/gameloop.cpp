@@ -115,7 +115,7 @@ Snapshot Gameloop::initialize_DTO() {
     dto.is_owner = false;
     dto.cars_finished = finished;
     dto.cars_finished.insert(dto.cars_finished.end(), deads.begin(), deads.end());
-
+    dto.player_total_times = player_total_times;
     return dto;
 }
 
@@ -230,6 +230,7 @@ void Gameloop::handle_lobby_command(const ClientCommand& cmd) {
 void Gameloop::change_phase(std::unique_ptr<Phase> new_phase) {
     this->current_phase = std::move(new_phase);
     finished.clear();
+    deads.clear();
 }
 
 
@@ -263,7 +264,9 @@ void Gameloop::update_race_state() {
                 finished, [&] (const CarRacingInfo& player) { return player.name == user_names[id];});
         bool not_added = it == finished.end();
         if (race.car_finished(id) && not_added) {
-            finished.emplace_back(user_names[id], current_phase->get_time(), race.get_position(id));
+            int race_time = current_phase->get_time();
+            finished.emplace_back(user_names[id], race_time, race.get_position(id));
+            player_total_times[id] += race_time;
             continue;
         }
         it = std::ranges::find_if(
@@ -271,6 +274,7 @@ void Gameloop::update_race_state() {
         not_added = it == deads.end();
         if (race.car_dead(id) && not_added) {
             deads.emplace_back(user_names[id], current_phase->get_time(), -1);
+            player_total_times[id] += (MAX_TIME_PER_RACE / 1000);
         }
     }
 }
@@ -281,7 +285,7 @@ FinalScoreList Gameloop::calculate_final_results() {
     for (const auto& [client_id, total_time] : player_total_times) {
         CarRacingInfo result;
         result.name = user_names[client_id];
-        result.time = static_cast<float>(total_time) / 1000.0f;
+        result.time = static_cast<float>(total_time);
         result.position = 0;
         results.push_back(result);
     }

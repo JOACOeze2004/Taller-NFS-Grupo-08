@@ -47,6 +47,18 @@ uint32_t Protocol::receive_big_endian_32() const{
     return ntohl(big_endian_to_receive);
 }
 
+void Protocol::send_big_endian_64(const uint64_t value) const {
+    uint32_t high = (value >> 32) & 0xFFFFFFFF;
+    send_big_endian_32(high);
+    uint32_t low = value & 0xFFFFFFFF;
+    send_big_endian_32(low);
+}
+
+uint64_t Protocol::receive_big_endian_64() const {
+    uint32_t high = receive_big_endian_32();
+    uint32_t low = receive_big_endian_32();
+    return (static_cast<uint64_t>(high) << 32) | low;
+}
 
 void Protocol::send_string(const std::string& str) const {
     size_t sent = socket.sendall(str.c_str(), str.size());
