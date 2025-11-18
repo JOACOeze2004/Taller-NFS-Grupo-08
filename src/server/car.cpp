@@ -264,7 +264,7 @@ void Car::set_spawn(float& x, float& y, float& angle_x, float& angle_y) {
     life = MAX_LIFE;
     nitro = MAX_NITRO;
     nitro_activated = false;
-    upgrades_remaining = 3;
+    remaining_upgrades = 3;
     b2Body_SetTransform(body_id, {x,y}, rot);
 }
 

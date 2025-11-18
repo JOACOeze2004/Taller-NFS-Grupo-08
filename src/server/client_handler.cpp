@@ -20,8 +20,8 @@ ClientHandler::ClientHandler(Socket&& peer,Monitor& monitor, int _id):
 
 void ClientHandler::receive_player_configuration() {
     protocol.receive_player_config(player_name, car_id, map_name);
-    if (player_name.size() < MIN_NAME_LEN || player_name.size() > MAX_NAME_LEN) {
-        throw InvalidPlayerNameException("must be between 3 and 16 characters");
+    if (player_name.empty() || player_name.size() < MIN_NAME_LEN || player_name.size() > MAX_NAME_LEN) {
+        throw InvalidPlayerNameException("the name must be between 3 and 16 characters");
     }
 }
 

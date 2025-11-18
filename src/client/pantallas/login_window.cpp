@@ -97,12 +97,6 @@ void LoginWindow::setupGameActions() {
 void LoginWindow::setupConnections() {
     connect(createGameButton, &QPushButton::clicked, this, [this]() {
         std::string playerName = nameInput->text().toStdString();
-
-        if (playerName.empty()) {
-            QMessageBox::warning(this, "Nombre requerido",
-                "Por favor, ingresa tu nombre antes de crear una partida.");
-            return;
-        }
         this->lobbyAction = SEND_CREATE_GAME;
         this->selectedGameId = "";
         emit startButtonClicked();
@@ -111,16 +105,6 @@ void LoginWindow::setupConnections() {
     connect(joinGameButton, &QPushButton::clicked, this, [this]() {
         std::string gameId = gameIdInput->text().toStdString();
         std::string playerName = nameInput->text().toStdString();
-
-        if (playerName.empty()) {
-            QMessageBox::warning(this, "Nombre requerido",
-                "Por favor, ingresa tu nombre antes de unirte a una partida.");
-            return;
-        }
-        if (gameId.empty()) {
-            std::cout << "[CLIENT] ERROR: Debes ingresar un ID de partida" << std::endl;
-            return;
-        }
         this->lobbyAction = SEND_JOIN_GAME;
         this->selectedGameId = gameId;
         emit startButtonClicked();
@@ -157,9 +141,6 @@ std::string LoginWindow::getSelectedGameId() const {
 PlayerConfig LoginWindow::getPlayerConfig() const {
     PlayerConfig config;
     config.playerName = nameInput->text().toStdString();
-    if (config.playerName.empty()) {
-        throw std::runtime_error("Player name is required");
-    }
     config.carId = carSelector->getSelectedCarId();
     config.mapName = mapSelector->currentText().toStdString();
     return config;
