@@ -4,9 +4,15 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>
+#include <memory>
 #include "../common/DTO.h"
 #include "text_renderer.h"
 #include "client_handler.h"
+
+constexpr int UPGRADE_FONT_SIZE = 18;
+constexpr const char* UPGRADE_FONT_PATH = "../assets/fonts/DejaVuSans.ttf";
+constexpr const char* WORKSHOP_ICONS_PATH = "../assets/need-for-speed/sprits/Workshop_icons_1.png";
+constexpr const char* WORKSHOP_ARROWS_PATH = "../assets/need-for-speed/sprits/workshop_arrow_spritesheet.png";
 
 class UpgradePhase {
 private:
@@ -14,7 +20,7 @@ private:
     SDL_Window* window;
     int screen_width;
     int screen_height;
-    TextRenderer* text;
+    std::unique_ptr<TextRenderer> text;
     ClientHandler* handler;
     
     SDL_Texture* icons_texture;

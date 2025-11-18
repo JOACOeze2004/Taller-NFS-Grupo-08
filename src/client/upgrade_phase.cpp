@@ -6,16 +6,14 @@
 UpgradePhase::UpgradePhase(SDL_Renderer* renderer, SDL_Window* window, 
                            int screen_width, int screen_height, ClientHandler* _handler)
     : renderer(renderer), window(window), 
-      screen_width(screen_width), screen_height(screen_height), text(nullptr),
+      screen_width(screen_width), screen_height(screen_height), 
+      text(std::make_unique<TextRenderer>(UPGRADE_FONT_PATH, UPGRADE_FONT_SIZE)),
       handler(_handler), icons_texture(nullptr), arrows_texture(nullptr),
       selected_upgrade(NONE_UPGRADE), upgrade_selected(false) {
     
-    const char* default_font_path = "../assets/fonts/DejaVuSans.ttf";
-    text = new TextRenderer();
-    if (!text->load(default_font_path, 18) || !text->ok()) {
+    if (!text->ok()) {
         std::cerr << "[UPGRADE_PHASE] Fuente no disponible" << std::endl;
-        delete text;
-        text = nullptr;
+        text.reset();
     }
     
     load_textures();
@@ -30,7 +28,7 @@ UpgradePhase::UpgradePhase(SDL_Renderer* renderer, SDL_Window* window,
 }
 
 void UpgradePhase::load_textures() {
-    SDL_Surface* icons_surface = IMG_Load("../assets/need-for-speed/sprits/Workshop_icons_1.png");
+    SDL_Surface* icons_surface = IMG_Load(WORKSHOP_ICONS_PATH);
     
     if (!icons_surface) {
         std::cerr << "[UPGRADE_PHASE] Error loading Workshop_icons.webp: " << IMG_GetError() << std::endl;
@@ -42,7 +40,7 @@ void UpgradePhase::load_textures() {
         }
     }
     
-    SDL_Surface* arrows_surface = IMG_Load("../assets/need-for-speed/sprits/workshop_arrow_spritesheet.png");
+    SDL_Surface* arrows_surface = IMG_Load(WORKSHOP_ARROWS_PATH);
     if (!arrows_surface) {
         std::cerr << "[UPGRADE_PHASE] Error loading workshop_arrow_spritesheet.png: " << IMG_GetError() << std::endl;
     } else {
@@ -263,10 +261,5 @@ UpgradePhase::~UpgradePhase() {
     if (arrows_texture) {
         SDL_DestroyTexture(arrows_texture);
         arrows_texture = nullptr;
-    }
-
-    if (text) {
-        delete text;
-        text = nullptr;
     }
 }

@@ -9,12 +9,11 @@
 #include "text_renderer.h"
 #include "upgrade_phase.h"
 
-constexpr float ZOOM_FACTOR = 2.0f;
-
 GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _handler)
         : renderer(nullptr), bg_texture(nullptr), window(nullptr),
             player_car_id(-1), camera_x(0.0f), camera_y(0.0f), 
-            screen_width(1200), screen_height(900), text(nullptr), handler(_handler), 
+            screen_width(DEFAULT_SCREEN_WIDTH), screen_height(DEFAULT_SCREEN_HEIGHT), 
+            text(nullptr), handler(_handler), 
             ready_sent(false), upgrade_phase(nullptr) {
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -46,16 +45,14 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
     if (TTF_Init() == -1) {
         std::cerr << "[CLIENT] Error inicializando SDL_ttf: " << TTF_GetError() << std::endl;
     } else {
-        const char* default_font_path = "../assets/fonts/DejaVuSans.ttf";
-        text = new TextRenderer();
-        if (!text->load(default_font_path, 20) || !text->ok()) {
+        text = std::make_unique<TextRenderer>(DEFAULT_FONT_PATH, DEFAULT_FONT_SIZE);
+        if (!text->ok()) {
             std::cerr << "[CLIENT] Fuente no disponible, no se renderizará texto en pantalla." << std::endl;
-            delete text;
-            text = nullptr;
+            text.reset();
         }
-    } //pasarlo al constructor del text render
+    }
 
-    SDL_Surface* checkpoint_surface = IMG_Load("../assets/need-for-speed/sprits/checkpoints.png");
+    SDL_Surface* checkpoint_surface = IMG_Load(CHECKPOINT_TEXTURE_PATH);
     if (!checkpoint_surface) {
         std::cerr << "[CLIENT] Error cargando textura de checkpoint: " << SDL_GetError() << std::endl;
     } else {
@@ -66,7 +63,7 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
         }
     }
 
-    SDL_Surface* hint_surface = IMG_Load("../assets/need-for-speed/sprits/Hints.png");
+    SDL_Surface* hint_surface = IMG_Load(HINT_TEXTURE_PATH);
     if (!hint_surface) {
         std::cerr << "[CLIENT] Error cargando textura de hint: " << SDL_GetError() << std::endl;
     } else {
@@ -77,7 +74,7 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
         }
     }
 
-    SDL_Surface* speedometer_surface = IMG_Load("../assets/need-for-speed/sprits/Speedmeter.png");
+    SDL_Surface* speedometer_surface = IMG_Load(SPEEDOMETER_TEXTURE_PATH);
     if (!speedometer_surface) {
         std::cerr << "[CLIENT] Error cargando textura de speedometer: " << SDL_GetError() << std::endl;
     } else {
@@ -90,11 +87,11 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
 
     std::string map_path;
     if (initial_snapshot.map == LIBERTY_CITY) {
-        map_path = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - Liberty City.png";
+        map_path = LIBERTY_CITY_MAP_PATH;
     } else if (initial_snapshot.map == SAN_ANDREAS) {
-        map_path = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - San Andreas.png";
+        map_path = SAN_ANDREAS_MAP_PATH;
     } else if (initial_snapshot.map == VICE_CITY) {
-        map_path = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - Vice City.png";
+        map_path = VICE_CITY_MAP_PATH;
     }
 
     SDL_Surface* bg_surface = IMG_Load(map_path.c_str());
@@ -120,7 +117,7 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
     camera_id = player_car_id;
     
 
-    upgrade_phase = new UpgradePhase(renderer, window, screen_width, screen_height, handler); 
+    upgrade_phase = std::make_unique<UpgradePhase>(renderer, window, screen_width, screen_height, handler); 
 
     draw(initial_snapshot);
 }
@@ -705,6 +702,9 @@ void GraphicClient::draw_cars() {
 }
 
 GraphicClient::~GraphicClient() {
+    upgrade_phase.reset();
+    text.reset();
+    
     if (bg_texture) {
         SDL_DestroyTexture(bg_texture);
         bg_texture = nullptr;
@@ -722,14 +722,6 @@ GraphicClient::~GraphicClient() {
         hint_texture = nullptr;
     }
 
-    if (upgrade_phase) {
-        delete upgrade_phase;
-        upgrade_phase = nullptr;
-    }
-    if (text) {
-        delete text;
-        text = nullptr;
-    }
     if (TTF_WasInit()) {
         TTF_Quit();
     }
