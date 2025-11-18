@@ -5,13 +5,13 @@
 #include <sstream>
 
 Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_name, const int client_id):
-        game_id(gid), monitor(_monitor), owner_id(client_id), ready_to_start(false), race(map_name, &cars, "../src/server/tracks"), game_started(false) {
+        game_id(gid), monitor(_monitor), owner_id(client_id), ready_to_start(false), race(map_name, &cars, TRACKS_PATH), game_started(false) {
     initialize_car_actions();
     world.generate_map(map_name);
 
-    if (map_name == "San Andreas") {
+    if (map_name == SAN_ANDREAS_STR ) {
         current_map = SAN_ANDREAS;
-    } else if (map_name == "Vice City") {
+    } else if (map_name == VICE_CITY_STR) {
         current_map = VICE_CITY;
     } else {
         current_map = LIBERTY_CITY;
@@ -233,7 +233,7 @@ void Gameloop::change_phase(std::unique_ptr<Phase> new_phase) {
 }
 
 
-bool Gameloop::did_all_finish() { //deberiamos validar q todos los jugadores vivoss lleguen  a al meta
+bool Gameloop::did_all_finish() {
     int cars_finished = 0;
     for (auto& [id, car] : cars) {
         if (race.car_finished(id)) {
@@ -320,15 +320,11 @@ void Gameloop::increment_race_counter() {
     std::cout << "[GAMELOOP] Races completed: " << races_completed << "/" << MAX_RACES << std::endl;
 }
 
-int Gameloop::get_races_completed() const {
-    return races_completed;
-}
+int Gameloop::get_races_completed() const { return races_completed;}
 
 void Gameloop::reset_race() {
     std::cout << "[GAMELOOP] Resetting race for next round" << std::endl;
     race.reset_race();
 }
 
-bool Gameloop::has_active_players() const {
-    return !cars.empty();
-}
+bool Gameloop::has_active_players() const { return !cars.empty();}

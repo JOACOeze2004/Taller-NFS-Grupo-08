@@ -75,6 +75,8 @@
 #define SAN_ANDREAS_PATH "../src/server/sanandreas.yaml"
 #define VICE_CITY_PATH "../src/server/vicecity.yaml"
 #define MAPS_PATH "../src/server/car_states.yaml"
+#define UNKNOWN_PATH "Unknown map name"
+
 
 // RACE
 #define FIRST_CHECKPOINT 0
@@ -107,6 +109,7 @@
 // USAGE ERROR
 #define USAGE_ERROR "Usage: ./server [PORT]"
 #define ERROR "[SERVER] Error: "
+#define NAME_LEN_ERROR "the name must be between 3 and 16 characters"
 
 // SERVER PROTOCOL
 #define ZERO_GAMES 0
@@ -119,6 +122,7 @@
 #define ACCEPTOR_CLOSING "[SERVER] Acceptor closing"
 #define ACCEPTOR_CLOSED "[SERVER] Acceptor closed"
 #define CONNECTION_CLOSED "[SERVER] Connection closed"
+#define TRACKS_PATH "../src/server/tracks"
 
 
 //CAR CONTROLS COMMANDS

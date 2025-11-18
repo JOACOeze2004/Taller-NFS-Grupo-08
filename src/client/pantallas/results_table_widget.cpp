@@ -13,7 +13,7 @@ void ResultsTableWidget::setupTable() {
     setColumnCount(3);
     
     QStringList headers;
-    headers << tr("Lugar") << tr("Jugador") << tr("Tiempo Total");
+    headers << tr("Place") << tr("Player") << tr("Total Time");
     setHorizontalHeaderLabels(headers);
     
     StyleManager::styleResultsTable(this);

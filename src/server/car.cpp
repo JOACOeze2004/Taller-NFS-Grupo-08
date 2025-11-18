@@ -137,8 +137,6 @@ void Car::apply_friction() {
         -lateral_speed*right.y*b2Body_GetMass(body_id),
     };
     b2Body_ApplyLinearImpulseToCenter(body_id, lateral_impulse, true);
-
-    //last_hit = NONE_COLLISION;
 }
 
 void Car::handle_hit(b2Vec2& normal, float& force, bool is_hitter) {
@@ -152,13 +150,6 @@ void Car::handle_hit(b2Vec2& normal, float& force, bool is_hitter) {
     b2Vec2 forward = b2Body_GetWorldVector(body_id, {1.0f, 0.0f});
     float angle_impact = fabs(b2Dot(normal, forward));
 
-    /*if (angle_impact == 1) {
-        last_hit = HEAVY_COLLISION;
-    }
-    else {
-        last_hit = CHILL_COLLISION;
-    }
-    */
     float angle_factor = 0.3f + 0.7f * angle_impact;
 
     if (is_hitter) {
@@ -169,7 +160,7 @@ void Car::handle_hit(b2Vec2& normal, float& force, bool is_hitter) {
     }
 
     if (life < 0) {
-        life = 0; // matarlo
+        life = 0;
     }
 }
 
@@ -260,7 +251,7 @@ void Car::set_spawn(float& x, float& y, float& angle_x, float& angle_y) {
     float angle = atan2f(dx, dy);
     b2Body_SetLinearVelocity(body_id, {0,0});
     b2Body_SetAngularVelocity(body_id, 0);
-    b2Rot rot = b2MakeRot(angle + std::numbers::pi/2);  //no pregunten
+    b2Rot rot = b2MakeRot(angle + std::numbers::pi/2);
     life = MAX_LIFE;
     nitro = MAX_NITRO;
     nitro_activated = false;

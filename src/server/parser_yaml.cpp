@@ -5,22 +5,23 @@
 #include <yaml-cpp/yaml.h>
 
 #include "CarStats.h"
+#include "../common/constants.h"
 
-ParserYaml::ParserYaml() : cars_file(YAML::LoadFile("../src/server/car_states.yaml")) {}
+ParserYaml::ParserYaml() : cars_file(YAML::LoadFile(MAPS_PATH)) {}
 
 std::vector<StaticBody> ParserYaml::parse_map(std::string& map_name) {
     YAML::Node map;
-    if (map_name == "Liberty City") {
-        map = YAML::LoadFile("../src/server/libertycity.yaml");
+    if (map_name == LIBERTY_CITY_STR ) {
+        map = YAML::LoadFile(LIBERTY_CITY_PATH);
     }
-    else if (map_name == "San Andreas") {
-        map = YAML::LoadFile("../src/server/sanandreas.yaml");
+    else if (map_name == SAN_ANDREAS_STR) {
+        map = YAML::LoadFile(SAN_ANDREAS_PATH);
     }
-    else if (map_name == "Vice City") {
-        map = YAML::LoadFile("../src/server/vicecity.yaml");
+    else if (map_name == VICE_CITY_STR) {
+        map = YAML::LoadFile(VICE_CITY_PATH);
     }
     else {
-        throw std::invalid_argument("Unknown map name");
+        throw std::invalid_argument(UNKNOWN_PATH);
     }
 
     std::vector<StaticBody> boxes;
@@ -54,10 +55,10 @@ CarStats ParserYaml::parse_car(const int car_id) {
 std::vector<Track> ParserYaml::parse_tracks(const std::string& tracks_dir, const std::string& map_name) {
     std::vector<Track> tracks;
     std::string map_id;
-    if (map_name == "Liberty City") {
+    if (map_name == LIBERTY_CITY_STR) {
         map_id = "liberty_city";
     }
-    else if (map_name == "San Andreas") {
+    else if (map_name == SAN_ANDREAS_STR) {
         map_id = "san_andreas";
     }
     else {

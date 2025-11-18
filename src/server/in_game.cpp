@@ -9,7 +9,7 @@ bool InGame::should_continue(){
         std::cout << "[IN_GAME] No active players remaining, ending race" << std::endl;
         return false;
     }
-    return gameloop->is_running() && !gameloop->did_all_finish(); // agregar metodo q valide q todos los autos q estan vivos pasarlo la meta final.
+    return gameloop->is_running() && !gameloop->did_all_finish();
 }
 
 void InGame::execute(ClientCommand& command) {gameloop->process_command(command); }

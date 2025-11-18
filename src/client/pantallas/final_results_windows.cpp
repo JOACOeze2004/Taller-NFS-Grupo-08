@@ -31,7 +31,7 @@ void FinalResultsWindow::setupUI() {
 }
 
 void FinalResultsWindow::setupTitle() {
-    QLabel* title = new QLabel("🏁 RESULTADOS FINALES 🏁");
+    QLabel* title = new QLabel("🏁 FINAL RESULTS 🏁");
     title->setStyleSheet("color: #00eaff; font-size: 48px; font-weight: bold;");
     StyleManager::applyGlowEffectToLabel(title);
     layout->addWidget(title);
@@ -43,7 +43,7 @@ void FinalResultsWindow::setupTable() {
 }
 
 void FinalResultsWindow::setupExitButton() {
-    QPushButton* exitBtn = new QPushButton("SALIR");
+    QPushButton* exitBtn = new QPushButton("EXIT");
     StyleManager::styleButton(exitBtn);
     StyleManager::applyGlowEffect(exitBtn);
     layout->addWidget(exitBtn);

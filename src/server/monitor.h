@@ -19,10 +19,10 @@ class Monitor {
 private:
     std::mutex mutex;
     int game_id;    
-    std::unordered_map<std::string, std::string> players; //{Nombre de usuario, id partida}
-    std::unordered_map<std::string, std::shared_ptr<Gameloop>> current_games; // {id partida, ptr a esa partida}
+    std::unordered_map<std::string, std::string> players;
+    std::unordered_map<std::string, std::shared_ptr<Gameloop>> current_games;
 
-    std::map<int, std::unique_ptr<ClientHandler>> clients; //Este en el futuro, vuela.
+    std::map<int, std::unique_ptr<ClientHandler>> clients;
 
     std::string generate_game_id();
     void clear_remaining_clients(const std::string& _game_id);
@@ -31,7 +31,6 @@ private:
 public:
     Monitor();
     void add_client(const int client_id, std::unique_ptr<ClientHandler> client);
-    void broadcast(Snapshot& snapshot,const std::string& gid);
     void broadcast(const Snapshot& snapshot,const std::string& gid, int client_id);
     void broadcast_final_results(const FinalScoreList& results, const std::string& gid);
     void clear_clients();
@@ -43,7 +42,6 @@ public:
     void remove_player(const std::string& username);
     void remove_game(const std::string& user_id);
     std::string get_last_created_game_id() const;
-
 
     void kill_games();
 

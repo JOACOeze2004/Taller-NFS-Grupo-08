@@ -66,8 +66,6 @@ CarDTO ClientProtocol::receive_car_state() const {
     car.angle = protocol.receive_float();
     car.car_id = protocol.receive_big_endian_32();
 
-    //protocol.receive_bool(car.under_bridge); VER SI QUEDA O SE VA
-
     car.life = protocol.receive_float();
     car.nitro = protocol.receive_bool();
     car.remaining_nitro = protocol.receive_float();

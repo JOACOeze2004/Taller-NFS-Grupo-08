@@ -53,7 +53,7 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
             delete text;
             text = nullptr;
         }
-    } //pasarlo al constructor del text render
+    }
 
     SDL_Surface* checkpoint_surface = IMG_Load("../assets/need-for-speed/sprits/checkpoints.png");
     if (!checkpoint_surface) {
@@ -309,7 +309,7 @@ void GraphicClient::draw_results(const std::vector<CarRacingInfo>& cars_finished
 
     int row_y = panel_y + 120;
     const int row_height = 40;
-    const size_t max_rows = 15; //aca hacer algo de cars.size o algo
+    const size_t max_rows = 15;
 
     for (size_t i = 0; i < cars_finished.size() && i < max_rows; ++i) {
         const auto& car_info = cars_finished[i];

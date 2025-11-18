@@ -21,7 +21,7 @@ ClientHandler::ClientHandler(Socket&& peer,Monitor& monitor, int _id):
 void ClientHandler::receive_player_configuration() {
     protocol.receive_player_config(player_name, car_id, map_name);
     if (player_name.empty() || player_name.size() < MIN_NAME_LEN || player_name.size() > MAX_NAME_LEN) {
-        throw InvalidPlayerNameException("the name must be between 3 and 16 characters");
+        throw InvalidPlayerNameException(NAME_LEN_ERROR);
     }
 }
 
@@ -51,11 +51,11 @@ std::shared_ptr<Gameloop> ClientHandler::process_lobby_action() {
 
 void ClientHandler::send_initial_data() {
     std::string map_path;
-    if (map_name == "Liberty City") {
+    if (map_name == LIBERTY_CITY_STR) {
         map_path = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - Liberty City.png";
-    } else if (map_name == "San Andreas") {
+    } else if (map_name == SAN_ANDREAS_STR) {
         map_path = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - San Andreas.png";
-    } else if (map_name == "Vice City") {
+    } else if (map_name == VICE_CITY_STR) {
         map_path = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - Vice City.png";
     }
 

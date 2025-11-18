@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <map>
+#include <vector>
 #include "car_DTO.h"
 
 struct LobbyCarDTO {
@@ -69,7 +70,7 @@ struct CarRacingInfo {
     int position;
 };
 
-struct Snapshot { //deberia ser una clase
+struct Snapshot {
     int id;
     int game_id;
     std::unordered_map<int, CarDTO> cars;
@@ -84,7 +85,7 @@ struct Snapshot { //deberia ser una clase
     enum TypeCheckpoint type_checkpoint;
     int time_ms;
     State state;
-    std::unordered_map<int, LobbyCarDTO> lobby_cars; // el int es el car_id. al cliente no le importa el int igual
+    std::unordered_map<int, LobbyCarDTO> lobby_cars;
     bool is_owner;
     std::map<Upgrades, std::chrono::seconds> prices;
     std::vector<CarRacingInfo> cars_finished;

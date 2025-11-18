@@ -44,7 +44,6 @@ public:
     void activate_infinite_life();
     void activate_infinite_nitro();
 
-    //ver como manejar estos casos seguro se manejan desde el gameloop
     void activate_lose_race();
     void activate_win_race();
 

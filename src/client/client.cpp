@@ -63,7 +63,7 @@ void Client::run() {
 
     GraphicClient graphic_client(snapshot, &handler);
     
-    const Uint32 FRAME_DELAY = 1000 / 60;  // ~60 FPS
+    const Uint32 FRAME_DELAY = 1000 / 60;
 
 
 

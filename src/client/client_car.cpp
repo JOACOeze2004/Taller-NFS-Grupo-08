@@ -70,7 +70,6 @@ Car::Car(float x, float y, float angle, SDL_Renderer* renderer, int car_id, floa
                 }
             }
         }
-        //si no agarre del yaml uso el verde defa
         if (!yamlLoaded) {
             srcRect.x = 2;
             srcRect.y = 5;

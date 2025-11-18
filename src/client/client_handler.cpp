@@ -36,7 +36,6 @@ void ClientHandler::handle_button_action(ButtonType type) {
         case BUTTON_READY:
             parser.parse_command(SEND_READY_TO_PLAY);
             break;
-        // upgrades
         case BUTTON_LIFE_UP:
             std::cout << "Clicked: BUTTON_LIFE_UP" << std::endl;
             parser.parse_command(SEND_LIFE_UPGRADE);
@@ -61,7 +60,6 @@ void ClientHandler::handle_button_action(ButtonType type) {
             std::cout << "Clicked: BUTTON_NITRO_UP" << std::endl;
             parser.parse_command(SEND_NITRO_UPGRADE);
             break;
-        // downgrades
         case BUTTON_LIFE_DOWN:
             std::cout << "Clicked: BUTTON_LIFE_DOWN" << std::endl;
             parser.parse_command(SEND_LIFE_DOWNGRADE);
@@ -115,7 +113,6 @@ void ClientHandler::process_event(const SDL_Event& event) {
     else if (event.type == SDL_KEYDOWN) {
         SDL_Keymod mod = SDL_GetModState();
         if (mod & KMOD_CTRL) {
-            
             switch (event.key.keysym.sym) {
                 case SDLK_z:
                     parser.parse_command(SEND_WIN_RACE_CHEAT);

@@ -33,7 +33,6 @@ void World::update() {
             float vel = b2Dot(vec_a - vec_b, event.normal);
 
             if (vel > 0) {
-                    //a golpea a b igual seguro lo cambio a dependiendo el angulo
                 car_a->handle_hit(normal, force, true);
                 car_b->handle_hit(normal, force, false);
             }
