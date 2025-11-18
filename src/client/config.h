@@ -3,17 +3,17 @@
 
 #include <SDL2/SDL.h>
 
-// ==================== DISPLAY ====================
+// DISPLAY
 constexpr int DEFAULT_SCREEN_WIDTH = 1200;
 constexpr int DEFAULT_SCREEN_HEIGHT = 900;
 constexpr float ZOOM_FACTOR = 2.0f;
 
-// ==================== FONTS ====================
+// FONTS
 constexpr const char* DEFAULT_FONT_PATH = "../assets/fonts/DejaVuSans.ttf";
 constexpr int DEFAULT_FONT_SIZE = 24;
 constexpr int UPGRADE_FONT_SIZE = 18;
 
-// ==================== TEXTURE PATHS ====================
+// TEXTURE PATHS
 // Gameplay
 constexpr const char* CHECKPOINT_TEXTURE_PATH = "../assets/need-for-speed/sprits/checkpoints.png";
 constexpr const char* HINT_TEXTURE_PATH = "../assets/need-for-speed/sprits/Hints.png";
@@ -33,7 +33,7 @@ constexpr const char* LIBERTY_CITY_MAP_PATH = "../assets/need-for-speed/cities/G
 constexpr const char* SAN_ANDREAS_MAP_PATH = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - San Andreas.png";
 constexpr const char* VICE_CITY_MAP_PATH = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - Vice City.png";
 
-// ==================== MINIMAP ====================
+// MINIMAP
 constexpr float MINIMAP_SCALE = 0.04f;
 constexpr float RADAR_RADIUS = 400.0f;
 constexpr int MINIMAP_MARGIN = 10;
@@ -46,7 +46,7 @@ constexpr float MINIMAP_HINT_ARROW_W_OUTSIDE = 12.0f;
 constexpr float MINIMAP_HINT_ARROW_H_OUTSIDE = 18.0f;
 constexpr float MINIMAP_EDGE_FACTOR = 0.45f;
 
-// ==================== UI COLORS ====================
+// UI COLORS
 // Medals
 constexpr SDL_Color COLOR_GOLD = {255, 215, 0, 255};
 constexpr SDL_Color COLOR_SILVER = {192, 192, 192, 255};
@@ -89,7 +89,7 @@ constexpr SDL_Color COLOR_UPGRADE_TITLE = {255, 215, 0, 255};
 constexpr SDL_Color COLOR_UPGRADE_INFO = {200, 200, 200, 255};
 constexpr SDL_Color COLOR_UPGRADE_DESC = {200, 200, 200, 255};
 
-// ==================== UI DIMENSIONS ====================
+// UI DIMENSIONS
 // Ready Button
 constexpr int READY_BUTTON_WIDTH = 250;
 constexpr int READY_BUTTON_HEIGHT = 50;
@@ -157,7 +157,7 @@ constexpr float HINT_CENTER_X = 15.0f;
 constexpr float HINT_CENTER_Y = 15.0f;
 constexpr double HINT_ANGLE_OFFSET = 180.0;
 
-// ==================== CHECKPOINT SPRITES ====================
+// CHECKPOINT SPRITES
 struct CheckpointSprite {
     int x, y, w, h;
 };

@@ -85,7 +85,7 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
     camera_id = player_car_id;
     
 
-    upgrade_phase = std::make_unique<UpgradePhase>(renderer, window, screen_width, screen_height, handler); 
+    upgrade_phase = std::make_unique<UpgradePhase>(renderer, window, screen_width, screen_height, handler, resources.get()); 
 
     draw(initial_snapshot);
 }
@@ -665,7 +665,6 @@ void GraphicClient::draw_cars() {
 
             auto it = car_objects.find(id);
             if (it == car_objects.end()) {
-                std::cout << "Creating new car object for car_id: " << car_dto_world.car_id << std::endl;
                 car_objects[id] = std::make_unique<Car>(adjusted.x, adjusted.y, adjusted.angle, renderer, resources.get(), car_dto_world.car_id, ZOOM_FACTOR);
                 it = car_objects.find(id);
             }

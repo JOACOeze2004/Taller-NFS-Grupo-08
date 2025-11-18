@@ -10,18 +10,7 @@
 #include "client_handler.h"
 #include "upgrade_phase.h"
 #include "resource_manager.h"
-
-constexpr int DEFAULT_SCREEN_WIDTH = 1200;
-constexpr int DEFAULT_SCREEN_HEIGHT = 900;
-constexpr float ZOOM_FACTOR = 2.0f;
-constexpr int DEFAULT_FONT_SIZE = 20;
-constexpr const char* DEFAULT_FONT_PATH = "../assets/fonts/DejaVuSans.ttf";
-constexpr const char* CHECKPOINT_TEXTURE_PATH = "../assets/need-for-speed/sprits/checkpoints.png";
-constexpr const char* HINT_TEXTURE_PATH = "../assets/need-for-speed/sprits/Hints.png";
-constexpr const char* SPEEDOMETER_TEXTURE_PATH = "../assets/need-for-speed/sprits/Speedmeter.png";
-constexpr const char* LIBERTY_CITY_MAP_PATH = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - Liberty City.png";
-constexpr const char* SAN_ANDREAS_MAP_PATH = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - San Andreas.png";
-constexpr const char* VICE_CITY_MAP_PATH = "../assets/need-for-speed/cities/Game Boy _ GBC - Grand Theft Auto - Backgrounds - Vice City.png";
+#include "config.h"
 
 class GraphicClient {
     SDL_Renderer* renderer;
