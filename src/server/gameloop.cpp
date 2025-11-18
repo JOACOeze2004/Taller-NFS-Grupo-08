@@ -26,11 +26,12 @@ void Gameloop::initialize_car_actions() {
     car_actions[SEND_BRAKE] = [](Car& car) { car.brake(); };
     car_actions[SEND_USE_NITRO] = [](Car& car) { car.toggle_nitro_status(); };
 
-    car_actions[SEND_WIN_RACE_CHEAT] = [](Car& car) { car.activate_win_race(); };
     car_actions[SEND_RESTORE_LIFE_CHEAT] = [](Car& car) { car.restore_life(); };
     car_actions[SEND_INFINITE_LIFE_CHEAT] = [](Car& car) { car.activate_infinite_life(); };
     car_actions[SEND_LOSE_RACE_CHEAT] = [](Car& car) { car.activate_lose_race(); };
     car_actions[SEND_INFINITE_NITRO_CHEAT] = [](Car& car) { car.activate_infinite_nitro(); };
+
+    race_actions[SEND_WIN_RACE_CHEAT] = [](Race& race, int& id) { race.activate_win(id); };
 }
 
 void Gameloop::run() {
@@ -51,7 +52,7 @@ void Gameloop::process_command(ClientCommand& client_command) {
     }
 
     auto it = cars.find(client_command.id);
-    //auto& id = it->first;
+    int id = it->first;
     /*if (race.car_finished(id) || race.car_dead(id)) {
         return;
     }*/
@@ -60,6 +61,12 @@ void Gameloop::process_command(ClientCommand& client_command) {
     auto action = car_actions.find(client_command.cmd_struct.cmd);
     if (action != car_actions.end()) {
         action->second(car);
+    }
+    else {
+        auto race_action = race_actions.find(client_command.cmd_struct.cmd);
+        if (race_action != race_actions.end()) {
+            race_action->second(race, id);
+        }
     }
 
 }

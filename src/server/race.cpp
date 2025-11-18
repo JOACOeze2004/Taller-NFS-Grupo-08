@@ -177,3 +177,7 @@ void Race::reset_race() {
     int indx = rand() % tracks.size();
     track = tracks[indx];
 }
+
+void Race::activate_win(int& id) {
+    finished[id] = true;
+}
