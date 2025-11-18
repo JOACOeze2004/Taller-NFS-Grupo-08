@@ -54,6 +54,7 @@ class GraphicClient {
     void draw_game_id(int id);
     void draw_state(int state);
     void draw_ready_btn(int player_count, bool& ready_sent);
+    void draw_results(const std::vector<CarRacingInfo>& cars_finished);
 };
 
 

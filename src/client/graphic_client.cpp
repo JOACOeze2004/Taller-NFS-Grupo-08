@@ -267,6 +267,8 @@ void GraphicClient::draw(const Snapshot& snapshot) {
         auto player_it = snapshot.cars.find(player_car_id);
         if (player_it != snapshot.cars.end() && player_it->second.state != IN_GAME) {
             draw_state(player_it->second.state);
+            draw_results(snapshot.cars_finished);
+
         }
 
 
@@ -274,7 +276,72 @@ void GraphicClient::draw(const Snapshot& snapshot) {
     }
 } 
 
+void GraphicClient::draw_results(const std::vector<CarRacingInfo>& cars_finished) {
 
+    if (!text || cars_finished.empty()) return;
+
+    const int panel_w = 800;  
+    const int panel_h = 600;  
+    const int panel_x = (screen_width - panel_w) / 2;
+    const int panel_y = (screen_height - panel_h) / 2;
+
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 20, 20, 40, 230);
+    SDL_Rect panel_rect = {panel_x, panel_y, panel_w, panel_h};
+    SDL_RenderFillRect(renderer, &panel_rect);
+
+    SDL_SetRenderDrawColor(renderer, 255, 215, 0, 255);
+    SDL_RenderDrawRect(renderer, &panel_rect);
+
+    SDL_Color title_color = {255, 215, 0, 255};
+    std::string title = "RACE RESULTS";
+    int title_x = panel_x + (panel_w - static_cast<int>(title.size()) * 14) / 2;
+    int title_y = panel_y + 30;
+    text->render(renderer, title, title_x, title_y, title_color);
+
+    SDL_Color header_color = {200, 200, 200, 255};
+    text->render(renderer, "Pos", panel_x + 30, panel_y + 80, header_color);
+    text->render(renderer, "Name", panel_x + 120, panel_y + 80, header_color);
+    text->render(renderer, "Time", panel_x + panel_w - 180, panel_y + 80, header_color);
+
+    int row_y = panel_y + 120;
+    const int row_height = 40;
+    const size_t max_rows = 15; //aca hacer algo de cars.size o algo
+
+    for (size_t i = 0; i < cars_finished.size() && i < max_rows; ++i) {
+        const auto& car_info = cars_finished[i];
+
+        SDL_Color row_color = {255, 255, 255, 255};
+        if (car_info.position == 1) {
+            row_color = {255, 215, 0, 255};
+        } else if (car_info.position == 2) {
+            row_color = {192, 192, 192, 255};
+        } else if (car_info.position == 3) {
+            row_color = {205, 127, 50, 255};
+        }
+
+        char position_str[16];
+        std::snprintf(position_str, sizeof(position_str), "%d.", car_info.position);
+        text->render(renderer, position_str, panel_x + 30, row_y, row_color);
+
+        std::string display_name = car_info.name;
+        if (display_name.length() > 30) {
+            display_name = display_name.substr(0, 27) + "...";
+        }
+        text->render(renderer, display_name, panel_x + 120, row_y, row_color);
+
+        int total_seconds = static_cast<int>(car_info.time);
+        int minutes = total_seconds / 60;
+        int seconds = total_seconds % 60;
+        int millis = static_cast<int>((car_info.time - total_seconds) * 1000);
+
+        char time_str[32];
+        std::snprintf(time_str, sizeof(time_str), "%02d:%02d.%03d", minutes, seconds, millis);
+        text->render(renderer, time_str, panel_x + panel_w - 180, row_y, row_color);
+
+        row_y += row_height;
+    }
+}
 
 void GraphicClient::draw_ready_btn(int player_count, bool& ready_sent){
     if (!text || !handler) return;
