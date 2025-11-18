@@ -75,7 +75,7 @@ bool Client::initialize_game_data() {
 }
 
 bool Client::wait_for_initial_snapshot(ClientReceiver& receiver, Snapshot& snapshot) {
-    while (!receiver.try_pop_car_state(snapshot)) {
+    while (!receiver.try_pop_snapshot(snapshot)) {
         SDL_Delay(SNAPSHOT_POLL_DELAY_MS);
     }
     return true;
@@ -112,7 +112,7 @@ bool Client::update_game_state(ClientReceiver& receiver, GraphicClient& graphic_
         return true;
     }
 
-    while (receiver.try_pop_car_state(snapshot)) {
+    while (receiver.try_pop_snapshot(snapshot)) {
         graphic_client.update_from_snapshot(snapshot);
     }
     return false;

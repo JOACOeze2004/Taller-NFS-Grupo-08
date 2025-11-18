@@ -15,9 +15,9 @@ class ClientReceiver : public Thread  {
     bool has_finals;
     std::mutex finals_mutex;
 public:
-    explicit ClientReceiver(ClientProtocol& protocol); // seguro tendrá el parser que actualiza el juego
+    explicit ClientReceiver(ClientProtocol& protocol); 
     void run() override;
-    bool try_pop_car_state(Snapshot& snapshot); // Ver si nos sirve en un futuro o lo sacamos (lo vi en el tp del CS)
+    bool try_pop_snapshot(Snapshot& snapshot);
     bool has_final_results();
     FinalScoreList get_final_results();
 };
