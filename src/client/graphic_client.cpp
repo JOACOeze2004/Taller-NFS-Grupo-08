@@ -521,15 +521,15 @@ void GraphicClient::draw_minimap(const CheckpointCoords& checkpoint, int checkpo
 
     const float radar_radius = 400.0f;
     
-    if (player_car_id < 0 || cars.find(player_car_id) == cars.end()) {
+    if (camera_id < 0 || cars.find(camera_id) == cars.end()) {
         return;
     }
     
-    const CarDTO& player_car = cars[player_car_id];
+    const CarDTO& camera_car = cars[camera_id];
     
     SDL_Rect src_rect = {
-        static_cast<int>(player_car.x - radar_radius),
-        static_cast<int>(player_car.y - radar_radius),
+        static_cast<int>(camera_car.x - radar_radius),
+        static_cast<int>(camera_car.y - radar_radius),
         static_cast<int>(radar_radius * 2.0f),
         static_cast<int>(radar_radius * 2.0f)
     };
@@ -578,8 +578,8 @@ void GraphicClient::draw_minimap(const CheckpointCoords& checkpoint, int checkpo
         checkpoint_minimap_x = minimap_x + (checkpoint.x - src_rect.x) * scale;
         checkpoint_minimap_y = minimap_y + (checkpoint.y - src_rect.y) * scale;
     } else {
-        float center_x = player_car.x;
-        float center_y = player_car.y;
+        float center_x = camera_car.x;
+        float center_y = camera_car.y;
         float dx = checkpoint.x - center_x;
         float dy = checkpoint.y - center_y;
         float distance = std::sqrt(dx * dx + dy * dy);
@@ -637,8 +637,8 @@ void GraphicClient::draw_minimap(const CheckpointCoords& checkpoint, int checkpo
         hint_minimap_x = minimap_x + (hint.x - src_rect.x) * scale;
         hint_minimap_y = minimap_y + (hint.y - src_rect.y) * scale;
     } else {
-        float center_x = player_car.x;
-        float center_y = player_car.y;
+        float center_x = camera_car.x;
+        float center_y = camera_car.y;
         float dx = hint.x - center_x;
         float dy = hint.y - center_y;
         float distance = std::sqrt(dx * dx + dy * dy);
@@ -671,7 +671,8 @@ void GraphicClient::draw_minimap(const CheckpointCoords& checkpoint, int checkpo
     
     SDL_RenderCopyExF(renderer, hint_texture, &hint_src_rect, &hint_dst_rect, hint_angle_deg, &hint_center, SDL_FLIP_NONE);
     
-    
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderDrawRectF(renderer, &border_rect);
 }
 
 
