@@ -153,6 +153,8 @@ void GraphicClient::update_from_snapshot(const Snapshot& snapshot) {
                camera_id = id;
             }
         }
+    } else {
+        camera_id = player_car_id;
     }
 }
 
