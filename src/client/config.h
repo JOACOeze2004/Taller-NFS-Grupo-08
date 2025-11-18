@@ -20,7 +20,7 @@ constexpr const char* HINT_TEXTURE_PATH = "../assets/need-for-speed/sprits/Hints
 constexpr const char* SPEEDOMETER_TEXTURE_PATH = "../assets/need-for-speed/sprits/Speedmeter.png";
 
 // Workshop
-constexpr const char* WORKSHOP_ICONS_PATH = "../assets/need-for-speed/sprits/Workshop_icons.webp";
+constexpr const char* WORKSHOP_ICONS_PATH = "../assets/need-for-speed/sprits/Workshop_icons_1.png";
 constexpr const char* WORKSHOP_ARROWS_PATH = "../assets/need-for-speed/sprits/workshop_arrow_spritesheet.png";
 
 // Cars
