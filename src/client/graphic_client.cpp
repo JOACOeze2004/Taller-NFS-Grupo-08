@@ -287,8 +287,6 @@ void GraphicClient::draw_race_state(const Snapshot& snapshot) {
     draw_hint(snapshot.hint);
     draw_minimap(snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
     draw_speedometer(cars[player_car_id].velocity);
-    draw_position(snapshot.position, snapshot.cars.size());
-    draw_time(snapshot.time_ms);
     draw_game_id(snapshot.game_id);
     draw_cars();
     
@@ -296,6 +294,9 @@ void GraphicClient::draw_race_state(const Snapshot& snapshot) {
     if (player_it != snapshot.cars.end() && player_it->second.state != IN_GAME) {
         draw_state(player_it->second.state);
         draw_results(snapshot.cars_finished);
+    } else {
+        draw_position(snapshot.position, snapshot.cars.size());
+        draw_time(snapshot.time_ms);
     }
 } 
 
