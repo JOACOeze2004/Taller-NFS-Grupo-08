@@ -281,7 +281,9 @@ void Car::nitro_upgrade() {
 }
 
 void Car::life_upgrade() {
-    upgrade((float&)life, LIFE_UPGRADE_FACTOR);
+    float life_casted = static_cast<float>(life);
+    upgrade(life_casted, LIFE_UPGRADE_FACTOR);
+    life = static_cast<int>(life_casted);
 }
 
 void Car::brake_upgrade() {
