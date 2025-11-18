@@ -126,6 +126,25 @@ void UpgradePhase::render_title() {
     text->render(renderer, title, title_x, title_y, title_color);
 }
 
+void UpgradePhase::render_remaining_upgrades(int remaining_upgrades) {
+    if (!text) return;
+    
+    std::string info;
+    if (remaining_upgrades == 1) {
+        info = "You have 1 upgrade point to spend";
+    } else if (remaining_upgrades == 0) {
+        info = "No upgrade points remaining";
+    } else {
+        info = "You have " + std::to_string(remaining_upgrades) + " upgrade points to spend";
+    }
+    
+    SDL_Color info_color = {200, 200, 200, 255};
+    int est_width = static_cast<int>(info.size()) * 9;
+    int info_x = (screen_width - est_width) / 2;
+    int info_y = 50;
+    text->render(renderer, info, info_x, info_y, info_color);
+}
+
 void UpgradePhase::render_upgrade_buttons() {
     
     if (handler) {
@@ -220,11 +239,11 @@ void UpgradePhase::render_instructions() {
     text->render(renderer, instruction, x, y, color);
 }
 
-void UpgradePhase::render() {
-    //SDL_RenderClear(renderer);
+void UpgradePhase::render(int remaining_upgrades) {
     
     render_background();
     render_title();
+    render_remaining_upgrades(remaining_upgrades);
     render_upgrade_buttons();
     render_instructions();
     

@@ -49,6 +49,7 @@ private:
     void render_title();
     void render_upgrade_buttons();
     void render_instructions();
+    void render_remaining_upgrades(int remaining_upgrades);
 
 public:
     UpgradePhase(SDL_Renderer* renderer, SDL_Window* window, int screen_width, int screen_height, ClientHandler* _handler);
@@ -56,7 +57,7 @@ public:
     
     Upgrades show_and_wait_selection();
     
-    void render();
+    void render(int remaining_upgrades);
 };
 
 #endif  // TALLER_TP_UPGRADE_PHASE_H

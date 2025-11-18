@@ -234,8 +234,11 @@ void GraphicClient::clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dt
 }
 
 void GraphicClient::draw(const Snapshot& snapshot) {
-    if (snapshot.state == IN_WORK_SHOP) { // en reallllllllllidad es si estoy en whorkshowp
-        upgrade_phase->render();
+    std::cout << snapshot.state << std::endl;
+    if (snapshot.state == IN_WORK_SHOP) { 
+        auto player_it = snapshot.cars.find(player_car_id);
+        int remaining_upgrades = (player_it != snapshot.cars.end()) ? player_it->second.remaining_upgrades : 0;
+        upgrade_phase->render(remaining_upgrades);
         SDL_RenderPresent(renderer);
 
         return;
