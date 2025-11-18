@@ -45,6 +45,16 @@ class GraphicClient {
     void draw_lobby_state(const Snapshot& snapshot);
     void draw_race_state(const Snapshot& snapshot);
     
+    void initialize_sdl();
+    void initialize_window();
+    void initialize_renderer();
+    void initialize_image_and_ttf();
+    void initialize_resource_manager();
+    void load_core_textures();
+    void load_map_texture(int map_id);
+    void initialize_text_renderer();
+    void initialize_upgrade_phase();
+    
     void clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dto);
     void draw_cars();
     void draw_camera();

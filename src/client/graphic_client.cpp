@@ -16,78 +16,124 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
             text(nullptr), handler(_handler), 
             ready_sent(false), upgrade_phase(nullptr) {
 
+    initialize_sdl();
+    initialize_window();
+    initialize_renderer();
+    initialize_image_and_ttf();
+    initialize_resource_manager();
+    load_core_textures();
+    load_map_texture(initial_snapshot.map);
+    initialize_text_renderer();
+    
+    set_player_car(initial_snapshot.id);
+    update_from_snapshot(initial_snapshot);
+    camera_id = player_car_id;
+    
+    initialize_upgrade_phase();
+    draw(initial_snapshot);
+}
+
+void GraphicClient::initialize_sdl() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        std::cerr << "[CLIENT] Error inicializando SDL: " << SDL_GetError() << std::endl;
-        return;
+        throw std::runtime_error(
+            std::string("[CLIENT] Error inicializando SDL: ") + SDL_GetError()
+        );
     }
+}
 
-    window = SDL_CreateWindow("Client Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-                              screen_width, screen_height, SDL_WINDOW_SHOWN | SDL_WINDOW_MAXIMIZED);
-
+void GraphicClient::initialize_window() {
+    window = SDL_CreateWindow("Client Game", 
+                              SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                              screen_width, screen_height, 
+                              SDL_WINDOW_SHOWN | SDL_WINDOW_MAXIMIZED);
+    
     if (!window) {
-        std::cerr << "[CLIENT] Error creando ventana: " << SDL_GetError() << std::endl;
         SDL_Quit();
-        return;
+        throw std::runtime_error(
+            std::string("[CLIENT] Error creando ventana: ") + SDL_GetError()
+        );
     }
+}
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+void GraphicClient::initialize_renderer() {
+    renderer = SDL_CreateRenderer(window, -1, 
+                                  SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!renderer) {
-        std::cerr << "[CLIENT] Error creando renderer: " << SDL_GetError() << std::endl;
         SDL_DestroyWindow(window);
         SDL_Quit();
-        return;
+        throw std::runtime_error(
+            std::string("[CLIENT] Error creando renderer: ") + SDL_GetError()
+        );
     }
+}
 
-    resources = std::make_unique<ResourceManager>(renderer);
-
+void GraphicClient::initialize_image_and_ttf() {
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
-        std::cerr << "Error inicializando SDL_image: " << IMG_GetError() << std::endl;
+        std::cerr << "[CLIENT] Warning: SDL_image PNG support: " 
+                  << IMG_GetError() << std::endl;
     }
-
+    
     if (TTF_Init() == -1) {
-        std::cerr << "[CLIENT] Error inicializando SDL_ttf: " << TTF_GetError() << std::endl;
-    } else {
-        text = std::make_unique<TextRenderer>(DEFAULT_FONT_PATH, DEFAULT_FONT_SIZE);
-        if (!text->ok()) {
-            std::cerr << "[CLIENT] Fuente no disponible, no se renderizará texto en pantalla." << std::endl;
-            text.reset();
-        }
+        throw std::runtime_error(
+            std::string("[CLIENT] Error inicializando SDL_ttf: ") + TTF_GetError()
+        );
     }
+}
 
+void GraphicClient::initialize_resource_manager() {
+    resources = std::make_unique<ResourceManager>(renderer);
+}
+
+void GraphicClient::load_core_textures() {
     checkpoint_texture = resources->load(CHECKPOINT_TEXTURE_PATH);
     hint_texture = resources->load(HINT_TEXTURE_PATH);
     speedometer_texture = resources->load(SPEEDOMETER_TEXTURE_PATH);
+}
 
+void GraphicClient::load_map_texture(int map_id) {
     std::string map_path;
-    if (initial_snapshot.map == LIBERTY_CITY) {
-        map_path = LIBERTY_CITY_MAP_PATH;
-    } else if (initial_snapshot.map == SAN_ANDREAS) {
-        map_path = SAN_ANDREAS_MAP_PATH;
-    } else if (initial_snapshot.map == VICE_CITY) {
-        map_path = VICE_CITY_MAP_PATH;
+    switch (map_id) {
+        case LIBERTY_CITY:
+            map_path = LIBERTY_CITY_MAP_PATH;
+            break;
+        case SAN_ANDREAS:
+            map_path = SAN_ANDREAS_MAP_PATH;
+            break;
+        case VICE_CITY:
+            map_path = VICE_CITY_MAP_PATH;
+            break;
+        default:
+            throw std::runtime_error(
+                "[CLIENT] Invalid map ID: " + std::to_string(map_id)
+            );
     }
-
+    
     SDL_Surface* bg_surface = IMG_Load(map_path.c_str());
     if (!bg_surface) {
-        std::cerr << "[CLIENT] Error cargando fondo: " << SDL_GetError() << std::endl;
-    } else {
-        map_width = static_cast<float>(bg_surface->w);
-        map_height = static_cast<float>(bg_surface->h);
-        SDL_FreeSurface(bg_surface);
+        throw std::runtime_error(
+            std::string("[CLIENT] Error cargando fondo: ") + SDL_GetError()
+        );
     }
     
+    map_width = static_cast<float>(bg_surface->w);
+    map_height = static_cast<float>(bg_surface->h);
+    SDL_FreeSurface(bg_surface);
+    
     bg_texture = resources->load(map_path.c_str());
+}
 
-    set_player_car(initial_snapshot.id);
+void GraphicClient::initialize_text_renderer() {
+    text = std::make_unique<TextRenderer>(DEFAULT_FONT_PATH, DEFAULT_FONT_SIZE);
+    if (!text->ok()) {
+        std::cerr << "[CLIENT] Fuente no disponible, no se renderizará texto en pantalla." << std::endl;
+        text.reset();
+    }
+}
 
-    update_from_snapshot(initial_snapshot);
-    
-    camera_id = player_car_id;
-    
-
-    upgrade_phase = std::make_unique<UpgradePhase>(renderer, window, screen_width, screen_height, handler, resources.get()); 
-
-    draw(initial_snapshot);
+void GraphicClient::initialize_upgrade_phase() {
+    upgrade_phase = std::make_unique<UpgradePhase>(
+        renderer, window, screen_width, screen_height, handler, resources.get()
+    );
 }
 
 void GraphicClient::update_from_snapshot(const Snapshot& snapshot) {
@@ -281,7 +327,7 @@ void GraphicClient::draw_results(const std::vector<CarRacingInfo>& cars_finished
 
     int row_y = panel_y + 120;
     const int row_height = 40;
-    const size_t max_rows = 15; //aca hacer algo de cars.size o algo
+    const size_t max_rows = 15; 
 
     for (size_t i = 0; i < cars_finished.size() && i < max_rows; ++i) {
         const auto& car_info = cars_finished[i];
