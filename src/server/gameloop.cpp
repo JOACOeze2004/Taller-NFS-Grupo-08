@@ -53,9 +53,9 @@ void Gameloop::process_command(ClientCommand& client_command) {
 
     auto it = cars.find(client_command.id);
     int id = it->first;
-    /*if (race.car_finished(id) || race.car_dead(id)) {
+    if (race.car_finished(id) || race.car_dead(id)) {
         return;
-    }*/
+    }
 
     Car& car = it->second;
     auto action = car_actions.find(client_command.cmd_struct.cmd);
@@ -269,7 +269,7 @@ void Gameloop::update_race_state() {
         it = std::ranges::find_if(
                 deads, [&] (const CarRacingInfo& player) { return player.name == user_names[id];});
         not_added = it == deads.end();
-        if (race.car_finished(id) && not_added) {
+        if (race.car_dead(id) && not_added) {
             deads.emplace_back(user_names[id], current_phase->get_time(), -1);
         }
     }
