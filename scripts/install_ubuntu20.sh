@@ -18,8 +18,8 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 log()  { echo -e "${GREEN}[install]${NC} $*"; }
-info() { echo -e "${BLUE}[info]${NC}  $*"; }
-warn() { echo -e "${YELLOW}[warn]${NC} $*"; }
+info() { echo -e "${BLUE}[info]${NC}    $*"; }
+warn() { echo -e "${YELLOW}[warn]${NC}    $*"; }
 
 log "Starting installer for '${GAME_NAME}'"
 info "Root dir: $ROOT_DIR"
@@ -100,47 +100,119 @@ if [[ -d "$ROOT_DIR/config" ]]; then
   info "Copying config files from repo/config -> $CFG_DIR"
   sudo cp -r "$ROOT_DIR/config/"* "$CFG_DIR/" || true
 else
-  info "No config/ folder found. Creating placeholder"
-  echo "# Placeholder client config" > "$CFG_DIR/client_config.yaml"
-  echo "# Placeholder server config" > "$CFG_DIR/server_config.yaml"
+  info "No config/ folder found. Creating placeholder configs"
+  echo "# Placeholder client config" | sudo tee "$CFG_DIR/client_config.yaml" >/dev/null
+  echo "# Placeholder server config" | sudo tee "$CFG_DIR/server_config.yaml" >/dev/null
 fi
 
+log "Copying assets to $VAR_DIR"
 if [[ -d "$ROOT_DIR/assets" ]]; then
-  info "Copying assets from repo/assets -> $VAR_DIR"
-  sudo cp -r "$ROOT_DIR/assets/"* "$VAR_DIR/" || true
+  sudo cp -r "$ROOT_DIR/assets" "$VAR_DIR/" || true
+  info "Copied assets/ directory"
 else
-  info "No assets/ folder found. Creating placeholder"
-  echo "placeholder asset" > "$VAR_DIR/README.txt"
+  for subdir in fonts images "need-for-speed"; do
+    if [[ -d "$ROOT_DIR/assets/$subdir" ]]; then
+      sudo mkdir -p "$VAR_DIR/assets/$subdir"
+      sudo cp -r "$ROOT_DIR/assets/$subdir/"* "$VAR_DIR/assets/$subdir/" || true
+      info "Copied assets/$subdir"
+    fi
+  done
 fi
 
-log "Creating launchers on Desktop"
+log "Copying complete src/ structure to $VAR_DIR"
+if [[ -d "$ROOT_DIR/src" ]]; then
+  sudo cp -r "$ROOT_DIR/src" "$VAR_DIR/" || true
+  info "Copied src/ directory with all YAMLs"
+fi
+
+log "Creating symlink structure for hardcoded paths"
+
+sudo ln -sf "$VAR_DIR/assets" /usr/assets
+if [[ -L /usr/assets ]]; then
+  info "Symlink created: /usr/assets -> $VAR_DIR/assets"
+else
+  warn "Failed to create symlink /usr/assets"
+fi
+
+sudo mkdir -p /usr/src
+sudo ln -sf "$VAR_DIR/src/server" /usr/src/server
+if [[ -L /usr/src/server ]]; then
+  info "Symlink created: /usr/src/server -> $VAR_DIR/src/server"
+  info "This makes hardcoded paths like '../src/server/libertycity.yaml' work from /usr/bin"
+else
+  warn "Failed to create symlink /usr/src/server"
+fi
+
+sudo ln -sf "$VAR_DIR/src/client" /usr/src/client
+if [[ -L /usr/src/client ]]; then
+  info "Symlink created: /usr/src/client -> $VAR_DIR/src/client"
+  info "This makes '../src/client/car_sprites.yaml' work from /usr/bin"
+else
+  warn "Failed to create symlink /usr/src/client"
+fi
+
+log "Creating launcher scripts on Desktop"
 mkdir -p "$DESKTOP_DIR"
 
-cat > "$DESKTOP_DIR/run_client.sh" <<EOF
+cat > "$DESKTOP_DIR/run_client.sh" <<'EOFCLIENT'
 #!/usr/bin/env bash
-cd "$ROOT_DIR"
-export NEED_FOR_SPEED_CLIENT_CONFIG_FILE="$CFG_DIR/client_config.yaml"
-exec "$BIN_DIR/$BIN_CLIENT_NAME" "\$@"
-EOF
+cd /usr/bin
+
+# Export config file location
+export NEED_FOR_SPEED_CLIENT_CONFIG_FILE="/etc/need_for_speed/client_config.yaml"
+
+# Default values
+HOST="${1:-localhost}"
+PORT="${2:-8080}"
+
+# Launch client
+exec ./need_for_speed-client "$HOST" "$PORT"
+EOFCLIENT
 
 chmod +x "$DESKTOP_DIR/run_client.sh"
 log "Client launcher created -> $DESKTOP_DIR/run_client.sh"
 
-cat > "$DESKTOP_DIR/run_server.sh" <<EOF
+cat > "$DESKTOP_DIR/run_server.sh" <<'EOFSERVER'
 #!/usr/bin/env bash
-cd "$ROOT_DIR"
-export NEED_FOR_SPEED_SERVER_CONFIG_FILE="$CFG_DIR/server_config.yaml"
-exec "$BIN_DIR/$BIN_SERVER_NAME" "\$@"
-EOF
+cd /usr/bin
+
+# Export config file location
+export NEED_FOR_SPEED_SERVER_CONFIG_FILE="/etc/need_for_speed/server_config.yaml"
+
+# Default port
+PORT="${1:-8080}"
+
+# Launch server
+exec ./need_for_speed-server "$PORT"
+EOFSERVER
 
 chmod +x "$DESKTOP_DIR/run_server.sh"
 log "Server launcher created -> $DESKTOP_DIR/run_server.sh"
 
-log "Installation finished successfully."
+log "Installation finished successfully!"
 echo
 info "Summary:"
 echo " - Client executable: ${BIN_DIR}/${BIN_CLIENT_NAME}"
 echo " - Server executable: ${BIN_DIR}/${BIN_SERVER_NAME}"
 echo " - Config directory: ${CFG_DIR}"
 echo " - Data directory: ${VAR_DIR}"
-echo " - Desktop launchers: ${DESKTOP_DIR}/run_client.sh, ${DESKTOP_DIR}/run_server.sh"
+echo " - Assets: ${VAR_DIR}/assets"
+echo " - Source YAMLs: ${VAR_DIR}/src/server"
+echo " - Symlinks for hardcoded paths:"
+echo "   * /usr/assets -> ${VAR_DIR}/assets"
+echo "   * /usr/src/server -> ${VAR_DIR}/src/server"
+echo "   * /usr/src/client -> ${VAR_DIR}/src/client"
+echo " - Desktop launchers:"
+echo "   * ${DESKTOP_DIR}/run_client.sh"
+echo "   * ${DESKTOP_DIR}/run_server.sh"
+echo
+info "To run the game:"
+echo " 1. Server: ${DESKTOP_DIR}/run_server.sh [PORT]"
+echo "    Example: ${DESKTOP_DIR}/run_server.sh 8080"
+echo "    (defaults to port 8080 if not specified)"
+echo
+echo " 2. Client: ${DESKTOP_DIR}/run_client.sh [HOST] [PORT]"
+echo "    Example: ${DESKTOP_DIR}/run_client.sh localhost 8080"
+echo "    (defaults to localhost:8080 if not specified)"
+echo
+echo " 3. You can also just double-click the .sh files for default values"
