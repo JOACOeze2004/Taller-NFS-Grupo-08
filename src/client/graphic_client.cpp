@@ -257,6 +257,8 @@ void GraphicClient::draw(const Snapshot& snapshot) {
         } else if (snapshot.state == IN_LOBBY && snapshot.is_owner) {
             draw_ready_btn(static_cast<int>(snapshot.cars.size()), ready_sent);
         }
+        
+
 
         draw_game_id(snapshot.game_id);
         
@@ -271,6 +273,8 @@ void GraphicClient::draw(const Snapshot& snapshot) {
         SDL_RenderPresent(renderer);
     }
 } 
+
+
 
 void GraphicClient::draw_ready_btn(int player_count, bool& ready_sent){
     if (!text || !handler) return;
@@ -545,6 +549,19 @@ void GraphicClient::draw_minimap(const CheckpointCoords& checkpoint, int checkpo
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderDrawRectF(renderer, &checkpoint_rect);
     
+    SDL_FRect border_rect = {
+        static_cast<float>(minimap_x), 
+        static_cast<float>(minimap_y), 
+        static_cast<float>(minimap_width), 
+        static_cast<float>(minimap_height)
+    };
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    
+    if (!hint_texture) {
+        SDL_RenderDrawRectF(renderer, &border_rect);
+        return;
+    }
+    
     float hint_minimap_x, hint_minimap_y;
     bool is_hint_inside = (hint.x >= src_rect.x && hint.x <= src_rect.x + src_rect.w &&
                         hint.y >= src_rect.y && hint.y <= src_rect.y + src_rect.h);
@@ -571,42 +588,23 @@ void GraphicClient::draw_minimap(const CheckpointCoords& checkpoint, int checkpo
         }
     }
     
-    const float arrow_size = is_inside ? 8.0f : 6.0f;
+    SDL_Rect hint_src_rect = {260, 20, 120, 150};
+    const float hint_arrow_w = is_hint_inside ? 16.0f : 12.0f;
+    const float hint_arrow_h = is_hint_inside ? 24.0f : 18.0f;
     
-    float angle_rad = hint.angle + 180;
-    float cos_a = std::cos(angle_rad);
-    float sin_a = std::sin(angle_rad);
-    
-    SDL_FPoint tip = {
-        hint_minimap_x + cos_a * arrow_size,
-        hint_minimap_y + sin_a * arrow_size
+    SDL_FRect hint_dst_rect = {
+        hint_minimap_x - hint_arrow_w * 0.5f,
+        hint_minimap_y - hint_arrow_h * 0.5f,
+        hint_arrow_w,
+        hint_arrow_h
     };
     
-    float base_offset = arrow_size * 0.6f;
-    SDL_FPoint base1 = {
-        hint_minimap_x - cos_a * arrow_size * 0.3f + sin_a * base_offset,
-        hint_minimap_y - sin_a * arrow_size * 0.3f - cos_a * base_offset
-    };
-    SDL_FPoint base2 = {
-        hint_minimap_x - cos_a * arrow_size * 0.3f - sin_a * base_offset,
-        hint_minimap_y - sin_a * arrow_size * 0.3f + cos_a * base_offset
-    };
+    double hint_angle_deg = hint.angle + 180;
+    SDL_FPoint hint_center = {hint_arrow_w * 0.5f, hint_arrow_h * 0.5f};
     
-    SDL_SetRenderDrawColor(renderer, 0, 200, 255, 255); 
-    SDL_RenderDrawLineF(renderer, tip.x, tip.y, base1.x, base1.y);
-    SDL_RenderDrawLineF(renderer, base1.x, base1.y, base2.x, base2.y);
-    SDL_RenderDrawLineF(renderer, base2.x, base2.y, tip.x, tip.y);
+    SDL_RenderCopyExF(renderer, hint_texture, &hint_src_rect, &hint_dst_rect, hint_angle_deg, &hint_center, SDL_FLIP_NONE);
     
-    SDL_RenderDrawLineF(renderer, tip.x, tip.y, hint_minimap_x, hint_minimap_y);
     
-    SDL_FRect border_rect = {
-        static_cast<float>(minimap_x), 
-        static_cast<float>(minimap_y), 
-        static_cast<float>(minimap_width), 
-        static_cast<float>(minimap_height)
-    };
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderDrawRectF(renderer, &border_rect);
 }
 
 
