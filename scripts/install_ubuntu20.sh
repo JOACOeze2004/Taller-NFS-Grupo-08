@@ -15,38 +15,124 @@ DESKTOP_DIR="${HOME}/Desktop"
 GREEN='\033[0;32m'
 BLUE='\033[94m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m'
 
 log()  { echo -e "${GREEN}[install]${NC} $*"; }
 info() { echo -e "${BLUE}[info]${NC}    $*"; }
 warn() { echo -e "${YELLOW}[warn]${NC}    $*"; }
+error() { echo -e "${RED}[error]${NC}   $*"; }
 
 log "Starting installer for '${GAME_NAME}'"
 info "Root dir: $ROOT_DIR"
+
+# Clean up problematic Kitware repo if it exists
+if [[ -f /etc/apt/sources.list.d/kitware.list ]]; then
+  warn "Found problematic Kitware repository, removing it..."
+  sudo rm -f /etc/apt/sources.list.d/kitware.list
+  sudo rm -f /usr/share/keyrings/kitware-archive-keyring.gpg
+fi
 
 log "Updating APT indexes"
 sudo apt-get update -y
 
 log "Installing base tools"
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  ca-certificates gnupg software-properties-common lsb-release curl \
-  build-essential git pkg-config ninja-build unzip zip
+  ca-certificates gnupg software-properties-common lsb-release curl wget \
+  build-essential git pkg-config ninja-build unzip zip libssl-dev
 
-if ! command -v cmake >/dev/null 2>&1 || ! cmake --version | awk 'NR==1{exit !($3 >= 3.24)}'; then
-  log "Installing modern CMake from Kitware APT repo"
-  sudo rm -f /usr/share/keyrings/kitware-archive-keyring.gpg || true
-  sudo apt-get purge --auto-remove -y cmake || true
+# Function to check if CMake version is sufficient
+check_cmake_version() {
+  if ! command -v cmake >/dev/null 2>&1; then
+    return 1
+  fi
+  
+  local version=$(cmake --version | head -n1 | grep -oP '\d+\.\d+' | head -n1)
+  local major=$(echo "$version" | cut -d. -f1)
+  local minor=$(echo "$version" | cut -d. -f2)
+  
+  if [[ $major -gt 3 ]] || [[ $major -eq 3 && $minor -ge 24 ]]; then
+    echo "$version"
+    return 0
+  fi
+  return 1
+}
 
-  curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc | \
-    gpg --dearmor | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
-
-echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu jammy main" | \
-  sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
-
-  sudo apt-get update -y
-  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y cmake
+# Check current CMake
+CMAKE_OK=false
+if CMAKE_VERSION=$(check_cmake_version); then
+  CMAKE_OK=true
+  log "CMake version $CMAKE_VERSION is sufficient (>= 3.24)"
 else
-  log "CMake is recent enough"
+  if command -v cmake >/dev/null 2>&1; then
+    CURRENT_VERSION=$(cmake --version | head -n1 | grep -oP '\d+\.\d+' | head -n1)
+    warn "CMake version $CURRENT_VERSION is too old (need >= 3.24)"
+  else
+    warn "CMake not found"
+  fi
+fi
+
+# Install CMake if needed
+if [[ "$CMAKE_OK" == "false" ]]; then
+  log "Installing modern CMake automatically from official source"
+  
+  # Determine architecture
+  ARCH=$(uname -m)
+  if [[ "$ARCH" == "x86_64" ]]; then
+    CMAKE_ARCH="x86_64"
+  elif [[ "$ARCH" == "aarch64" ]]; then
+    CMAKE_ARCH="aarch64"
+  else
+    error "Unsupported architecture: $ARCH"
+    exit 1
+  fi
+  
+  # CMake version to install
+  CMAKE_VERSION_TO_INSTALL="3.28.3"
+  CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION_TO_INSTALL}/cmake-${CMAKE_VERSION_TO_INSTALL}-linux-${CMAKE_ARCH}.tar.gz"
+  CMAKE_TAR="cmake-${CMAKE_VERSION_TO_INSTALL}-linux-${CMAKE_ARCH}.tar.gz"
+  CMAKE_DIR="cmake-${CMAKE_VERSION_TO_INSTALL}-linux-${CMAKE_ARCH}"
+  
+  log "Downloading CMake ${CMAKE_VERSION_TO_INSTALL} for ${CMAKE_ARCH}"
+  cd /tmp
+  
+  # Remove old CMake installation if exists
+  sudo rm -rf /opt/cmake
+  
+  # Download CMake
+  if [[ -f "$CMAKE_TAR" ]]; then
+    rm -f "$CMAKE_TAR"
+  fi
+  
+  wget --no-check-certificate -q --show-progress "$CMAKE_URL" || {
+    error "Failed to download CMake from $CMAKE_URL"
+    exit 1
+  }
+  
+  log "Extracting CMake"
+  tar -xzf "$CMAKE_TAR"
+  
+  log "Installing CMake to /opt/cmake"
+  sudo mv "$CMAKE_DIR" /opt/cmake
+  
+  # Create symlinks
+  sudo ln -sf /opt/cmake/bin/cmake /usr/local/bin/cmake
+  sudo ln -sf /opt/cmake/bin/ctest /usr/local/bin/ctest
+  sudo ln -sf /opt/cmake/bin/cpack /usr/local/bin/cpack
+  
+  # Clean up
+  rm -f "$CMAKE_TAR"
+  
+  # Update PATH for current session
+  export PATH="/usr/local/bin:$PATH"
+  
+  # Verify installation
+  if CMAKE_VERSION=$(check_cmake_version); then
+    log "Successfully installed CMake $CMAKE_VERSION"
+  else
+    error "CMake installation failed"
+    exit 1
+  fi
 fi
 
 log "Installing dependencies: Qt5, YAML-CPP, SDL2 and codec libs"
@@ -64,6 +150,13 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 log "Configuring and building project (Release)"
 mkdir -p "$BUILD_DIR"
+
+# Clean build if CMake was just installed
+if [[ "$CMAKE_OK" == "false" ]]; then
+  log "Cleaning previous build configuration due to CMake update"
+  rm -rf "$BUILD_DIR"/*
+fi
+
 if [[ ! -f "$BUILD_DIR/Makefile" && ! -f "$BUILD_DIR/build.ninja" ]]; then
   cmake -S "$ROOT_DIR" -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=Release
 fi
@@ -110,109 +203,191 @@ if [[ -d "$ROOT_DIR/assets" ]]; then
   sudo cp -r "$ROOT_DIR/assets" "$VAR_DIR/" || true
   info "Copied assets/ directory"
 else
-  for subdir in fonts images "need-for-speed"; do
-    if [[ -d "$ROOT_DIR/assets/$subdir" ]]; then
-      sudo mkdir -p "$VAR_DIR/assets/$subdir"
-      sudo cp -r "$ROOT_DIR/assets/$subdir/"* "$VAR_DIR/assets/$subdir/" || true
-      info "Copied assets/$subdir"
-    fi
-  done
+  warn "Assets directory not found at $ROOT_DIR/assets"
 fi
 
 log "Copying complete src/ structure to $VAR_DIR"
 if [[ -d "$ROOT_DIR/src" ]]; then
   sudo cp -r "$ROOT_DIR/src" "$VAR_DIR/" || true
   info "Copied src/ directory with all YAMLs"
+else
+  warn "Source directory not found at $ROOT_DIR/src"
 fi
 
-log "Creating symlink structure for hardcoded paths"
+log "Creating optimized directory structure for asset loading"
 
-sudo ln -sf "$VAR_DIR/assets" /usr/assets
+# Create main game directory structure
+sudo mkdir -p "$VAR_DIR/game"
+
+# Copy or move everything to the game directory
+if [[ -d "$VAR_DIR/assets" ]]; then
+  sudo cp -r "$VAR_DIR/assets" "$VAR_DIR/game/" || true
+fi
+
+if [[ -d "$VAR_DIR/src" ]]; then
+  sudo cp -r "$VAR_DIR/src" "$VAR_DIR/game/" || true
+fi
+
+log "Creating symlink structure for multiple path resolution strategies"
+
+# Strategy 1: Symlinks in /usr for ../assets and ../src paths
+sudo rm -f /usr/assets /usr/src 2>/dev/null || true
+sudo ln -sf "$VAR_DIR/game/assets" /usr/assets
+sudo ln -sf "$VAR_DIR/game/src" /usr/src
+
 if [[ -L /usr/assets ]]; then
-  info "Symlink created: /usr/assets -> $VAR_DIR/assets"
+  info "Created: /usr/assets -> $VAR_DIR/game/assets"
 else
   warn "Failed to create symlink /usr/assets"
 fi
 
-sudo mkdir -p /usr/src
-sudo ln -sf "$VAR_DIR/src/server" /usr/src/server
-if [[ -L /usr/src/server ]]; then
-  info "Symlink created: /usr/src/server -> $VAR_DIR/src/server"
-  info "This makes hardcoded paths like '../src/server/libertycity.yaml' work from /usr/bin"
+if [[ -L /usr/src ]]; then
+  info "Created: /usr/src -> $VAR_DIR/game/src"
 else
-  warn "Failed to create symlink /usr/src/server"
+  warn "Failed to create symlink /usr/src"
 fi
 
-sudo ln -sf "$VAR_DIR/src/client" /usr/src/client
-if [[ -L /usr/src/client ]]; then
-  info "Symlink created: /usr/src/client -> $VAR_DIR/src/client"
-  info "This makes '../src/client/car_sprites.yaml' work from /usr/bin"
-else
-  warn "Failed to create symlink /usr/src/client"
-fi
+# Strategy 2: Symlinks in /var/need_for_speed for working directory approach
+sudo ln -sf "$VAR_DIR/game/assets" "$VAR_DIR/assets" 2>/dev/null || true
+sudo ln -sf "$VAR_DIR/game/src" "$VAR_DIR/src" 2>/dev/null || true
 
-log "Creating launcher scripts on Desktop"
+# Strategy 3: Create assets and src in the parent directory of /usr/bin (root)
+sudo ln -sf "$VAR_DIR/game/assets" /assets 2>/dev/null || true
+sudo ln -sf "$VAR_DIR/game/src" /src 2>/dev/null || true
+
+log "Creating enhanced launcher scripts on Desktop"
 mkdir -p "$DESKTOP_DIR"
 
-cat > "$DESKTOP_DIR/run_client.sh" <<'EOFCLIENT'
+# Client launcher with multiple path strategies
+cat > "$DESKTOP_DIR/run_client.sh" <<EOFCLIENT
 #!/usr/bin/env bash
-cd /usr/bin
+
+# Set working directory to /var/need_for_speed/game where assets/src are located
+cd "$VAR_DIR/game" || cd /var/need_for_speed/game || {
+  echo "Error: Cannot change to game directory"
+  exit 1
+}
 
 # Export config file location
-export NEED_FOR_SPEED_CLIENT_CONFIG_FILE="/etc/need_for_speed/client_config.yaml"
+export NEED_FOR_SPEED_CLIENT_CONFIG_FILE="$CFG_DIR/client_config.yaml"
 
-# Default values
-HOST="${1:-localhost}"
-PORT="${2:-8080}"
+# Export asset paths for the game to use
+export NEED_FOR_SPEED_ASSETS_DIR="$VAR_DIR/game/assets"
+export NEED_FOR_SPEED_SRC_DIR="$VAR_DIR/game/src"
 
-# Launch client
-exec ./need_for_speed-client "$HOST" "$PORT"
+# Default connection values
+HOST="\${1:-localhost}"
+PORT="\${2:-8080}"
+
+echo "================================================"
+echo "  Need For Speed - Client Launcher"
+echo "================================================"
+echo "Working directory: \$(pwd)"
+echo "Assets directory: \$NEED_FOR_SPEED_ASSETS_DIR"
+echo "Source directory: \$NEED_FOR_SPEED_SRC_DIR"
+echo "Config file: \$NEED_FOR_SPEED_CLIENT_CONFIG_FILE"
+echo "Connecting to: \$HOST:\$PORT"
+echo "================================================"
+echo
+
+# Launch client from the game directory (so relative paths work)
+exec "$BIN_DIR/$BIN_CLIENT_NAME" "\$HOST" "\$PORT"
 EOFCLIENT
 
 chmod +x "$DESKTOP_DIR/run_client.sh"
 log "Client launcher created -> $DESKTOP_DIR/run_client.sh"
 
-cat > "$DESKTOP_DIR/run_server.sh" <<'EOFSERVER'
+# Server launcher with multiple path strategies
+cat > "$DESKTOP_DIR/run_server.sh" <<EOFSERVER
 #!/usr/bin/env bash
-cd /usr/bin
+
+# Set working directory to /var/need_for_speed/game where assets/src are located
+cd "$VAR_DIR/game" || cd /var/need_for_speed/game || {
+  echo "Error: Cannot change to game directory"
+  exit 1
+}
 
 # Export config file location
-export NEED_FOR_SPEED_SERVER_CONFIG_FILE="/etc/need_for_speed/server_config.yaml"
+export NEED_FOR_SPEED_SERVER_CONFIG_FILE="$CFG_DIR/server_config.yaml"
+
+# Export asset paths for the game to use
+export NEED_FOR_SPEED_ASSETS_DIR="$VAR_DIR/game/assets"
+export NEED_FOR_SPEED_SRC_DIR="$VAR_DIR/game/src"
 
 # Default port
-PORT="${1:-8080}"
+PORT="\${1:-8080}"
 
-# Launch server
-exec ./need_for_speed-server "$PORT"
+echo "================================================"
+echo "  Need For Speed - Server Launcher"
+echo "================================================"
+echo "Working directory: \$(pwd)"
+echo "Assets directory: \$NEED_FOR_SPEED_ASSETS_DIR"
+echo "Source directory: \$NEED_FOR_SPEED_SRC_DIR"
+echo "Config file: \$NEED_FOR_SPEED_SERVER_CONFIG_FILE"
+echo "Starting server on port: \$PORT"
+echo "================================================"
+echo
+
+# Launch server from the game directory (so relative paths work)
+exec "$BIN_DIR/$BIN_SERVER_NAME" "\$PORT"
 EOFSERVER
 
 chmod +x "$DESKTOP_DIR/run_server.sh"
 log "Server launcher created -> $DESKTOP_DIR/run_server.sh"
 
+# Set proper permissions
+sudo chown -R "$(id -u):$(id -g)" "$VAR_DIR" || true
+sudo chmod -R 755 "$VAR_DIR/game" || true
+
 log "Installation finished successfully!"
 echo
-info "Summary:"
-echo " - Client executable: ${BIN_DIR}/${BIN_CLIENT_NAME}"
-echo " - Server executable: ${BIN_DIR}/${BIN_SERVER_NAME}"
-echo " - Config directory: ${CFG_DIR}"
-echo " - Data directory: ${VAR_DIR}"
-echo " - Assets: ${VAR_DIR}/assets"
-echo " - Source YAMLs: ${VAR_DIR}/src/server"
-echo " - Symlinks for hardcoded paths:"
-echo "   * /usr/assets -> ${VAR_DIR}/assets"
-echo "   * /usr/src/server -> ${VAR_DIR}/src/server"
-echo "   * /usr/src/client -> ${VAR_DIR}/src/client"
-echo " - Desktop launchers:"
-echo "   * ${DESKTOP_DIR}/run_client.sh"
-echo "   * ${DESKTOP_DIR}/run_server.sh"
+info "=========================================="
+info "         INSTALLATION SUMMARY"
+info "=========================================="
 echo
-info "To run the game:"
-echo " 1. Server: ${DESKTOP_DIR}/run_server.sh [PORT]"
-echo "    Example: ${DESKTOP_DIR}/run_server.sh 8080"
-echo "    (defaults to port 8080 if not specified)"
+echo "CMake Version: $(cmake --version | head -n1)"
 echo
-echo " 2. Client: ${DESKTOP_DIR}/run_client.sh [HOST] [PORT]"
-echo "    Example: ${DESKTOP_DIR}/run_client.sh localhost 8080"
-echo "    (defaults to localhost:8080 if not specified)"
+echo "Executables:"
+echo "  • Client: ${BIN_DIR}/${BIN_CLIENT_NAME}"
+echo "  • Server: ${BIN_DIR}/${BIN_SERVER_NAME}"
 echo
-echo " 3. You can also just double-click the .sh files for default values"
+echo "Configuration:"
+echo "  • Config directory: ${CFG_DIR}"
+echo "  • Game data: ${VAR_DIR}/game"
+echo "  • Assets: ${VAR_DIR}/game/assets"
+echo "  • Source YAMLs: ${VAR_DIR}/game/src"
+echo
+echo "Symlinks for path resolution:"
+echo "  • /usr/assets -> ${VAR_DIR}/game/assets"
+echo "  • /usr/src -> ${VAR_DIR}/game/src"
+echo "  • /assets -> ${VAR_DIR}/game/assets"
+echo "  • /src -> ${VAR_DIR}/game/src"
+echo
+echo "Desktop Launchers:"
+echo "  • ${DESKTOP_DIR}/run_client.sh"
+echo "  • ${DESKTOP_DIR}/run_server.sh"
+echo
+info "=========================================="
+info "         HOW TO RUN THE GAME"
+info "=========================================="
+echo
+echo "1. START THE SERVER:"
+echo "   ${DESKTOP_DIR}/run_server.sh [PORT]"
+echo "   Example: ${DESKTOP_DIR}/run_server.sh 8080"
+echo "   (Default port: 8080)"
+echo
+echo "2. START THE CLIENT:"
+echo "   ${DESKTOP_DIR}/run_client.sh [HOST] [PORT]"
+echo "   Example: ${DESKTOP_DIR}/run_client.sh localhost 8080"
+echo "   (Defaults: localhost:8080)"
+echo
+echo "3. Or simply double-click the .sh files on your Desktop!"
+echo
+info "=========================================="
+echo
+info "The launchers now:"
+echo "  ✓ Change to the correct working directory"
+echo "  ✓ Set environment variables for asset paths"
+echo "  ✓ Display diagnostic information"
+echo "  ✓ Should resolve all asset/YAML loading issues"
+echo
