@@ -40,8 +40,8 @@ if ! command -v cmake >/dev/null 2>&1 || ! cmake --version | awk 'NR==1{exit !($
   curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc | \
     gpg --dearmor | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
 
-  echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" | \
-    sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu jammy main" | \
+  sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
 
   sudo apt-get update -y
   sudo DEBIAN_FRONTEND=noninteractive apt-get install -y cmake
