@@ -207,7 +207,10 @@ if(TALLER_SERVER)
             src/server/in_game.cpp
             src/server/in_game.h
             src/server/workshop.cpp
-            src/server/workshop.h)
+            src/server/workshop.h
+            src/server/car_command_processor.h
+            src/server/car_command_processor.cpp
+            )
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)
