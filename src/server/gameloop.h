@@ -17,6 +17,7 @@
 #include "race.h"
 #include "workshop.h"
 #include "world.h"
+#include "car_command_processor.h"
 
 class Monitor;
 
@@ -89,7 +90,8 @@ private:
     std::vector<CarRacingInfo> finished;
     std::vector<CarRacingInfo> deads;
     bool game_started;
-    void initialize_car_actions();
+    CarCommandProcessor command_processor;
+    
     Snapshot initialize_DTO();
 };
 

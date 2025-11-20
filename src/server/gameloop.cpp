@@ -5,8 +5,7 @@
 #include <sstream>
 
 Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_name, const int client_id):
-        game_id(gid), monitor(_monitor), owner_id(client_id), ready_to_start(false), race(map_name, &cars, TRACKS_PATH), game_started(false) {
-    initialize_car_actions();
+        game_id(gid), monitor(_monitor), owner_id(client_id), ready_to_start(false), race(map_name, &cars, TRACKS_PATH), game_started(false), command_processor() {
     world.generate_map(map_name);
 
     if (map_name == SAN_ANDREAS_STR ) {
@@ -17,21 +16,6 @@ Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_nam
         current_map = LIBERTY_CITY;
     }
     current_phase = std::make_unique<Lobby>(this, 1.0f);
-}
-
-void Gameloop::initialize_car_actions() {
-    car_actions[SEND_ACCELERATE] = [](Car& car) { car.accelerate(); };
-    car_actions[SEND_ROTATE_RIGHT] = [](Car& car) { car.turn_right(); };
-    car_actions[SEND_ROTATE_LEFT] = [](Car& car) { car.turn_left(); };
-    car_actions[SEND_BRAKE] = [](Car& car) { car.brake(); };
-    car_actions[SEND_USE_NITRO] = [](Car& car) { car.toggle_nitro_status(); };
-
-    car_actions[SEND_RESTORE_LIFE_CHEAT] = [](Car& car) { car.restore_life(); };
-    car_actions[SEND_INFINITE_LIFE_CHEAT] = [](Car& car) { car.activate_infinite_life(); };
-    car_actions[SEND_LOSE_RACE_CHEAT] = [](Car& car) { car.activate_lose_race(); };
-    car_actions[SEND_INFINITE_NITRO_CHEAT] = [](Car& car) { car.activate_infinite_nitro(); };
-
-    race_actions[SEND_WIN_RACE_CHEAT] = [](Race& race, int& id) { race.activate_win(id); };
 }
 
 void Gameloop::run() {
@@ -45,30 +29,30 @@ void Gameloop::run() {
 }
 
 void Gameloop::process_command(ClientCommand& client_command) {
-    if (client_command.cmd_struct.cmd == SEND_DISCONNECT) {
-        user_names.erase(client_command.id);
-        cars.erase(client_command.id);
+    int command = client_command.cmd_struct.cmd;
+    int command_id = client_command.id;
+
+    if (command == SEND_DISCONNECT) {
+        user_names.erase(command_id);
+        cars.erase(command_id);
         return;
     }
 
-    auto it = cars.find(client_command.id);
+    auto it = cars.find(command_id);
     int id = it->first;
     if (race.car_finished(id) || race.car_dead(id)) {
         return;
     }
 
     Car& car = it->second;
-    auto action = car_actions.find(client_command.cmd_struct.cmd);
-    if (action != car_actions.end()) {
-        action->second(car);
+    if (auto action = command_processor.get_car_action(command)) {
+        (*action)(car);
+        return;
     }
-    else {
-        auto race_action = race_actions.find(client_command.cmd_struct.cmd);
-        if (race_action != race_actions.end()) {
-            race_action->second(race, id);
-        }
+    if (auto action = command_processor.get_race_action(command)) {
+        (*action)(race, id);
+        return;
     }
-
 }
 
 bool Gameloop::is_username_taken(const int username_id) const {
