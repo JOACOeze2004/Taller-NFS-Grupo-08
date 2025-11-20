@@ -10,12 +10,10 @@ class Lobby : public Phase {
 public:
     explicit Lobby(Gameloop* _gameloop, float _duration);
     void execute(ClientCommand& command) override;
-    void update_phase() override;
-    void broadcast_phase(int time_ms) override;
+    void update(int time_ms) override;
     bool should_continue() override;
     void end() override;
     State get_current_phase_state() const override;
-
 };
 
 

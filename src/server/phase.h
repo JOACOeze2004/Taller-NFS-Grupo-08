@@ -23,9 +23,7 @@ public:
     virtual bool should_continue() = 0;
     virtual void execute(ClientCommand& command) = 0;
     virtual void end() = 0;
-    virtual void update_phase() = 0;
-    virtual void broadcast_phase(int time_ms) = 0;
-
+    virtual void update(int time_ms) = 0;
 
     virtual ~Phase();
 };

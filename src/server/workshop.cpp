@@ -49,7 +49,7 @@ bool Workshop::should_continue() {
     return gameloop->is_running();
 }
 
-void Workshop::update_phase() { } 
+void Workshop::update(int time_ms) { gameloop->broadcast_workshop(this->get_prices(),time_ms); } 
 
 void Workshop::end() {
     if (!gameloop->has_active_players()) {
@@ -64,8 +64,6 @@ void Workshop::end() {
               << (gameloop->get_races_completed() + 1) << ")" << std::endl;
     gameloop->change_phase(std::make_unique<InGame>(gameloop, MAX_TIME_PER_RACE + RACE_START_TIME));
 }
-
-void Workshop::broadcast_phase(int time_ms) { gameloop->broadcast_workshop(this->get_prices(),time_ms);}
 
 std::map<Upgrades, std::chrono::seconds> Workshop::get_prices() { return this->prices; }
 

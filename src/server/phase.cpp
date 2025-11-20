@@ -14,9 +14,8 @@ void Phase::run() {
         while (gameloop->try_pop(cmd)) {
             this->execute(cmd);
         }
-        update_phase();
-        broadcast_phase(this->get_time_remaining_ms(duration));
-
+        update(this->get_time_remaining_ms(duration));
+        
         auto t2 = std::chrono::steady_clock::now();
         auto rest = rate - std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 

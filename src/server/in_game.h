@@ -16,8 +16,7 @@ public:
     bool should_continue() override;
     void execute(ClientCommand& command) override;
     void end() override;
-    void update_phase() override;
-    void broadcast_phase(int time_ms) override;
+    void update(int time_ms) override;
     State get_current_phase_state() const override;
 };
 

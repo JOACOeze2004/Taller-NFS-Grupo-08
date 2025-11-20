@@ -11,9 +11,10 @@ void Lobby::execute(ClientCommand& command) {
 
 bool Lobby::should_continue() { return gameloop->is_running() && !gameloop->is_game_already_started(); }
 
-void Lobby::update_phase() {gameloop->update_positions(); }
-
-void Lobby::broadcast_phase(int time_ms) {gameloop->broadcast_lobby(time_ms);}
+void Lobby::update(int time_ms) {
+    gameloop->update_positions(); 
+    gameloop->broadcast_lobby(time_ms);
+}
 
 void Lobby::end() { gameloop->change_phase(std::make_unique<InGame>(gameloop, MAX_TIME_PER_RACE + RACE_START_TIME)); }
 

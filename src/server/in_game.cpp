@@ -14,8 +14,6 @@ bool InGame::should_continue(){
 
 void InGame::execute(ClientCommand& command) {gameloop->process_command(command); }
 
-void InGame::broadcast_phase(int time_ms) {gameloop->broadcast_in_game(time_ms);}
-
 void InGame::end() {
     gameloop->increment_race_counter();
 
@@ -33,13 +31,14 @@ void InGame::end() {
     gameloop->change_phase(std::make_unique<Workshop>(gameloop, MAX_TIME_PER_WORKSHOP));
 }
 
-void InGame::update_phase() {
+void InGame::update(int time_ms) {
     if(!race_started){
         this->race_started = true;
         gameloop->start_race();
     }
     gameloop->update_positions();
     gameloop->update_race_state(); 
+    gameloop->broadcast_in_game(time_ms);
 }
 
 State InGame::get_current_phase_state() const { return IN_RACE; }
