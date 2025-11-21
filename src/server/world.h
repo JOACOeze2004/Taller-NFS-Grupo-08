@@ -12,6 +12,7 @@ class World {
 
 private:
     void create_collisions(std::vector<StaticBody>& boxes);
+    void create_corners(std::vector<Corner>& corners);
 
 public:
     explicit World();

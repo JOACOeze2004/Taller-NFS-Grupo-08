@@ -14,6 +14,11 @@ struct StaticBody {
     float height;
 };
 
+struct Corner {
+    float x;
+    float y;
+};
+
 struct Checkpoint {
     float x;
     float y;
@@ -37,6 +42,7 @@ class ParserYaml {
 public:
     explicit ParserYaml();
     std::vector<StaticBody> parse_map(std::string& map_name);
+    std::vector<Corner> parse_corners(std::string& map_name);
     CarStats parse_car(const int car_id);
     std::vector<Track> parse_tracks(const std::string& tracks_dir, const std::string& map_name);
 };
