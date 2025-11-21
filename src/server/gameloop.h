@@ -92,7 +92,7 @@ private:
     
     Snapshot initialize_DTO();
     std::unordered_map<int, CarDTO> build_cars_dto(std::function<StateRunning(int)> car_state);
-    Snapshot build_base_snapshot (const std::unordered_map<int, CarDTO>& carsDTO, State state, int time_ms, int player_id);
+    Snapshot build_base_snapshot (const std::unordered_map<int, CarDTO>& cars_DTO, State state, int time_ms, int player_id);
 };
 
 
