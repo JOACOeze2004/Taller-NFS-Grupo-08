@@ -209,10 +209,6 @@ void Car::apply_nitro_force() {
 }
 
 void Car::update_nitro_usage(){
-    if (nitro > MAX_NITRO) {
-        return;
-    }
-
     if (nitro_activated){
         nitro -= nitro_consuption;
         if (nitro <= 0){
@@ -221,8 +217,8 @@ void Car::update_nitro_usage(){
         }
     }else{
         nitro += NITRO_RECHARGE_RATE;        
-        if (nitro >= NITRO){
-            nitro = NITRO;
+        if (nitro >= max_nitro){
+            nitro = max_nitro;
         }        
     }
 }
@@ -296,8 +292,9 @@ void Car::handling_upgrade() {
 }
 
 void Car::nitro_upgrade() {
-    if (upgrade(NITRO, NITRO_UPGRADE_FACTOR)) {
+    if (upgrade(max_nitro, NITRO_UPGRADE_FACTOR)) {
         nitro_upgrades_applied++;
+        nitro = max_nitro;
     }
 }
 
@@ -339,7 +336,7 @@ void Car::handling_downgrade() {
 }
 
 void Car::nitro_downgrade() {
-    downgrade(NITRO, NITRO_UPGRADE_FACTOR, nitro_upgrades_applied);
+    downgrade(max_nitro, NITRO_UPGRADE_FACTOR, nitro_upgrades_applied);
 }
 
 void Car::life_downgrade() {

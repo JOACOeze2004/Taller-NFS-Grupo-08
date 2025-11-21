@@ -12,7 +12,7 @@ constexpr float ACCELERATION = 80.0f - MASS;
 constexpr float BRAKING = 20.0f - MASS/2;
 
 class Car {
-    float NITRO = MAX_NITRO;
+    float max_nitro = MAX_NITRO;
     float max_speed = MAX_SPEED;
     CarState state;
     float mass;
@@ -21,7 +21,7 @@ class Car {
     float braking = BRAKING;
     int car_id;
     int life = MAX_LIFE;
-    int nitro = NITRO;
+    int nitro = MAX_NITRO;
     b2BodyId body_id;
     bool nitro_activated = false;
     int nitro_consuption = NITRO_CONSUMPTION;
