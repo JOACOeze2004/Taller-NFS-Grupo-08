@@ -4,8 +4,8 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "CarStats.h"
 #include "../common/constants.h"
+#include "CarStats.h"
 
 ParserYaml::ParserYaml() : cars_file(YAML::LoadFile(MAPS_PATH)) {}
 
@@ -26,7 +26,7 @@ std::vector<StaticBody> ParserYaml::parse_map(std::string& map_name) {
 
     std::vector<StaticBody> boxes;
     for (const auto& layer : map["layers"]) {
-        if (layer["nam"].as<std::string>() != "COLISIONES") continue;
+        if (layer["name"].as<std::string>() != "COLISIONES") continue;
         for (const auto& obj : layer["objects"]) {
             StaticBody box;
             box.id = obj["id"].as<int>();
