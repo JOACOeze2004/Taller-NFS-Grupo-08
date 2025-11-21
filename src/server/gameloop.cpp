@@ -80,6 +80,16 @@ void Gameloop::update_positions() {
     world.update();
 }
 
+std::unordered_map<int, CarDTO> Gameloop::build_cars_dto(std::function<StateRunning(int)> car_state){
+    std::unordered_map<int, CarDTO> cars_DTO;
+    for  (auto& [id, car] : cars) {
+        CarDTO car_dto = car.get_state();
+        car_dto.state = car_state(id);
+        cars_DTO.emplace(id, car_dto);
+    }
+    return cars_DTO;
+}
+
 Snapshot Gameloop::initialize_DTO() {
     Snapshot dto;
     dto.game_id = std::stoi(this->game_id);
@@ -104,15 +114,10 @@ Snapshot Gameloop::initialize_DTO() {
 }
 
 void Gameloop::broadcast_lobby(const int time_ms) {
-    std::unordered_map<int, CarDTO> carsDTO;
-    for  (auto& [id, car] : cars) {
-        CarDTO car_dto = car.get_state();
-        car_dto.state = IN_GAME;
-        carsDTO.emplace(id, car_dto);
-    }
+    std::unordered_map<int, CarDTO> cars_DTO = build_cars_dto([](int){ return StateRunning::IN_GAME; });
     for (auto& [id, car] : cars) {
         Snapshot dto = initialize_DTO();
-        dto.cars = carsDTO;
+        dto.cars = cars_DTO;
         dto.state = IN_LOBBY;
         dto.is_owner = id == owner_id;
         dto.time_ms = time_ms;
@@ -121,12 +126,7 @@ void Gameloop::broadcast_lobby(const int time_ms) {
 }
 
 void Gameloop::broadcast_in_game(const int time_ms) {
-    std::unordered_map<int, CarDTO> carsDTO;
-    for  (auto& [id, car] : cars) {
-        CarDTO car_dto = car.get_state();
-        car_dto.state = race.get_state(id,time_ms);
-        carsDTO.emplace(id, car_dto);
-    }
+    std::unordered_map<int, CarDTO> carsDTO = build_cars_dto([&](int id){ return race.get_state(id, time_ms); });
     for (auto& [id, car] : cars) {
         Snapshot dto = initialize_DTO();
         dto.cars = carsDTO;
@@ -142,12 +142,7 @@ void Gameloop::broadcast_in_game(const int time_ms) {
 }
 
 void Gameloop::broadcast_workshop(std::map<Upgrades, std::chrono::seconds> prices, const int time_ms ) {
-    std::unordered_map<int, CarDTO> carsDTO;
-    for  (auto& [id, car] : cars) {
-        CarDTO car_dto = car.get_state();
-        car_dto.state = FINISHED;
-        carsDTO.emplace(id, car_dto);
-    }
+    std::unordered_map<int, CarDTO> carsDTO = build_cars_dto([](int){ return StateRunning::FINISHED; });
     for (auto& [id, car] : cars) {
         Snapshot dto = initialize_DTO();
         dto.cars = carsDTO;
@@ -320,13 +315,7 @@ FinalScoreList Gameloop::calculate_final_results() {
 }
 
 void Gameloop::broadcast_final_results(const FinalScoreList& results) {
-    std::unordered_map<int, CarDTO> carsDTO;
-    for (auto& [id, car] : cars) {
-        CarDTO car_dto = car.get_state();
-        car_dto.state = FINISHED;
-        carsDTO.emplace(id, car_dto);
-    }
-
+    std::unordered_map<int, CarDTO> carsDTO = build_cars_dto([](int){ return StateRunning::FINISHED; });
     for (auto& [id, car] : cars) {
         Snapshot dto = initialize_DTO();
         dto.cars = carsDTO;

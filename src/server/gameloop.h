@@ -75,8 +75,6 @@ private:
     std::string game_id;
     Monitor& monitor;
     std::map<int, Car> cars;
-    std::map<uint8_t, std::function<void(Car& car)>> car_actions;
-    std::map<uint8_t, std::function<void(Race& car, int& id)>> race_actions;
     World world;
     int owner_id;
     bool ready_to_start;
@@ -93,6 +91,22 @@ private:
     CarCommandProcessor command_processor;
     
     Snapshot initialize_DTO();
+    std::unordered_map<int, CarDTO> build_cars_dto(std::function<StateRunning(int)> car_state);
+
+    template<typename StateOfCar, typename SnapshotFiller>
+    void common_broadcast(StateOfCar car_state, int time_ms,State state, SnapshotFiller fill_dto){
+        auto cars_dto = build_cars_dto(car_state);
+        for (auto [id, car] : cars) {
+            Snapshot dto = initialize_DTO();
+            dto.cars = cars_dto;
+            dto.state = state; 
+            dto.time_ms = time_ms;
+            dto.is_owner = id == owner_id;
+            fill_dto(dto, id);
+            monitor.broadcast(dto, game_id, id);
+        }        
+    }
+
 };
 
 
