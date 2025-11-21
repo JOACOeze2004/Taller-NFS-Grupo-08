@@ -92,21 +92,7 @@ private:
     
     Snapshot initialize_DTO();
     std::unordered_map<int, CarDTO> build_cars_dto(std::function<StateRunning(int)> car_state);
-
-    template<typename StateOfCar, typename SnapshotFiller>
-    void common_broadcast(StateOfCar car_state, int time_ms,State state, SnapshotFiller fill_dto){
-        auto cars_dto = build_cars_dto(car_state);
-        for (auto [id, car] : cars) {
-            Snapshot dto = initialize_DTO();
-            dto.cars = cars_dto;
-            dto.state = state; 
-            dto.time_ms = time_ms;
-            dto.is_owner = id == owner_id;
-            fill_dto(dto, id);
-            monitor.broadcast(dto, game_id, id);
-        }        
-    }
-
+    Snapshot build_base_snapshot (const std::unordered_map<int, CarDTO>& carsDTO, State state, int time_ms, int player_id);
 };
 
 
