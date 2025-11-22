@@ -30,12 +30,41 @@ Car::Car(b2WorldId world, float _mass, float _handling, float _acceleration, flo
     base_handling = handling;
     base_acceleration = acceleration;
     base_braking = braking;
+
+    initialize_upgrade_actions();
 }
 
 Car::~Car() {
     if (b2Body_IsValid(body_id)) {
         b2DestroyBody(body_id);
     }
+}
+
+void Car::initialize_upgrade_actions() {
+    upgrade_actions[ACCELERATION_UPGRADE] = {
+        [this]() { accelerate_upgrade(); },
+        [this]() { accelerate_downgrade(); }
+    };
+    upgrade_actions[HANDLING_UPGRADE] = {
+        [this]() { handling_upgrade(); },
+        [this]() { handling_downgrade(); }
+    };
+    upgrade_actions[NITRO_UPGRADE] = {
+        [this]() { nitro_upgrade(); },
+        [this]() { nitro_downgrade(); }
+    };
+    upgrade_actions[LIFE_UPGRADE] = {
+        [this]() { life_upgrade(); },
+        [this]() { life_downgrade(); }
+    };
+    upgrade_actions[BRAKE_UPGRADE] = {
+        [this]() { brake_upgrade(); },
+        [this]() { brake_downgrade(); }
+    };
+    upgrade_actions[MASS_UPGRADE] = {
+        [this]() { mass_upgrade(); },
+        [this]() { mass_downgrade(); }
+    };
 }
 
 void Car::accelerate() {
@@ -364,5 +393,12 @@ bool Car::downgrade(float& stat, float upgrade_factor, int& upgrades_applied) {
     remaining_upgrades += 1;
     upgrades_applied -= 1;
     return true;
+}
+
+void Car::apply_upgrade(Upgrades type, bool is_upgrade) {
+    auto it = upgrade_actions.find(type);
+    if (it != upgrade_actions.end()) {
+        (is_upgrade ? it->second.first : it->second.second)();
+    }
 }
 

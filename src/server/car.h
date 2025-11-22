@@ -2,7 +2,9 @@
 #define TALLER_TP_CAR_H
 
 #include "car_state.h"
+#include "functional"
 #include "../common/car_DTO.h"
+#include "../common/DTO.h"
 #include "../common/constants.h"
 #include <box2d/box2d.h>
 
@@ -38,6 +40,10 @@ class Car {
     int life_upgrades_applied = 0;
     int brake_upgrades_applied = 0;
     int mass_upgrades_applied = 0;
+
+    void initialize_upgrade_actions();
+    using UpgradeAction = std::function<void()>;
+    std::unordered_map<Upgrades, std::pair<UpgradeAction, UpgradeAction>> upgrade_actions;
 
 public:
     explicit Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking, int _car_id);
@@ -84,6 +90,8 @@ public:
     
     bool upgrade(float& stat, float upgrade_factor);
     bool downgrade(float& stat, float upgrade_factor, int& upgrades_applied);
+
+    void apply_upgrade(Upgrades type, bool is_upgrade);
 
 private:
     float calculate_torque() const;
