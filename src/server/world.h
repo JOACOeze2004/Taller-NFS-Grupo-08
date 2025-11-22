@@ -19,6 +19,7 @@ public:
     void update();
     b2WorldId get_id();
     void generate_map(std::string& map_name);
+    std::vector<Corner> generate_corners(std::string& map_name);
     ~World();
 };
 
