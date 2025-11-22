@@ -9,8 +9,8 @@
 #include "ClientQuitException.h"
 #include "graphic_client.h"
 
-Client::Client(const std::string& host, const std::string& port)
-    : host(host), port(port), client_socket(host.c_str(), port.c_str()), protocol(client_socket), final_results_received(false)  {}
+Client::Client(const std::string& host, const std::string& port, AudioManager* audio)
+    : host(host), port(port), client_socket(host.c_str(), port.c_str()), protocol(client_socket), final_results_received(false), audio_manager(audio)  {}
 
 void Client::send_config(const PlayerConfig& config,uint8_t lobby_action, const std::string& game_id) {
     std::cout << "[CLIENT] Connected to " << host << ":" << port << std::endl;

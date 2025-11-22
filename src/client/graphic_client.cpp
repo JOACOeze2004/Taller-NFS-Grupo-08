@@ -9,12 +9,13 @@
 #include "text_renderer.h"
 #include "upgrade_phase.h"
 
-GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _handler)
+GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _handler, AudioManager* audio)
         : renderer(nullptr), bg_texture(nullptr), window(nullptr),
             player_car_id(-1), camera_x(0.0f), camera_y(0.0f), 
             screen_width(DEFAULT_SCREEN_WIDTH), screen_height(DEFAULT_SCREEN_HEIGHT), 
             text(nullptr), handler(_handler), 
-            ready_sent(false), upgrade_phase(nullptr) {
+            ready_sent(false), upgrade_phase(nullptr), audio_manager(audio),
+            previous_collision(NONE_COLLISION), previous_using_nitro(false), previous_checkpoint_count(0) {
 
     initialize_sdl();
     initialize_window();
@@ -155,6 +156,38 @@ void GraphicClient::update_from_snapshot(const Snapshot& snapshot) {
         }
     } else {
         camera_id = player_car_id;
+    }
+    
+    if (audio_manager && player_it != snapshot.cars.end()) {
+        const CarDTO& player_car = player_it->second;
+
+        //Detect transition from lobby to race and play start sound once
+        static int previous_state = snapshot.state;
+        if (previous_state == IN_LOBBY && snapshot.state == IN_RACE) {
+            audio_manager->playSoundEffect(SoundEffect::RACE_START);
+        }
+        previous_state = snapshot.state;
+        
+        if (snapshot.collision != NONE_COLLISION && previous_collision == NONE_COLLISION) {
+            if (snapshot.collision == HEAVY_COLLISION) {
+                audio_manager->playSoundEffect(SoundEffect::CRASH);
+            }
+        }
+        previous_collision = snapshot.collision;
+        
+        bool using_nitro = player_car.remaining_nitro > 0.0f && player_car.nitro > 0.0f;
+        if (using_nitro && !previous_using_nitro) {
+            audio_manager->playSoundEffect(SoundEffect::NITRO);
+        }
+        previous_using_nitro = using_nitro;
+        
+        if (player_car.state == DEAD) {
+            audio_manager->playSoundEffect(SoundEffect::DEATH);
+        }
+        
+        if (player_car.state == FINISHED && snapshot.state == IN_RACE) {
+            audio_manager->playSoundEffect(SoundEffect::WIN);
+        }
     }
 }
 
