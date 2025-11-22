@@ -5,7 +5,8 @@ enum StateRunning {
     IN_GAME,
     FINISHED,
     DEAD,
-    TIMEOUTED
+    TIMEOUTED,
+    NPC
 };
 
 struct CarDTO {
