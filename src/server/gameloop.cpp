@@ -117,32 +117,31 @@ Snapshot Gameloop::build_base_snapshot( const std::unordered_map<int, CarDTO>& c
 }
 
 void Gameloop::broadcast_lobby(const int time_ms) {
-    std::unordered_map<int, CarDTO> cars_DTO = build_cars_dto([](int){ return StateRunning::IN_GAME; });
-    for (auto& [id, car] : cars) {
-        Snapshot dto = build_base_snapshot(cars_DTO, IN_LOBBY, time_ms, id);
-        monitor.broadcast(dto,this->game_id, id);
-    }
+    common_broadcast( IN_LOBBY ,time_ms, 
+        [](int){ return StateRunning::IN_GAME;},
+        [](Snapshot&,int) {}
+    );
 }
 
 void Gameloop::broadcast_in_game(const int time_ms) {
-    std::unordered_map<int, CarDTO> cars_DTO = build_cars_dto([&](int id){ return race.get_state(id, time_ms); });
-    for (auto& [id, car] : cars) {
-        Snapshot dto = build_base_snapshot(cars_DTO, IN_RACE, time_ms, id);
-        dto.checkpoint = race.get_checkpoint(id);
-        dto.hint = race.get_hint(id);
-        dto.position = race.get_position(id);
-        dto.type_checkpoint = race.get_cp_type(id);
-        monitor.broadcast(dto, game_id, id);
-    }
+    common_broadcast( IN_RACE ,time_ms, 
+        [&](int id){ return race.get_state(id, time_ms); },
+        [&](Snapshot& dto,int id) {
+            dto.checkpoint = race.get_checkpoint(id);
+            dto.hint = race.get_hint(id);
+            dto.position = race.get_position(id);
+            dto.type_checkpoint = race.get_cp_type(id);
+        }    
+    );
 }
 
 void Gameloop::broadcast_workshop(std::map<Upgrades, std::chrono::seconds> prices, const int time_ms ) {
-    std::unordered_map<int, CarDTO> cars_DTO = build_cars_dto([](int){ return StateRunning::FINISHED; });
-    for (auto& [id, car] : cars) {
-        Snapshot dto = build_base_snapshot(cars_DTO, IN_WORK_SHOP, time_ms, id);
-        dto.prices = prices;
-        monitor.broadcast(dto, game_id, id);
-    }
+    common_broadcast( IN_WORK_SHOP ,time_ms, 
+        [](int){ return StateRunning::FINISHED;},
+        [prices](Snapshot& dto,int) {
+            dto.prices = prices;
+        }
+    );
 }
 
 bool Gameloop::can_join_to_game(){ return cars.size() < MAX_PLAYERS_PER_GAME && !game_started; }
@@ -264,11 +263,10 @@ void Gameloop::update_race_state() {
 FinalScoreList Gameloop::calculate_final_results() { return results.calculate_final_scores(user_names); }
 
 void Gameloop::broadcast_final_results(const FinalScoreList& results) {
-    std::unordered_map<int, CarDTO> carsDTO = build_cars_dto([](int){ return StateRunning::FINISHED; });
-    for (auto& [id, car] : cars) {
-        Snapshot dto = build_base_snapshot(carsDTO, FINAL_RESULTS, 0, id);
-        monitor.broadcast(dto, game_id, id);
-    }
+    common_broadcast( IN_LOBBY ,0, 
+        [](int){ return StateRunning::FINISHED;},
+        [](Snapshot&,int) {}   
+    );
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     monitor.broadcast_final_results(results, game_id);
 }

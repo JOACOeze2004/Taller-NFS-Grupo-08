@@ -90,7 +90,18 @@ private:
     Snapshot initialize_DTO();
     std::unordered_map<int, CarDTO> build_cars_dto(std::function<StateRunning(int)> car_state);
     Snapshot build_base_snapshot (const std::unordered_map<int, CarDTO>& cars_DTO, State state, int time_ms, int player_id);
-};
+
+    template<typename CustomizedSnapshot>
+    void common_broadcast(State state, int time_ms, std::function<StateRunning(int)> state_fn, 
+        CustomizedSnapshot custom_snapshot) {
+            auto cars_DTO = build_cars_dto(state_fn);
+            for (auto& [id, car] : cars) {
+                Snapshot dto = build_base_snapshot(cars_DTO, state, time_ms, id);
+                custom_snapshot(dto, id);
+                monitor.broadcast(dto, game_id, id);
+            }
+        }
+    };
 
 
 #endif  // TALLER_TP_GAMELOOP_H
