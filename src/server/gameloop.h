@@ -20,6 +20,7 @@
 #include "results_handler.h"
 #include "workshop.h"
 #include "world.h"
+#include "upgrade_handler.h"
 
 class Monitor;
 
@@ -37,22 +38,9 @@ public:
     void broadcast_in_game(const int time_ms);
     void broadcast_final_results(const FinalScoreList& results);
     void broadcast_lobby(const int time_ms);
-    void broadcast_workshop(std::map<Upgrades, std::chrono::seconds> prices, const int time_ms);
+    void broadcast_workshop(const int time_ms);
     bool try_pop(ClientCommand& command);
     void update_positions();
-    void accelerate_upgrade(int& id);
-    void handling_upgrade(int& id);
-    void nitro_upgrade(int& id);
-    void life_upgrade(int& id);
-    void brake_upgrade(int& id);
-    void mass_upgrade(int& id);
-    
-    void accelerate_downgrade(int& id);
-    void handling_downgrade(int& id);
-    void nitro_downgrade(int& id);
-    void life_downgrade(int& id);
-    void brake_downgrade(int& id);
-    void mass_downgrade(int& id);
 
     bool is_game_already_started() const;
     void handle_lobby_command(const ClientCommand& cmd);
@@ -89,11 +77,19 @@ private:
     ResultsHandler results;
     std::vector<Corner> corners;
     std::vector<NPC> npcs;
+    UpgradeHandler upgrader; 
     
     Snapshot initialize_DTO();
     std::unordered_map<int, CarDTO> build_cars_dto(std::function<StateRunning(int)> car_state);
     Snapshot build_base_snapshot (const std::unordered_map<int, CarDTO>& cars_DTO, State state, int time_ms, int player_id);
     void generate_npcs();
+    
+    bool handle_disconnect(const int command_id, const int id);
+    bool handle_upgrade(const int command, Car& car);
+
+    bool handle_car_action(const int command, Car& car);
+    bool handle_race_action(const int command, int id);
+
 
     template<typename CustomizedSnapshot>
     void common_broadcast(State state, int time_ms, std::function<StateRunning(int)> state_fn, 
