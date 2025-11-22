@@ -54,10 +54,15 @@ b2WorldId World::get_id() {
 
 void World::generate_map(std::string& map_name) {
     std::vector<StaticBody> boxes = parser.parse_map(map_name);
-    std::vector<Corner> corners = parser.parse_corners(map_name);
 
     create_collisions(boxes);
+}
+
+std::vector<Corner> World::generate_corners(std::string& map_name) {
+    std::vector<Corner> corners = parser.parse_corners(map_name);
     create_corners(corners);
+
+    return corners;
 }
 
 void World::create_corners(std::vector<Corner>& corners) {
