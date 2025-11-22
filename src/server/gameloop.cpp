@@ -23,7 +23,7 @@ void Gameloop::run() {
         try {
             current_phase->run();
         }catch (...) {
-            break; // deberia ser para cuando se queda sin jugadores la partida o algo asi
+            break;
         }
     }
 }
@@ -55,28 +55,21 @@ void Gameloop::process_command(ClientCommand& client_command) {
     }
 }
 
-bool Gameloop::is_username_taken(const int username_id) const {
-    return user_names.find(username_id) != user_names.end();
-}
+bool Gameloop::is_username_taken(const int username_id) const { return user_names.find(username_id) != user_names.end(); }
 
 void Gameloop::add_car(const int client_id, const int car_id, const std::string& player_name) {
     auto [mass, handling, acceleration, braking] = parser.parse_car(car_id);
     user_names[client_id] = player_name;
-    player_total_times[client_id] = 0;
+    results.initialize_player(client_id);
 
     cars.emplace(std::piecewise_construct,
     std::forward_as_tuple(client_id),
     std::forward_as_tuple(world.get_id(), mass, handling, acceleration, braking, car_id));
 }
-void Gameloop::push_command(const ClientCommand& cmd){
-    this->cmd_queue.push(cmd);
-}
+void Gameloop::push_command(const ClientCommand& cmd) { this->cmd_queue.push(cmd); }
 
 void Gameloop::update_positions() {
-    for (auto& [id, car] : cars) {
-        car.update_nitro_usage();
-        car.apply_nitro_force();
-    }
+    race.update_cars();
     world.update();
 }
 
@@ -107,9 +100,10 @@ Snapshot Gameloop::initialize_DTO() {
     dto.time_ms = -1;
     dto.state = IN_LOBBY;
     dto.is_owner = false;
-    dto.cars_finished = finished;
+    dto.cars_finished = results.get_finished();
+    auto deads = results.get_deads();
     dto.cars_finished.insert(dto.cars_finished.end(), deads.begin(), deads.end());
-    dto.player_total_times = player_total_times;
+    dto.player_total_times = results.get_total_times();
     return dto;
 }
 
@@ -241,28 +235,14 @@ void Gameloop::handle_lobby_command(const ClientCommand& cmd) {
 
 void Gameloop::change_phase(std::unique_ptr<Phase> new_phase) {
     this->current_phase = std::move(new_phase);
-    finished.clear();
-    deads.clear();
+    results.reset_for_next_race(); 
 }
 
-
-bool Gameloop::did_all_finish() {
-    int cars_finished_or_dead = 0;
-    for (auto& [id, car] : cars) {
-        if (race.car_finished(id) || race.car_dead(id)) {
-            cars_finished_or_dead++;
-        }
-    }
-    return cars_finished_or_dead == (int)cars.size();
-}
+bool Gameloop::did_all_finish() {return race.all_cars_done(); }
 
 void Gameloop::start_race() {
     game_started = true;
-    Checkpoint start = race.get_start();
-    Checkpoint start_angle = race.get_start_angle();
-    for (auto& [id, car] : cars) {
-        car.set_spawn(start.x,start.y, start_angle.x, start_angle.y);
-    }
+    race.spawn_cars();
     update_positions();
     broadcast_in_game(MAX_TIME_PER_RACE);
     std::this_thread::sleep_for(std::chrono::seconds(3));
@@ -272,44 +252,16 @@ void Gameloop::update_race_state() {
     race.update_checkpoints();
     race.update_positions_order();
     for (auto& [id, car] : cars) {
-        auto it = std::ranges::find_if(
-                finished, [&] (const CarRacingInfo& player) { return player.name == user_names[id];});
-        bool not_added = it == finished.end();
-        if (race.car_finished(id) && not_added) {
-            int race_time = current_phase->get_time();
-            finished.emplace_back(user_names[id], race_time, race.get_position(id));
-            player_total_times[id] += race_time;
-            continue;
+        if (race.car_finished(id)) {
+            results.add_finished(id, user_names[id], current_phase->get_time(), race.get_position(id));
         }
-        it = std::ranges::find_if(
-                deads, [&] (const CarRacingInfo& player) { return player.name == user_names[id];});
-        not_added = it == deads.end();
-        if (race.car_dead(id) && not_added) {
-            deads.emplace_back(user_names[id], current_phase->get_time(), -1);
-            player_total_times[id] += (MAX_TIME_PER_RACE / 1000);
+        if (race.car_dead(id)) {
+            results.add_dead(id, user_names[id], current_phase->get_time(), MAX_TIME_PER_RACE / 1000);
         }
     }
 }
 
-FinalScoreList Gameloop::calculate_final_results() {
-    FinalScoreList results;
-
-    for (const auto& [client_id, total_time] : player_total_times) {
-        CarRacingInfo result;
-        result.name = user_names[client_id];
-        result.time = static_cast<float>(total_time);
-        result.position = 0;
-        results.push_back(result);
-    }
-    std::sort(results.begin(), results.end(),
-              [](const CarRacingInfo& a, const CarRacingInfo& b) { return a.time < b.time; });
-
-    for (size_t i = 0; i < results.size(); ++i) {
-        results[i].position = i + 1;
-    }
-
-    return results;
-}
+FinalScoreList Gameloop::calculate_final_results() { return results.calculate_final_scores(user_names); }
 
 void Gameloop::broadcast_final_results(const FinalScoreList& results) {
     std::unordered_map<int, CarDTO> carsDTO = build_cars_dto([](int){ return StateRunning::FINISHED; });
@@ -321,16 +273,10 @@ void Gameloop::broadcast_final_results(const FinalScoreList& results) {
     monitor.broadcast_final_results(results, game_id);
 }
 
-void Gameloop::increment_race_counter() {
-    races_completed++;
-    std::cout << "[GAMELOOP] Races completed: " << races_completed << "/" << MAX_RACES << std::endl;
-}
+void Gameloop::increment_race_counter() { races_completed++; }
 
 int Gameloop::get_races_completed() const { return races_completed;}
 
-void Gameloop::reset_race() {
-    std::cout << "[GAMELOOP] Resetting race for next round" << std::endl;
-    race.reset_race();
-}
+void Gameloop::reset_race() { race.reset_race(); }
 
 bool Gameloop::has_active_players() const { return !cars.empty();}

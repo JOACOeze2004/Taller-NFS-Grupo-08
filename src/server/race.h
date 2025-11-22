@@ -40,6 +40,9 @@ public:
     Checkpoint get_start() const;
     Checkpoint get_start_angle() const;
     void reset_race();
+    void update_cars();
+    bool all_cars_done();
+    void spawn_cars();
 
     void activate_win(int& id);
 };

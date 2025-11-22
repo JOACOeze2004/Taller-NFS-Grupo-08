@@ -18,12 +18,11 @@
 #include "workshop.h"
 #include "world.h"
 #include "car_command_processor.h"
+#include "results_handler.h" 
 
 class Monitor;
 
-
 class Gameloop: public Thread {
-
 public:
     explicit Gameloop(Monitor& _monitor, const std::string& game_id, std::string map_name, const int client_id);
     void run() override;
@@ -83,12 +82,10 @@ private:
     std::unordered_map<int, std::string> user_names;
     Race race;
     std::unique_ptr<Phase> current_phase;
-    std::map<int, long long> player_total_times;
     int races_completed{};
-    std::vector<CarRacingInfo> finished;
-    std::vector<CarRacingInfo> deads;
     bool game_started;
     CarCommandProcessor command_processor;
+    ResultsHandler results; 
     
     Snapshot initialize_DTO();
     std::unordered_map<int, CarDTO> build_cars_dto(std::function<StateRunning(int)> car_state);
