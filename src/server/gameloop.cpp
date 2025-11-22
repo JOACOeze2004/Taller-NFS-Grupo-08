@@ -7,6 +7,8 @@
 Gameloop::Gameloop(Monitor& _monitor,const std::string& gid, std::string map_name, const int client_id):
         game_id(gid), monitor(_monitor), owner_id(client_id), ready_to_start(false), race(map_name, &cars, TRACKS_PATH), game_started(false), command_processor() {
     world.generate_map(map_name);
+    corners = world.generate_corners(map_name);
+    generate_npcs();
 
     if (map_name == SAN_ANDREAS_STR ) {
         current_map = SAN_ANDREAS;
@@ -52,6 +54,13 @@ void Gameloop::process_command(ClientCommand& client_command) {
     if (auto action = command_processor.get_race_action(command)) {
         (*action)(race, id);
         return;
+    }
+}
+
+void Gameloop::generate_npcs() {
+    for (int i =0; i < 30; i++) {
+        auto rand_corner = rand() % corners.size();
+        npcs.emplace_back(world.get_id(), &corners, rand_corner);
     }
 }
 

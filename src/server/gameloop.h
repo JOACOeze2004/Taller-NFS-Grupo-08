@@ -10,15 +10,16 @@
 #include "src/common/DTO.h"
 
 #include "car.h"
+#include "car_command_processor.h"
 #include "client_command.h"
 #include "in_game.h"
 #include "lobby.h"
 #include "monitor.h"
+#include "npc.h"
 #include "race.h"
+#include "results_handler.h"
 #include "workshop.h"
 #include "world.h"
-#include "car_command_processor.h"
-#include "results_handler.h" 
 
 class Monitor;
 
@@ -85,11 +86,14 @@ private:
     int races_completed{};
     bool game_started;
     CarCommandProcessor command_processor;
-    ResultsHandler results; 
+    ResultsHandler results;
+    std::vector<Corner> corners;
+    std::vector<NPC> npcs;
     
     Snapshot initialize_DTO();
     std::unordered_map<int, CarDTO> build_cars_dto(std::function<StateRunning(int)> car_state);
     Snapshot build_base_snapshot (const std::unordered_map<int, CarDTO>& cars_DTO, State state, int time_ms, int player_id);
+    void generate_npcs();
 
     template<typename CustomizedSnapshot>
     void common_broadcast(State state, int time_ms, std::function<StateRunning(int)> state_fn, 
