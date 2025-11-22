@@ -53,7 +53,8 @@ void Client::run() {
         cleanup_resources(receiver, sender, command_queue);
         return;
     }
-
+    
+    AudioManager audio; 
     ClientHandler handler(parser);
     GraphicClient graphic_client(snapshot, &handler, audio_manager);
 

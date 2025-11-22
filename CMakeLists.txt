@@ -151,6 +151,8 @@ if(TALLER_CLIENT)
             src/client/pantallas/results_table_widget.h
             src/client/pantallas/style_manager.cpp
             src/client/pantallas/style_manager.h
+            src/client/audio_manager.h
+            src/client/audio_manager.cpp
     )
 
     # Make them depend on taller_common lib
