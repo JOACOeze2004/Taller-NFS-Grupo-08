@@ -210,6 +210,8 @@ if(TALLER_SERVER)
             src/server/workshop.h
             src/server/car_command_processor.h
             src/server/car_command_processor.cpp
+            src/server/results_handler.cpp
+            src/server/results_handler.h
             )
 
     # Make them depend on taller_common lib
