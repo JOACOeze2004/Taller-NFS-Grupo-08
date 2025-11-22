@@ -153,6 +153,8 @@ if(TALLER_CLIENT)
             src/client/pantallas/style_manager.h
             src/client/audio_manager.h
             src/client/audio_manager.cpp
+            src/client/sprite_loader.cpp
+            src/client/sprite_loader.h
     )
 
     # Make them depend on taller_common lib
