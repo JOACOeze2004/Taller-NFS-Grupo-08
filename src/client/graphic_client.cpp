@@ -23,6 +23,7 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
     initialize_renderer();
     initialize_image_and_ttf();
     initialize_resource_manager();
+    load_sprites_config();
     load_core_textures();
     load_map_texture(initial_snapshot.map);
     initialize_text_renderer();
@@ -33,6 +34,13 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
     
     initialize_upgrade_phase();
     draw(initial_snapshot);
+}
+
+void GraphicClient::load_sprites_config() {
+    const std::string yaml_path = "../src/client/checkpoints_hints.yaml";
+
+    checkpoint_sprites = SpriteLoader::loadCheckpointSprites(yaml_path);
+    hint_sprite = SpriteLoader::loadHintSprite(yaml_path);
 }
 
 void GraphicClient::initialize_sdl() {
@@ -489,46 +497,44 @@ void GraphicClient::draw_checkpoint(CheckpointCoords checkpoint, int type) {
 
     if (checkpoint.x >= camera_x && checkpoint.x <= camera_x + viewport_width &&
         checkpoint.y >= camera_y && checkpoint.y <= camera_y + viewport_height) {
-        
+
         float screen_x = (checkpoint.x - camera_x) * ZOOM_FACTOR;
         float screen_y = (checkpoint.y - camera_y) * ZOOM_FACTOR;
 
-        const float dst_w = 60.0f;
-        const float dst_h = 90.0f;
+        const float dst_w = CHECKPOINT_DST_W;
+        const float dst_h = CHECKPOINT_DST_H;
         SDL_FRect dst_rect = {screen_x - dst_w * 0.5f, screen_y - dst_h * 0.5f, dst_w, dst_h};
 
-        if (type == 1){
-            SDL_Rect src_rect = {290, 650, 95, 120};
-            SDL_RenderCopyF(renderer, checkpoint_texture, &src_rect, &dst_rect);
-        }else if (type == 2){
-            SDL_Rect src_rect = {410, 20, 90, 127};
-            SDL_RenderCopyF(renderer, checkpoint_texture, &src_rect, &dst_rect);
-        } else {
-            SDL_Rect src_rect = {290, 175, 95, 120};
-            SDL_RenderCopyF(renderer, checkpoint_texture, &src_rect, &dst_rect);
+        SDL_Rect src_rect = {290, 175, 95, 120};
+        for (const auto& sprite : checkpoint_sprites) {
+            if (sprite.type == type) {
+                src_rect = sprite.rect;
+                break;
+            }
         }
-    }    
-} 
+        SDL_RenderCopyF(renderer, checkpoint_texture, &src_rect, &dst_rect);
+    }
+}
 
 void GraphicClient::draw_hint(HintCoords hint) {
     if (!hint_texture) return;
+
     const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
     const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
+
     if (hint.x >= camera_x && hint.x <= camera_x + viewport_width &&
         hint.y >= camera_y && hint.y <= camera_y + viewport_height) {
-        
+
         float screen_x = (hint.x - camera_x) * ZOOM_FACTOR;
         float screen_y = (hint.y - camera_y) * ZOOM_FACTOR;
 
-        SDL_Rect src_rect = {260, 20, 120, 150};
-        SDL_FRect dst_rect = {screen_x, screen_y, 40.0f, 60.0f};
+        SDL_FRect dst_rect = {screen_x, screen_y, HINT_DST_W, HINT_DST_H};
+        double angle_deg = hint.angle + 180.0;
+        SDL_FPoint center = {15.0f, 15.0f};
 
-        double angle_deg = hint.angle + 180;
-        SDL_FPoint center = {15.0f, 15.0f}; 
-                    
-        SDL_RenderCopyExF(renderer, hint_texture, &src_rect, &dst_rect, angle_deg, &center, SDL_FLIP_NONE);
+        SDL_RenderCopyExF(renderer, hint_texture, &hint_sprite.rect,
+                         &dst_rect, angle_deg, &center, SDL_FLIP_NONE);
     }
-
 }
 
 

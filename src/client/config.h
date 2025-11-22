@@ -147,23 +147,7 @@ constexpr float CHECKPOINT_DST_W = 60.0f;
 constexpr float CHECKPOINT_DST_H = 90.0f;
 
 // Hint Arrow
-constexpr int HINT_SRC_X = 260;
-constexpr int HINT_SRC_Y = 20;
-constexpr int HINT_SRC_W = 120;
-constexpr int HINT_SRC_H = 150;
 constexpr float HINT_DST_W = 40.0f;
 constexpr float HINT_DST_H = 60.0f;
-constexpr float HINT_CENTER_X = 15.0f;
-constexpr float HINT_CENTER_Y = 15.0f;
-constexpr double HINT_ANGLE_OFFSET = 180.0;
-
-// CHECKPOINT SPRITES
-struct CheckpointSprite {
-    int x, y, w, h;
-};
-
-constexpr CheckpointSprite CHECKPOINT_TYPE_1 = {290, 650, 95, 120};
-constexpr CheckpointSprite CHECKPOINT_TYPE_2 = {410, 20, 90, 127};
-constexpr CheckpointSprite CHECKPOINT_DEFAULT = {290, 175, 95, 120};
 
 #endif // CLIENT_CONFIG_H
