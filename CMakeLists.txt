@@ -218,6 +218,8 @@ if(TALLER_SERVER)
             src/server/npc.cpp
             src/server/car_npc.h
             src/server/car_npc.cpp
+            src/server/upgrade_handler.h
+            src/server/upgrade_handler.cpp
             )
 
     # Make them depend on taller_common lib
