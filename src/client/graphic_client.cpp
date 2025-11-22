@@ -8,6 +8,7 @@
 #include <cmath>
 #include "text_renderer.h"
 #include "upgrade_phase.h"
+#include "audio_manager.h"
 
 GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _handler, AudioManager* audio)
         : renderer(nullptr), bg_texture(nullptr), window(nullptr),

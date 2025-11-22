@@ -55,7 +55,7 @@ void Client::run() {
     }
 
     ClientHandler handler(parser);
-    GraphicClient graphic_client(snapshot, &handler);
+    GraphicClient graphic_client(snapshot, &handler, audio_manager);
 
     game_loop(receiver, handler, graphic_client, snapshot);
 

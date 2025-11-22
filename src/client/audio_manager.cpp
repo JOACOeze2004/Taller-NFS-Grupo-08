@@ -57,9 +57,9 @@ bool AudioManager::initialize() {
 void AudioManager::loadMusic() {
     // Cargar música de diferentes estados
     // Ajusta las rutas según tu estructura de archivos
-    music[GameState::LOBBY] = Mix_LoadMUS("assets/music/lobby.mp3");
-    music[GameState::PLAYING] = Mix_LoadMUS("assets/music/game.mp3");
-    music[GameState::RESULTS] = Mix_LoadMUS("assets/music/results.mp3");
+    music[GameState::LOBBY] = Mix_LoadMUS("../assets/music/lobby.mp3");
+    music[GameState::PLAYING] = Mix_LoadMUS("../assets/music/game.mp3");
+    music[GameState::RESULTS] = Mix_LoadMUS("../assets/music/results.mp3");
 
     for (const auto& [state, mus] : music) {
         if (!mus) {
@@ -70,13 +70,13 @@ void AudioManager::loadMusic() {
 
 void AudioManager::loadSoundEffects() {
     // Cargar efectos de sonido (archivos .mp3)
-    soundEffects[SoundEffect::CRASH] = Mix_LoadWAV("assets/sounds/crashing.mp3");
-    soundEffects[SoundEffect::DEATH] = Mix_LoadWAV("assets/sounds/death.mp3");
-    soundEffects[SoundEffect::WIN] = Mix_LoadWAV("assets/sounds/reach_finish.mp3");
-    soundEffects[SoundEffect::BRAKE] = Mix_LoadWAV("assets/sounds/braking.mp3");
-    soundEffects[SoundEffect::NITRO] = Mix_LoadWAV("assets/sounds/nitro.mp3");
-    soundEffects[SoundEffect::RACE_START] = Mix_LoadWAV("assets/sounds/countdown.mp3");
-
+    soundEffects[SoundEffect::CRASH] = Mix_LoadWAV("../assets/sounds/crashing.mp3");
+    soundEffects[SoundEffect::DEATH] = Mix_LoadWAV("../assets/sounds/death.mp3");
+    soundEffects[SoundEffect::WIN] = Mix_LoadWAV("../assets/sounds/reach_finish.mp3");
+    soundEffects[SoundEffect::BRAKE] = Mix_LoadWAV("../assets/sounds/braking.mp3");
+    soundEffects[SoundEffect::NITRO] = Mix_LoadWAV("../assets/sounds/nitro.mp3");
+    soundEffects[SoundEffect::RACE_START] = Mix_LoadWAV("../assets/sounds/countdown.mp3");
+    
     for (auto& [effect, chunk] : soundEffects) {
         if (!chunk) {
             std::cerr << "No se pudo cargar efecto: " << Mix_GetError() << std::endl;
