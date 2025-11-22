@@ -7,12 +7,15 @@
 
 #include <box2d/box2d.h>
 
+#include "src/common/car_DTO.h"
+
 #include "parser_yaml.h"
 
 class CarNPC {
     b2BodyId body_id;
 
     void rotate(Corner& target);
+    CarDTO get_state();
 
 public:
     explicit CarNPC(Corner& start_corner, b2WorldId& world);

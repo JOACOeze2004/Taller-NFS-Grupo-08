@@ -1,5 +1,6 @@
 #include "car_npc.h"
 
+#include "src/common/DTO.h"
 #include "src/common/constants.h"
 
 #include "parser_yaml.h"
@@ -52,4 +53,14 @@ void CarNPC::rotate(Corner& target) {
     float diff = target_angle - car_angle;
 
     b2Body_SetAngularVelocity(body_id, diff *4);
+}
+
+CarDTO CarNPC::get_state() {
+    b2Vec2 pos = get_position();
+    float x = pos.x;
+    float y = pos.y;
+    b2Rot rot = b2Body_GetRotation(body_id);
+    float angle = atan2(rot.s, rot.c);
+
+    return {x, y,0, angle, 0, false, 0, 0, 0, NPC, 0};
 }

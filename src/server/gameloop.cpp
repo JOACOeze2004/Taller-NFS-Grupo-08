@@ -92,6 +92,12 @@ std::unordered_map<int, CarDTO> Gameloop::build_cars_dto(std::function<StateRunn
         car_dto.state = car_state(id);
         cars_DTO.emplace(id, car_dto);
     }
+
+    for (auto& npc : npcs) {
+        CarDTO car_dto = npc.get_state();
+        cars_DTO.emplace(-1, car_dto);
+    }
+
     return cars_DTO;
 }
 
