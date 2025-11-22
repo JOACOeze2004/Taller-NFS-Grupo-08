@@ -11,6 +11,7 @@
 #include "upgrade_phase.h"
 #include "resource_manager.h"
 #include "config.h"
+#include "audio_manager.h"
 
 class GraphicClient {
     SDL_Renderer* renderer;
@@ -33,9 +34,15 @@ class GraphicClient {
     ClientHandler* handler;
     bool ready_sent;
     std::unique_ptr<UpgradePhase> upgrade_phase;
+    AudioManager* audio_manager;
+    
+    // Track previous state to detect changes
+    CollisionType previous_collision;
+    bool previous_using_nitro;
+    int previous_checkpoint_count;
 
     public:
-    explicit GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _handler);
+    explicit GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _handler, AudioManager* audio);
     void draw(const Snapshot& snapshot);
     void update_from_snapshot(const Snapshot& snapshot);
     ~GraphicClient();
