@@ -17,6 +17,7 @@
 #include "client_car.h"
 #include "ClientQuitException.h"
 #include "../common/DTO.h"
+#include "audio_manager.h"
 
 
 
@@ -26,7 +27,7 @@ public:
     static constexpr Uint32 FRAME_DELAY_MS = 1000 / TARGET_FPS;
     static constexpr Uint32 SNAPSHOT_POLL_DELAY_MS = 10;
 
-    Client(const std::string& host, const std::string& port);
+    Client(const std::string& host, const std::string& port, AudioManager* audio);
     void run();
     bool has_final_results() const;
     FinalScoreList get_final_results() const;
@@ -40,6 +41,7 @@ private:
     ClientProtocol protocol;
     FinalScoreList final_results;
     bool final_results_received;
+    AudioManager* audio_manager;
 
     bool initialize_game_data();
     bool wait_for_initial_snapshot(ClientReceiver& receiver, Snapshot& snapshot);
