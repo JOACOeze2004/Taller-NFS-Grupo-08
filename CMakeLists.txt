@@ -135,6 +135,8 @@ if(TALLER_CLIENT)
             src/client/graphic_client.h
             src/client/resource_manager.cpp
             src/client/resource_manager.h
+            src/client/audio_manager.cpp
+            src/client/audio_manager.h
             src/client/text_renderer.cpp
             src/client/text_renderer.h
             src/client/ClientQuitException.h
@@ -166,7 +168,7 @@ if(TALLER_CLIENT)
     target_include_directories(taller_client PRIVATE ${libSDL2pp_SOURCE_DIR})
 
     # Link the taller_common lib target
-    target_link_libraries(taller_client taller_common SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2pp::SDL2pp Qt5::Widgets yaml-cpp)
+    target_link_libraries(taller_client taller_common SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2pp::SDL2pp Qt5::Widgets yaml-cpp SDL2_mixer)
 endif()
 
 if(TALLER_SERVER)
@@ -273,7 +275,7 @@ if(TALLER_EDITOR)
     target_include_directories(taller_editor PRIVATE ${libSDL2pp_SOURCE_DIR})
 
     # Link the taller_common lib target
-    target_link_libraries(taller_editor taller_common SDL2pp::SDL2pp Qt5::Widgets yaml-cpp)
+    target_link_libraries(taller_editor taller_common SDL2pp::SDL2pp Qt5::Widgets yaml-cpp SDL2_mixer)
 endif()
 
 
