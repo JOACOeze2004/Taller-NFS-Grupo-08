@@ -26,7 +26,7 @@ void NPC::update() {
         choose_next_corner();
     }
 
-    Corner& target = corners->at(next_corner);
+    Corner target = (*corners)[next_corner];
 
     float dx = target.x - car_pos.x;
     float dy = target.y - car_pos.y;

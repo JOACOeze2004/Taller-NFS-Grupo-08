@@ -80,6 +80,9 @@ void Gameloop::push_command(const ClientCommand& cmd) { this->cmd_queue.push(cmd
 void Gameloop::update_positions() {
     race.update_cars();
     world.update();
+    for (auto& npc : npcs) {
+        npc.update();
+    }
 }
 
 std::unordered_map<int, CarDTO> Gameloop::build_cars_dto(std::function<StateRunning(int)> car_state){
