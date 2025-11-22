@@ -53,9 +53,10 @@ void Client::run() {
         cleanup_resources(receiver, sender, command_queue);
         return;
     }
-
+    
+    AudioManager audio; 
     ClientHandler handler(parser);
-    GraphicClient graphic_client(snapshot, &handler);
+    GraphicClient graphic_client(snapshot, &handler,&audio);
 
     game_loop(receiver, handler, graphic_client, snapshot);
 
