@@ -135,8 +135,6 @@ if(TALLER_CLIENT)
             src/client/graphic_client.h
             src/client/resource_manager.cpp
             src/client/resource_manager.h
-            src/client/audio_manager.cpp
-            src/client/audio_manager.h
             src/client/text_renderer.cpp
             src/client/text_renderer.h
             src/client/ClientQuitException.h

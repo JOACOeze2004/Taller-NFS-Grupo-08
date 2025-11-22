@@ -15,12 +15,12 @@ class CarNPC {
     b2BodyId body_id;
 
     void rotate(Corner& target);
-    CarDTO get_state();
 
 public:
     explicit CarNPC(Corner& start_corner, b2WorldId& world);
     void move(Corner& target);
     b2Vec2 get_position();
+    CarDTO get_state();
 };
 
 

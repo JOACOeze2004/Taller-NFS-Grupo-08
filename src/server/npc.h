@@ -14,9 +14,11 @@ class NPC {
 
     void choose_next_corner();
     bool is_visible(const Corner& _origin, const Corner& _traslation) const;
+
 public:
     explicit NPC(b2WorldId world, std::vector<Corner>* _corners, int start_corner);
     void update();
+    CarDTO get_state();
 };
 
 

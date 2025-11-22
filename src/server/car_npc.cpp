@@ -62,5 +62,5 @@ CarDTO CarNPC::get_state() {
     b2Rot rot = b2Body_GetRotation(body_id);
     float angle = atan2(rot.s, rot.c);
 
-    return {x, y,0, angle, 0, false, 0, 0, 0, NPC, 0};
+    return {x, y,0, angle, 0, false, 0, 0, 0, NPC_STATE, 0};
 }

@@ -79,3 +79,7 @@ bool NPC::is_visible(const Corner& _origin, const Corner& _traslation) const {
 
     return result.shapeId.index1 == 0;
 }
+
+CarDTO NPC::get_state() {
+    return car.get_state();
+}
