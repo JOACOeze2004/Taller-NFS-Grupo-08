@@ -75,7 +75,7 @@ private:
     bool game_started;
     CarCommandProcessor command_processor;
     ResultsHandler results;
-    std::vector<Corner> corners;
+    std::vector<GraphNode> corners;
     std::vector<NPC> npcs;
     UpgradeHandler upgrader; 
     

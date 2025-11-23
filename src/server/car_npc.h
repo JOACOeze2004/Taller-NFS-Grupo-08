@@ -10,15 +10,16 @@
 #include "src/common/car_DTO.h"
 
 #include "parser_yaml.h"
+#include "world.h"
 
 class CarNPC {
     b2BodyId body_id;
 
-    void rotate(Corner& target);
+    void rotate(GraphNode& target);
 
 public:
-    explicit CarNPC(Corner& start_corner, b2WorldId& world);
-    void move(Corner& target);
+    explicit CarNPC(GraphNode& start_corner, b2WorldId& world);
+    void move(GraphNode& target);
     b2Vec2 get_position();
     CarDTO get_state();
 };
