@@ -157,7 +157,7 @@ Snapshot ClientProtocol::receive_game_state() const {
     std::vector<CarRacingInfo> cars;
     size_t size;
     CarRacingInfo car;
-    for (int i =0; i < cars_count; i++) {
+    for (int i = 0; i < cars_count; i++) {
         size = protocol.receive_big_endian_16();
         car.name = protocol.receive_string(size);
         car.time = protocol.receive_big_endian_32();
@@ -172,7 +172,6 @@ Snapshot ClientProtocol::receive_game_state() const {
         long long total_time = protocol.receive_big_endian_64();
         snapshot.player_total_times[player_id] = total_time;
     }
-
 
     return snapshot;
 }

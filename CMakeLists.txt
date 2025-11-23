@@ -308,6 +308,15 @@ if(TALLER_TESTS)
     # HEY!! TODO XXX: Change the name of the executable to the one you like!
     add_executable(taller_tests)
 
+    target_compile_definitions(taller_tests PRIVATE TESTS)
+
+    target_sources(taller_tests
+        PRIVATE
+        ../src/common/protocol.cpp
+        ../src/common/mocked_socket.cpp
+        tests/test_protocol.cpp
+    )
+
     # HEY!! TODO XXX: I'm assuming that the code under testing is in taller_common
     # Change this if you have to.
     add_dependencies(taller_tests taller_common)
