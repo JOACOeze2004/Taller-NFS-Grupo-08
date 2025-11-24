@@ -241,7 +241,7 @@ void Gameloop::update_race_state() {
 FinalScoreList Gameloop::calculate_final_results() { return results.calculate_final_scores(user_names); }
 
 void Gameloop::broadcast_final_results(const FinalScoreList& results) {
-    common_broadcast( IN_LOBBY ,0, 
+    common_broadcast( FINAL_RESULTS, 0, 
         [](int){ return StateRunning::FINISHED;},
         [](Snapshot&,int) {}   
     );

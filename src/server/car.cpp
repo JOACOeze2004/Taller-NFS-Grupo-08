@@ -401,4 +401,3 @@ void Car::apply_upgrade(Upgrades type, bool is_upgrade) {
         (is_upgrade ? it->second.first : it->second.second)();
     }
 }
-
