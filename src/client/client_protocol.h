@@ -1,7 +1,6 @@
 #ifndef CLIENT_PROTOCOL_H
 #define CLIENT_PROTOCOL_H
 
-#include "../common/socket.h"
 #include "../common/protocol.h"
 #include "../common/DTO.h"
 
