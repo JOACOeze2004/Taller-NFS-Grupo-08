@@ -618,7 +618,7 @@ void GraphicClient::draw_minimap(const CheckpointCoords& checkpoint, int checkpo
 
     for (const auto& [id, car] : cars) {
         if (car.x >= src_rect.x && car.x <= src_rect.x + src_rect.w &&
-            car.y >= src_rect.y && car.y <= src_rect.y + src_rect.h && car.state == IN_GAME) {
+            car.y >= src_rect.y && car.y <= src_rect.y + src_rect.h && (car.state == IN_GAME || car.state == NPC_STATE)) {
             
             float car_minimap_x = minimap_x + (car.x - src_rect.x) * scale - 3.0f;
             float car_minimap_y = minimap_y + (car.y - src_rect.y) * scale - 3.0f;
@@ -743,6 +743,13 @@ void GraphicClient::draw_minimap(const CheckpointCoords& checkpoint, int checkpo
 void GraphicClient::draw_cars() {
     const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
     const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
+    // Imprime las coordenadas de TODOS los NPCs, sin importar si están dentro de la cámara
+    for (const auto& [nid, ncar] : cars) {
+        if (ncar.state == NPC_STATE) {
+            std::cout << "[CLIENT] NPC id=" << nid
+                      << " coords=(" << ncar.x << ", " << ncar.y << ")\n";
+        }
+    }
 
     for (const auto& [id, car_dto_world] : cars) {
         if (car_dto_world.x >= camera_x && car_dto_world.x <= camera_x + viewport_width &&
@@ -751,7 +758,8 @@ void GraphicClient::draw_cars() {
             CarDTO adjusted = car_dto_world;
             adjusted.x = (car_dto_world.x - camera_x) * ZOOM_FACTOR;
             adjusted.y = (car_dto_world.y - camera_y) * ZOOM_FACTOR;
-
+            
+            
             auto it = car_objects.find(id);
             if (it == car_objects.end()) {
                 car_objects[id] = std::make_unique<Car>(adjusted.x, adjusted.y, adjusted.angle, renderer, resources.get(), car_dto_world.car_id, ZOOM_FACTOR);
