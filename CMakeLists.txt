@@ -307,9 +307,9 @@ if(TALLER_TESTS)
     # target for testing
     # HEY!! TODO XXX: Change the name of the executable to the one you like!
     add_executable(taller_tests
-        #tests/test_protocol.cpp
         tests/test_client_protocol.cpp
         tests/test_server_protocol.cpp
+        tests/test_integration.cpp
 
         src/client/client_protocol.cpp
         src/server/server_protocol.cpp
