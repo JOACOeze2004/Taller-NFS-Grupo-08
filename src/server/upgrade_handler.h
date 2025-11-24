@@ -19,7 +19,9 @@ public:
     bool is_upgrade_command(int command_id) const;
     void apply_upgrade_to_car(int command_id, Car& car);
     const std::map<Upgrades, std::chrono::seconds>& get_prices() const;
-
+    std::chrono::seconds get_price(Upgrades type) const;
+    Upgrades get_upgrade_type(int command_id) const;
+    
     ~UpgradeHandler();
 };
 

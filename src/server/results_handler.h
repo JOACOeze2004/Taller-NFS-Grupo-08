@@ -30,6 +30,8 @@ public:
     const std::vector<CarRacingInfo>& get_finished() const;
     const std::vector<CarRacingInfo>& get_deads() const;
     const std::map<int, long long>& get_total_times() const;
+
+    void add_upgrade_time(int player_id, int ms);
 };
 
 

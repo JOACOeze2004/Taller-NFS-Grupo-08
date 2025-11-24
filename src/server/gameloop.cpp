@@ -43,6 +43,13 @@ bool Gameloop::handle_upgrade(const int command, Car& car) {
     if (!upgrader.is_upgrade_command(command)) {
         return false;
     }
+    Upgrades type = upgrader.get_upgrade_type(command);
+    int price_ms = std::chrono::duration_cast<std::chrono::seconds>( upgrader.get_price(type) ).count();
+
+    int player_id = car.get_id();
+
+    results.add_upgrade_time(player_id, price_ms);
+
     upgrader.apply_upgrade_to_car(command, car);
     return true;
 }

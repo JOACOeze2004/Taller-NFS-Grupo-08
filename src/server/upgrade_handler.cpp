@@ -48,5 +48,11 @@ void UpgradeHandler::apply_upgrade_to_car(int command_id, Car& car){
 
 const std::map<Upgrades, std::chrono::seconds>& UpgradeHandler::get_prices() const { return prices; }
 
+std::chrono::seconds UpgradeHandler::get_price(Upgrades type) const { return prices.at(type); }
+
+Upgrades UpgradeHandler::get_upgrade_type(int command_id) const {
+    auto [type, is_upgrade] = parse_command(command_id);
+    return type;
+}
 
 UpgradeHandler::~UpgradeHandler() {}

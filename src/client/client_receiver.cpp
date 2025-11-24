@@ -10,8 +10,6 @@ void ClientReceiver::run(){
         try {
             Snapshot snapshot = protocol.receive_game_state();
             if (snapshot.state == FINAL_RESULTS) {
-
-                std::lock_guard<std::mutex> lock(finals_mutex);
                 final_results = protocol.receive_final_results();
                 has_finals = true;
 

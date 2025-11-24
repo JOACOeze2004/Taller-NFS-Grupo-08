@@ -61,3 +61,5 @@ const std::vector<CarRacingInfo>& ResultsHandler::get_finished() const { return 
 const std::vector<CarRacingInfo>& ResultsHandler::get_deads() const { return deads; }
 
 const std::map<int, long long>& ResultsHandler::get_total_times() const { return player_total_times; }
+
+void ResultsHandler::add_upgrade_time(int player_id, int ms) { player_total_times[player_id] += ms; }

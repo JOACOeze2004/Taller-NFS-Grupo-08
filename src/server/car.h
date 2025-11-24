@@ -92,6 +92,7 @@ public:
     bool downgrade(float& stat, float upgrade_factor, int& upgrades_applied);
 
     void apply_upgrade(Upgrades type, bool is_upgrade);
+    int get_id() const;
 
 private:
     float calculate_torque() const;
