@@ -89,14 +89,17 @@ void Car::update_from_dto(const CarDTO& state) {
     life = state.life;
     nitro = state.nitro;
     nitro_remaining = state.remaining_nitro;
+    this->state = state.state;
 }
 
 void Car::render() {
     if (texture && srcRect.w > 0 && srcRect.h > 0) {
-        renderNitro();
+        if(state != NPC_STATE){
+            renderLife();
+            renderNitroBar();
+            renderNitro();
+        }
         renderTexture();
-        renderLife();
-        renderNitroBar();
     } else {
         renderFallback();
     }

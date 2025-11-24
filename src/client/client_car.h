@@ -65,6 +65,7 @@ private:
     float nitro_remaining;
     int life;
     float render_scale;
+    int state;  
     
     SDL_Renderer* renderer;
     SDL_Texture* texture = nullptr;
