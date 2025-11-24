@@ -153,6 +153,8 @@ if(TALLER_CLIENT)
             src/client/pantallas/style_manager.h
             src/client/audio_manager.h
             src/client/audio_manager.cpp
+            src/client/sprite_loader.cpp
+            src/client/sprite_loader.h
     )
 
     # Make them depend on taller_common lib
@@ -218,6 +220,8 @@ if(TALLER_SERVER)
             src/server/npc.cpp
             src/server/car_npc.h
             src/server/car_npc.cpp
+            src/server/upgrade_handler.h
+            src/server/upgrade_handler.cpp
             )
 
     # Make them depend on taller_common lib
@@ -302,7 +306,24 @@ if(TALLER_TESTS)
 
     # target for testing
     # HEY!! TODO XXX: Change the name of the executable to the one you like!
-    add_executable(taller_tests)
+    add_executable(taller_tests
+        tests/test_client_protocol.cpp
+        tests/test_server_protocol.cpp
+        tests/test_integration.cpp
+
+        src/client/client_protocol.cpp
+        src/server/server_protocol.cpp
+    
+    )
+
+    target_compile_definitions(taller_tests PRIVATE TESTS)
+
+    target_sources(taller_tests
+        PRIVATE
+        ../src/common/protocol.cpp
+        ../src/common/mocked_socket.cpp
+        tests/test_protocol.cpp
+    )
 
     # HEY!! TODO XXX: I'm assuming that the code under testing is in taller_common
     # Change this if you have to.

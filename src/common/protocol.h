@@ -1,18 +1,23 @@
 #ifndef TALLER_TP_PROTOCOL_H
 #define TALLER_TP_PROTOCOL_H
 
+#ifdef TESTS
+#include "../common/mocked_socket.h"
+using Socket = MockedSocket;
+#else
+#include "../common/socket.h"
+using Socket = Socket;
+#endif
+
 #include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>
-
 #include <arpa/inet.h>
 
 #include "../server/car_state.h"
-
 #include "car_DTO.h"
 #include "constants.h"
-#include "socket.h"
 
 class Protocol {
 public:

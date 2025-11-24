@@ -5,7 +5,7 @@
 
 #include "parser_yaml.h"
 
-CarNPC::CarNPC(Corner& start_corner, b2WorldId& world) {
+CarNPC::CarNPC(GraphNode& start_corner, b2WorldId& world) {
     b2BodyDef body = b2DefaultBodyDef();
     body.type = b2_dynamicBody;
     body.linearDamping = 2.0f;
@@ -27,7 +27,7 @@ b2Vec2 CarNPC::get_position() {
     return b2Body_GetPosition(body_id);
 }
 
-void CarNPC::move(Corner& target) {
+void CarNPC::move(GraphNode& target) {
     rotate(target);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
@@ -42,7 +42,7 @@ void CarNPC::move(Corner& target) {
     }
 }
 
-void CarNPC::rotate(Corner& target) {
+void CarNPC::rotate(GraphNode& target) {
     b2Vec2 pos = b2Body_GetPosition(body_id);
     b2Vec2 dir = {target.x - pos.x, target.y - pos.y};
 

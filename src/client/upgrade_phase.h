@@ -10,6 +10,7 @@
 #include "client_handler.h"
 #include "resource_manager.h"
 #include "config.h"
+#include "sprite_loader.h"
 
 class UpgradePhase {
 private:
@@ -26,6 +27,9 @@ private:
     
     Upgrades selected_upgrade;
     bool upgrade_selected;
+
+    std::vector<UpgradeData> upgrade_data;
+    ArrowData arrow_data;
     
     struct UpgradeButton {
         SDL_Rect rect; 
@@ -44,10 +48,8 @@ private:
     std::vector<ArrowButton> arrow_buttons;
     
     void init_upgrade_buttons();
-    void addUpgrade(int order, const char* title, const char* desc, SDL_Rect icon_src,
-                    ButtonType left_button_type, ButtonType right_button_type,
-                    int start_x, int start_y, int button_width, int button_height,
-                    int spacing, int icon_size, int arrow_size);
+    void load_upgrade_sprites();
+    ButtonType getButtonType(const std::string& button_name);
     void load_textures();
     void render_background();
     void render_title();

@@ -19,6 +19,7 @@ UpgradePhase::UpgradePhase(SDL_Renderer* renderer, SDL_Window* window,
     }
     
     load_textures();
+    load_upgrade_sprites();
     init_upgrade_buttons();
     if (handler) {
         handler->clear_buttons();
@@ -34,27 +35,26 @@ void UpgradePhase::load_textures() {
     arrows_texture = resources->load(WORKSHOP_ARROWS_PATH);
 }
 
-void UpgradePhase::addUpgrade(int order, const char* title, const char* desc, SDL_Rect icon_src,
-                              ButtonType left_button_type, ButtonType right_button_type,
-                              int start_x, int start_y, int button_width, int button_height,
-                              int spacing, int icon_size, int arrow_size) {
-    UpgradeButton btn;
-    btn.rect = {start_x, start_y + order * (button_height + spacing), button_width, button_height};
-    btn.upgrade_type = NONE_UPGRADE;
-    btn.title = title;
-    btn.description = desc;
-    btn.icon_src_rect = icon_src;
-    upgrade_buttons.push_back(btn);
+void UpgradePhase::load_upgrade_sprites() {
+    const std::string yaml_path = "../src/client/workshop_sprites.yaml";
+    upgrade_data = SpriteLoader::loadUpgradeSprites(yaml_path);
+    arrow_data = SpriteLoader::loadArrowSprite(yaml_path);
+}
 
-    int center_x = btn.rect.x + btn.rect.w / 2;
-    int arrow_gap = icon_size + 50;
-    int arrow_y = btn.rect.y + (btn.rect.h - arrow_size) / 2;
-
-    SDL_Rect left_arrow  = { center_x - arrow_gap - arrow_size, arrow_y, arrow_size, arrow_size };
-    SDL_Rect right_arrow = { center_x + arrow_gap, arrow_y, arrow_size, arrow_size };
-
-    arrow_buttons.push_back({left_arrow, left_button_type});
-    arrow_buttons.push_back({right_arrow, right_button_type});
+ButtonType UpgradePhase::getButtonType(const std::string& button_name) {
+    if (button_name == "BUTTON_LIFE_UP") return BUTTON_LIFE_UP;
+    if (button_name == "BUTTON_LIFE_DOWN") return BUTTON_LIFE_DOWN;
+    if (button_name == "BUTTON_VELOCITY_UP") return BUTTON_VELOCITY_UP;
+    if (button_name == "BUTTON_VELOCITY_DOWN") return BUTTON_VELOCITY_DOWN;
+    if (button_name == "BUTTON_ACCELERATION_UP") return BUTTON_ACCELERATION_UP;
+    if (button_name == "BUTTON_ACCELERATION_DOWN") return BUTTON_ACCELERATION_DOWN;
+    if (button_name == "BUTTON_HANDLING_UP") return BUTTON_HANDLING_UP;
+    if (button_name == "BUTTON_HANDLING_DOWN") return BUTTON_HANDLING_DOWN;
+    if (button_name == "BUTTON_CONTROL_UP") return BUTTON_CONTROL_UP;
+    if (button_name == "BUTTON_CONTROL_DOWN") return BUTTON_CONTROL_DOWN;
+    if (button_name == "BUTTON_NITRO_UP") return BUTTON_NITRO_UP;
+    if (button_name == "BUTTON_NITRO_DOWN") return BUTTON_NITRO_DOWN;
+    return BUTTON_READY;
 }
 
 void UpgradePhase::init_upgrade_buttons() {
@@ -62,31 +62,41 @@ void UpgradePhase::init_upgrade_buttons() {
     arrow_buttons.clear();
     
     int start_x = (screen_width - UPGRADE_BUTTON_WIDTH) / 2;
-    
-    addUpgrade(3, "NITRO", "Temporary speed boost", SDL_Rect{372, 175,135,140},
-               BUTTON_NITRO_DOWN, BUTTON_NITRO_UP,
-               start_x, UPGRADE_START_Y, UPGRADE_BUTTON_WIDTH, UPGRADE_BUTTON_HEIGHT, 
-               UPGRADE_BUTTON_SPACING, UPGRADE_ICON_SIZE, UPGRADE_ARROW_SIZE);
-    addUpgrade(4, "LIFE", "Increases car durability", SDL_Rect{355,10, 180, 170},
-               BUTTON_LIFE_DOWN, BUTTON_LIFE_UP,
-               start_x, UPGRADE_START_Y, UPGRADE_BUTTON_WIDTH, UPGRADE_BUTTON_HEIGHT, 
-               UPGRADE_BUTTON_SPACING, UPGRADE_ICON_SIZE, UPGRADE_ARROW_SIZE);
-    addUpgrade(1, "ACCELERATION", "Improves acceleration", SDL_Rect{350, 310, 180, 110},
-               BUTTON_ACCELERATION_DOWN, BUTTON_ACCELERATION_UP,
-               start_x, UPGRADE_START_Y, UPGRADE_BUTTON_WIDTH, UPGRADE_BUTTON_HEIGHT, 
-               UPGRADE_BUTTON_SPACING, UPGRADE_ICON_SIZE, UPGRADE_ARROW_SIZE);
-    addUpgrade(0, "MASS", "Increases car mass", SDL_Rect{305,430,275,140},
-               BUTTON_CONTROL_DOWN, BUTTON_CONTROL_UP,
-               start_x, UPGRADE_START_Y, UPGRADE_BUTTON_WIDTH, UPGRADE_BUTTON_HEIGHT, 
-               UPGRADE_BUTTON_SPACING, UPGRADE_ICON_SIZE, UPGRADE_ARROW_SIZE);
-    addUpgrade(5, "BRAKES", "Improves braking ability", SDL_Rect{350,565,180,145},
-               BUTTON_VELOCITY_DOWN, BUTTON_VELOCITY_UP,
-               start_x, UPGRADE_START_Y, UPGRADE_BUTTON_WIDTH, UPGRADE_BUTTON_HEIGHT, 
-               UPGRADE_BUTTON_SPACING, UPGRADE_ICON_SIZE, UPGRADE_ARROW_SIZE);
-    addUpgrade(2, "HANDLING", "Improves car handling", SDL_Rect{360,710,170,170},
-               BUTTON_HANDLING_DOWN, BUTTON_HANDLING_UP,
-               start_x, UPGRADE_START_Y, UPGRADE_BUTTON_WIDTH, UPGRADE_BUTTON_HEIGHT, 
-               UPGRADE_BUTTON_SPACING, UPGRADE_ICON_SIZE, UPGRADE_ARROW_SIZE);
+
+    for (const auto& upgrade : upgrade_data) {
+        UpgradeButton btn;
+        btn.rect = {
+            start_x,
+            UPGRADE_START_Y + upgrade.order * (UPGRADE_BUTTON_HEIGHT + UPGRADE_BUTTON_SPACING),
+            UPGRADE_BUTTON_WIDTH,
+            UPGRADE_BUTTON_HEIGHT
+        };
+        btn.upgrade_type = NONE_UPGRADE;
+        btn.title = upgrade.title;
+        btn.description = upgrade.description;
+        btn.icon_src_rect = upgrade.sprite;
+        upgrade_buttons.push_back(btn);
+
+        int center_x = btn.rect.x + btn.rect.w / 2;
+        int arrow_gap = UPGRADE_ICON_SIZE + UPGRADE_ARROW_GAP;
+        int arrow_y = btn.rect.y + (btn.rect.h - UPGRADE_ARROW_SIZE) / 2;
+
+        SDL_Rect left_arrow  = {
+            center_x - arrow_gap - UPGRADE_ARROW_SIZE,
+            arrow_y,
+            UPGRADE_ARROW_SIZE,
+            UPGRADE_ARROW_SIZE
+        };
+        SDL_Rect right_arrow = {
+            center_x + arrow_gap,
+            arrow_y,
+            UPGRADE_ARROW_SIZE,
+            UPGRADE_ARROW_SIZE
+        };
+
+        arrow_buttons.push_back({left_arrow, getButtonType(upgrade.button_left)});
+        arrow_buttons.push_back({right_arrow, getButtonType(upgrade.button_right)});
+    }
 }
 
 void UpgradePhase::render_background() {
@@ -132,7 +142,7 @@ void UpgradePhase::render_upgrade_buttons() {
         }
     }
 
-    SDL_Rect arrow_src = {550, 340, 240, 230};
+    SDL_Rect arrow_src = arrow_data.sprite;
     for (size_t i = 0; i < upgrade_buttons.size(); ++i) {
         auto& button = upgrade_buttons[i];
         SDL_SetRenderDrawColor(renderer, COLOR_UPGRADE_BUTTON_BG.r, COLOR_UPGRADE_BUTTON_BG.g, 
@@ -222,7 +232,6 @@ void UpgradePhase::render(int remaining_upgrades) {
     render_instructions();
     
 }
-
 
 UpgradePhase::~UpgradePhase() {
     if (handler) {

@@ -30,35 +30,74 @@ void Gameloop::run() {
     }
 }
 
-void Gameloop::process_command(ClientCommand& client_command) {
-    int command = client_command.cmd_struct.cmd;
-    int command_id = client_command.id;
+bool Gameloop::handle_disconnect(const int command,const int id) {
+    if (command != SEND_DISCONNECT){
+        return false;
+    } 
+    user_names.erase(id);
+    cars.erase(id);
+    return true;
+}
 
-    if (command == SEND_DISCONNECT) {
-        user_names.erase(command_id);
-        cars.erase(command_id);
-        return;
+bool Gameloop::handle_upgrade(const int command, Car& car) {
+    if (!upgrader.is_upgrade_command(command)) {
+        return false;
     }
+    Upgrades type = upgrader.get_upgrade_type(command);
+    int price_ms = std::chrono::duration_cast<std::chrono::seconds>( upgrader.get_price(type) ).count();
 
-    auto it = cars.find(command_id);
-    int id = it->first;
-    if (race.car_finished(id) || race.car_dead(id)) {
-        return;
-    }
+    int player_id = car.get_id();
 
-    Car& car = it->second;
+    results.add_upgrade_time(player_id, price_ms);
+
+    upgrader.apply_upgrade_to_car(command, car);
+    return true;
+}
+
+bool Gameloop::handle_car_action(const int command, Car& car) {
     if (auto action = command_processor.get_car_action(command)) {
         (*action)(car);
-        return;
+        return true;
     }
+    return false;
+}
+
+bool Gameloop::handle_race_action(const int command, int id) {
     if (auto action = command_processor.get_race_action(command)) {
         (*action)(race, id);
+        return true;
+    }
+    return false;
+}
+
+void Gameloop::process_command(ClientCommand& client_command) {
+    int command = client_command.cmd_struct.cmd;
+    int player_id = client_command.id;
+
+    if (handle_disconnect(command, player_id)) {
         return;
     }
+    auto it = cars.find(player_id);
+    if (it == cars.end()){
+        return;
+    }
+    Car& car = it->second;
+    if (handle_upgrade(command, car)){
+        return;
+    } 
+    if (race.car_finished(player_id) || race.car_dead(player_id)) {
+        return;
+    }
+    if (handle_car_action(command, car)) {
+        return;
+    }
+    if (handle_race_action(command, player_id)){
+        return;
+    } 
 }
 
 void Gameloop::generate_npcs() {
-    for (int i =0; i < 30; i++) {
+    for (int i =0; i < MAX_NPCS; i++) {
         auto rand_corner = rand() % corners.size();
         npcs.emplace_back(world.get_id(), &corners, rand_corner);
     }
@@ -153,11 +192,11 @@ void Gameloop::broadcast_in_game(const int time_ms) {
     );
 }
 
-void Gameloop::broadcast_workshop(std::map<Upgrades, std::chrono::seconds> prices, const int time_ms ) {
+void Gameloop::broadcast_workshop(const int time_ms ) {
     common_broadcast( IN_WORK_SHOP ,time_ms, 
         [](int){ return StateRunning::FINISHED;},
-        [prices](Snapshot& dto,int) {
-            dto.prices = prices;
+        [this](Snapshot& dto,int) {
+            dto.prices = upgrader.get_prices();
         }
     );
 }
@@ -169,78 +208,6 @@ const std::string& Gameloop::get_game_id() const{ return this->game_id; }
 bool Gameloop::try_pop(ClientCommand& command) { return cmd_queue.try_pop(command); }
 
 bool Gameloop::is_game_already_started() const { return this->ready_to_start; }
-
-void Gameloop::accelerate_upgrade(int& id) {
-    auto it = cars.find(id);
-    Car& car = it->second;
-    car.accelerate_upgrade();
-}
-
-void Gameloop::handling_upgrade(int& id) {
-    auto it = cars.find(id);
-    Car& car = it->second;
-    car.handling_upgrade();
-}
-
-void Gameloop::nitro_upgrade(int& id) {
-    auto it = cars.find(id);
-    Car& car = it->second;
-    car.nitro_upgrade();
-}
-
-void Gameloop::life_upgrade(int& id) {
-    auto it = cars.find(id);
-    Car& car = it->second;
-    car.life_upgrade();
-}
-
-void Gameloop::brake_upgrade(int& id) {
-    auto it = cars.find(id);
-    Car& car = it->second;
-    car.brake_upgrade();
-}
-
-void Gameloop::mass_upgrade(int& id) {
-    auto it = cars.find(id);
-    Car& car = it->second;
-    car.mass_upgrade();
-}
-
-void Gameloop::accelerate_downgrade(int& id) {
-    auto it = cars.find(id);
-    Car& car = it->second;
-    car.accelerate_downgrade();
-}
-
-void Gameloop::handling_downgrade(int& id) {
-    auto it = cars.find(id);
-    Car& car = it->second;
-    car.handling_downgrade();
-}
-
-void Gameloop::nitro_downgrade(int& id) {
-    auto it = cars.find(id);
-    Car& car = it->second;
-    car.nitro_downgrade();
-}
-
-void Gameloop::life_downgrade(int& id) {
-    auto it = cars.find(id);
-    Car& car = it->second;
-    car.life_downgrade();
-}
-
-void Gameloop::brake_downgrade(int& id) {
-    auto it = cars.find(id);
-    Car& car = it->second;
-    car.brake_downgrade();
-}
-
-void Gameloop::mass_downgrade(int& id) {
-    auto it = cars.find(id);
-    Car& car = it->second;
-    car.mass_downgrade();
-}
 
 bool Gameloop::is_running() const { return should_keep_running(); }
 
@@ -281,7 +248,7 @@ void Gameloop::update_race_state() {
 FinalScoreList Gameloop::calculate_final_results() { return results.calculate_final_scores(user_names); }
 
 void Gameloop::broadcast_final_results(const FinalScoreList& results) {
-    common_broadcast( IN_LOBBY ,0, 
+    common_broadcast( FINAL_RESULTS, 0, 
         [](int){ return StateRunning::FINISHED;},
         [](Snapshot&,int) {}   
     );

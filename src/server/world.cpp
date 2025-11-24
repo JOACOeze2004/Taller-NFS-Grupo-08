@@ -1,6 +1,10 @@
 #include "world.h"
+
+#include <iostream>
 #include <vector>
+
 #include "car.h"
+
 
 World::World() {
     b2WorldDef world_def = b2DefaultWorldDef();
@@ -58,20 +62,43 @@ void World::generate_map(std::string& map_name) {
     create_collisions(boxes);
 }
 
-std::vector<Corner> World::generate_corners(std::string& map_name) {
+std::vector<GraphNode> World::generate_corners(std::string& map_name) {
     std::vector<Corner> corners = parser.parse_corners(map_name);
-    create_corners(corners);
-
-    return corners;
+    return create_nodes(corners);
 }
 
-void World::create_corners(std::vector<Corner>& corners) {
-    for (const auto& corner : corners) {
-        b2BodyDef body_def = b2DefaultBodyDef();
-        body_def.type = b2_staticBody;
-        body_def.position = {corner.x, corner.y};
-        b2CreateBody(world, &body_def);
+std::vector<GraphNode> World::create_nodes(std::vector<Corner>& corners) {
+    std::vector<GraphNode> nodes;
+    nodes.resize(corners.size());
+
+    for (size_t i=0; i < corners.size(); i++) {
+        nodes[i].x = corners[i].x;
+        nodes[i].y = corners[i].y;
+
+        for (size_t j =0; j < corners.size(); j++) {
+            if ( i == j) continue;
+            if (is_visible(corners[i], corners[j])) {
+                float dx = corners[j].x - corners[i].x;
+                float dy = corners[j].y - corners[i].y;
+                float dist = dx*dx + dy*dy;
+                nodes[i].neighbors.push_back(static_cast<int>(j));
+                nodes[i].dist.push_back(dist);
+            }
+        }
+        std::cout << nodes[i].neighbors.size() << std::endl;
     }
+
+    return nodes;
+}
+
+bool World::is_visible(const Corner& _origin, const Corner& _traslation) const {
+    b2Vec2 origin = {_origin.x, _origin.y};
+    b2Vec2 traslation = {_traslation.x, _traslation.y};
+    b2QueryFilter filter = b2DefaultQueryFilter();
+
+    b2RayResult result = b2World_CastRayClosest(world, origin, traslation, filter);
+
+    return result.hit == false;
 }
 
 void World::create_collisions(std::vector<StaticBody>& boxes) {

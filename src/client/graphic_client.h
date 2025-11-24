@@ -12,6 +12,7 @@
 #include "resource_manager.h"
 #include "config.h"
 #include "audio_manager.h"
+#include "sprite_loader.h"
 
 class GraphicClient {
     SDL_Renderer* renderer;
@@ -41,6 +42,9 @@ class GraphicClient {
     bool previous_using_nitro;
     int previous_checkpoint_count;
 
+    std::vector<SpriteData> checkpoint_sprites;
+    SpriteData hint_sprite;
+
     public:
     explicit GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _handler, AudioManager* audio);
     void draw(const Snapshot& snapshot);
@@ -58,6 +62,7 @@ class GraphicClient {
     void initialize_image_and_ttf();
     void initialize_resource_manager();
     void load_core_textures();
+    void load_sprites_config();
     void load_map_texture(int map_id);
     void initialize_text_renderer();
     void initialize_upgrade_phase();

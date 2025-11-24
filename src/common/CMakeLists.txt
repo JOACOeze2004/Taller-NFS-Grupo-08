@@ -1,15 +1,14 @@
 target_sources(taller_common
     PRIVATE
     # .cpp files
-    foo.cpp
         protocol.cpp
         socket.cpp
         resolver.cpp
         resolvererror.cpp
         liberror.cpp
+        mocked_socket.cpp
     PUBLIC
     # .h files
-    foo.h
         constants.h
         protocol.h
         socket.h
@@ -18,4 +17,5 @@ target_sources(taller_common
         resolver.h
         resolvererror.h
         liberror.h
+        mocked_socket.h
     )
