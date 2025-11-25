@@ -245,7 +245,7 @@ void Gameloop::start_race() {
     race.spawn_cars();
     update_positions();
     broadcast_in_game(MAX_TIME_PER_RACE);
-    //std::this_thread::sleep_for(std::chrono::seconds(3));
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 }
 
 void Gameloop::update_race_state() {
