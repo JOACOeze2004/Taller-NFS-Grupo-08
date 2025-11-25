@@ -148,8 +148,10 @@ void GraphicClient::initialize_upgrade_phase() {
 
 void GraphicClient::update_from_snapshot(const Snapshot& snapshot) {
 
+    human_count = 0;
     for (auto& [id, car] : snapshot.cars) {
         update_car(id, car);
+        if (car.state != NPC_STATE) ++human_count;
     }
 
     update_camera();
@@ -308,7 +310,7 @@ void GraphicClient::draw(const Snapshot& snapshot) {
 void GraphicClient::draw_workshop_state(const Snapshot& snapshot) {
     auto player_it = snapshot.cars.find(player_car_id);
     int remaining_upgrades = (player_it != snapshot.cars.end()) ? player_it->second.remaining_upgrades : 0;
-    upgrade_phase->render(remaining_upgrades);
+    upgrade_phase->render(remaining_upgrades, snapshot.prices);
 }
 
 void GraphicClient::draw_lobby_state(const Snapshot& snapshot) {
@@ -319,7 +321,7 @@ void GraphicClient::draw_lobby_state(const Snapshot& snapshot) {
     draw_game_id(snapshot.game_id);
     
     if (snapshot.is_owner) {
-        draw_ready_btn(static_cast<int>(snapshot.cars.size()), ready_sent);
+        draw_ready_btn(human_count, ready_sent);
     }
 }
 
@@ -337,7 +339,7 @@ void GraphicClient::draw_race_state(const Snapshot& snapshot) {
         draw_state(player_it->second.state);
         draw_results(snapshot.cars_finished);
     } else {
-        draw_position(snapshot.position, snapshot.cars.size());
+        draw_position(snapshot.position, human_count);
         draw_time(snapshot.time_ms);
     }
 } 
@@ -743,14 +745,7 @@ void GraphicClient::draw_minimap(const CheckpointCoords& checkpoint, int checkpo
 void GraphicClient::draw_cars() {
     const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
     const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
-    // Imprime las coordenadas de TODOS los NPCs, sin importar si están dentro de la cámara
-    for (const auto& [nid, ncar] : cars) {
-        if (ncar.state == NPC_STATE) {
-            std::cout << "[CLIENT] NPC id=" << nid
-                      << " coords=(" << ncar.x << ", " << ncar.y << ")\n";
-        }
-    }
-
+  
     for (const auto& [id, car_dto_world] : cars) {
         if (car_dto_world.x >= camera_x && car_dto_world.x <= camera_x + viewport_width &&
             car_dto_world.y >= camera_y && car_dto_world.y <= camera_y + viewport_height && (car_dto_world.state == IN_GAME || car_dto_world.state == NPC_STATE)) {

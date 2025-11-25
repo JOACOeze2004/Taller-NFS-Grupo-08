@@ -41,6 +41,7 @@ class GraphicClient {
     CollisionType previous_collision;
     bool previous_using_nitro;
     int previous_checkpoint_count;
+    int human_count;
 
     std::vector<SpriteData> checkpoint_sprites;
     SpriteData hint_sprite;
