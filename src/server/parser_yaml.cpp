@@ -26,7 +26,7 @@ std::vector<StaticBody> ParserYaml::parse_map(std::string& map_name) {
 
     std::vector<StaticBody> boxes;
     for (const auto& layer : map["layers"]) {
-        if (layer["name"].as<std::string>() != "COLISIONES") continue;
+        if (layer["name"].as<std::string>() != "BOXES") continue;
         for (const auto& obj : layer["objects"]) {
             StaticBody box;
             box.id = obj["id"].as<int>();

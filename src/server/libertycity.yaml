@@ -21199,7 +21199,7 @@ layers:
   "y": 0
 - draworder: topdown
   id: 3
-  name: COLISIONES
+  name: BOXES
   objects:
   - height: 34.6667
     id: 4
