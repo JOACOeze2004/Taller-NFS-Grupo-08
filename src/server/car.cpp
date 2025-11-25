@@ -296,7 +296,7 @@ CarDTO Car::get_state() const {
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    std::cout << "acceleracion: " << this->acceleration << " brakes: " << this->braking << " mass: " << this->mass << " handling: " << this->handling << std::endl;
+    std::cout << "acceleration: " << this->acceleration << " braking: " << this->braking << " mass: " << this->mass << " handling: " << this->handling << " life: " << life << " nitro: " << nitro << std::endl;
     return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME, remaining_upgrades);
 }
 
@@ -314,7 +314,6 @@ void Car::delete_from_map() {
     }
 }
 
-//No tenia sentido resetear vida, nitro y amigos aca (ya lo haces en reseat)
 void Car::set_spawn(float& x, float& y, float& angle_x, float& angle_y) {
     float dx = x - angle_x;
     float dy = -(y - angle_y);
@@ -322,6 +321,8 @@ void Car::set_spawn(float& x, float& y, float& angle_x, float& angle_y) {
     b2Body_SetLinearVelocity(body_id, {0,0});
     b2Body_SetAngularVelocity(body_id, 0);
     b2Rot rot = b2MakeRot(angle + std::numbers::pi/2);
+    life = max_life;
+    nitro = max_nitro;
     nitro_activated = false;
     b2Body_SetTransform(body_id, {x,y}, rot);
 }
