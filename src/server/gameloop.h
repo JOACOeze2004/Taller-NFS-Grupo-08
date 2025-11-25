@@ -39,6 +39,7 @@ public:
     void broadcast_final_results(const FinalScoreList& results);
     void broadcast_lobby(const int time_ms);
     void broadcast_workshop(const int time_ms);
+    void broadcast_countdown(const int time_ms);
     bool try_pop(ClientCommand& command);
     void update_positions();
 

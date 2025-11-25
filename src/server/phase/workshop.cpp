@@ -21,8 +21,8 @@ void Workshop::end() {
         gameloop->stop();
         return;
     }
-
     gameloop->change_phase(std::make_unique<InGame>(gameloop, MAX_TIME_PER_RACE + RACE_START_TIME));
+    //gameloop->change_phase(std::make_unique<Countdown>(gameloop, RACE_START_TIME)); Este seria el posta
 }
 
 State Workshop::get_current_phase_state() const { return IN_WORK_SHOP; }

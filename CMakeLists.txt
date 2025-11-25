@@ -212,6 +212,8 @@ if(TALLER_SERVER)
             src/server/phase/in_game.h
             src/server/phase/workshop.cpp
             src/server/phase/workshop.h
+            src/server/phase/countdown.h
+            src/server/phase/countdown.cpp
             src/server/car_command_processor.h
             src/server/car_command_processor.cpp
             src/server/results_handler.cpp

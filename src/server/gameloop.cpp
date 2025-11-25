@@ -201,6 +201,13 @@ void Gameloop::broadcast_in_game(const int time_ms) {
     );
 }
 
+void Gameloop::broadcast_countdown(const int time_ms) {
+    common_broadcast( IN_COUNTDOWN ,time_ms, 
+        [&](int){ return StateRunning::IN_GAME; },  //VER SI QUEDA INGAME O ALGUN OTRO ESTADO NUEVO
+        [&](Snapshot&,int) { }    
+    );
+}
+
 void Gameloop::broadcast_workshop(const int time_ms ) {
     common_broadcast( IN_WORK_SHOP ,time_ms, 
         [](int){ return StateRunning::FINISHED;},
@@ -238,7 +245,7 @@ void Gameloop::start_race() {
     race.spawn_cars();
     update_positions();
     broadcast_in_game(MAX_TIME_PER_RACE);
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+    //std::this_thread::sleep_for(std::chrono::seconds(3));
 }
 
 void Gameloop::update_race_state() {
