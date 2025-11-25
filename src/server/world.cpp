@@ -49,6 +49,9 @@ void World::update() {
         else if (car_a) {
             car_a->handle_hit(event.normal, event.approachSpeed, false);
         }
+        else if (car_b) {
+            car_b->handle_hit(event.normal, event.approachSpeed, false);
+        }
     }
 }
 
