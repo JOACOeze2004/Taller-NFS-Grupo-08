@@ -1,5 +1,6 @@
 #include "results_handler.h"
 #include <ranges>
+#include <iostream>
 
 void ResultsHandler::initialize_player(const int id){
     player_total_times[id] = 0;
@@ -61,5 +62,14 @@ const std::vector<CarRacingInfo>& ResultsHandler::get_finished() const { return 
 const std::vector<CarRacingInfo>& ResultsHandler::get_deads() const { return deads; }
 
 const std::map<int, long long>& ResultsHandler::get_total_times() const { return player_total_times; }
+
+void ResultsHandler::subtract_upgrade_time(int player_id, int ms) {
+    if (player_total_times.find(player_id) != player_total_times.end()) {
+        player_total_times[player_id] -= ms;
+        if (player_total_times[player_id] < 0) {
+            player_total_times[player_id] = 0;
+        }
+    }
+}
 
 void ResultsHandler::add_upgrade_time(int player_id, int ms) { player_total_times[player_id] += ms; }

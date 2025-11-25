@@ -32,6 +32,7 @@ public:
     const std::map<int, long long>& get_total_times() const;
 
     void add_upgrade_time(int player_id, int ms);
+    void subtract_upgrade_time(int player_id, int ms);
 };
 
 

@@ -94,7 +94,7 @@ public:
     bool upgrade(float& stat, float upgrade_factor);
     bool downgrade(float& stat, float upgrade_factor, int& upgrades_applied);
 
-    void apply_upgrade(Upgrades type, bool is_upgrade);
+    bool apply_upgrade(Upgrades type, bool is_upgrade);
     int get_id() const;
 
 private:

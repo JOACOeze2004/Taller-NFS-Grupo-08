@@ -11,7 +11,7 @@ class UpgradeHandler {
 private:
     std::map<Upgrades, std::chrono::seconds> prices;
     
-    void initialize_prices();
+    void initialize_prices(); 
     std::pair<Upgrades, bool> parse_command(int command_id) const;
 
 public:
@@ -21,6 +21,7 @@ public:
     const std::map<Upgrades, std::chrono::seconds>& get_prices() const;
     std::chrono::seconds get_price(Upgrades type) const;
     Upgrades get_upgrade_type(int command_id) const;
+    bool is_upgrade_operation(int command_id) const;
     
     ~UpgradeHandler();
 };

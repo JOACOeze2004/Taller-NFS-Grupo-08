@@ -448,11 +448,21 @@ bool Car::downgrade(float& stat, float upgrade_factor, int& upgrades_applied) {
     return true;
 }
 
-void Car::apply_upgrade(Upgrades type, bool is_upgrade) {
+bool Car::apply_upgrade(Upgrades type, bool is_upgrade) {
     auto it = upgrade_actions.find(type);
     if (it != upgrade_actions.end()) {
+        int upgrades_before = remaining_upgrades;
+        
         (is_upgrade ? it->second.first : it->second.second)();
+        
+        int upgrades_after = remaining_upgrades;        
+        if (is_upgrade) {
+            return upgrades_after < upgrades_before; 
+        } else {
+            return upgrades_after > upgrades_before;
+        }
     }
+    return false;
 }
 
 int Car::get_id() const { return this->car_id; }

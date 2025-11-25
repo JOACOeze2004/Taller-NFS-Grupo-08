@@ -55,4 +55,9 @@ Upgrades UpgradeHandler::get_upgrade_type(int command_id) const {
     return type;
 }
 
+bool UpgradeHandler::is_upgrade_operation(int command_id) const {
+    auto [type, is_upgrade] = parse_command(command_id);
+    return is_upgrade;
+}
+
 UpgradeHandler::~UpgradeHandler() {}
