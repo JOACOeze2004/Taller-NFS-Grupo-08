@@ -18,16 +18,12 @@ void InGame::end() {
     gameloop->increment_race_counter();
 
     if (gameloop->get_races_completed() >= MAX_RACES) {
-        std::cout << "[IN_GAME] Max races completed (" << gameloop->get_races_completed()
-                  << "/" << MAX_RACES << "), ending game" << std::endl;
         FinalScoreList final_results = gameloop->calculate_final_results();
         gameloop->broadcast_final_results(final_results);
         gameloop->stop();
         return;
     }
-
-    std::cout << "[IN_GAME] Race " << gameloop->get_races_completed()
-              << " completed, going to workshop" << std::endl;
+    gameloop->reset_race();
     gameloop->change_phase(std::make_unique<Workshop>(gameloop, MAX_TIME_PER_WORKSHOP));
 }
 
