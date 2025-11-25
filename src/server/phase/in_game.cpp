@@ -1,12 +1,10 @@
 #include "in_game.h"
-#include "gameloop.h" 
+#include "../gameloop.h" 
 
 InGame::InGame(Gameloop* _gameloop, float _duration): Phase(_gameloop, _duration), race_started(false) {}
 
-
 bool InGame::should_continue(){
     if (!gameloop->has_active_players()) {
-        std::cout << "[IN_GAME] No active players remaining, ending race" << std::endl;
         return false;
     }
     return gameloop->is_running() && !gameloop->did_all_finish();

@@ -15,15 +15,7 @@ Car::Car(b2WorldId world, float _mass, float _handling, float _acceleration, flo
     handling = base_handling + mass;
     acceleration = base_acceleration - mass;
     braking = base_braking - mass/2;
-
-
-    std::cout << "[Constructor Car " << car_id << "]" << std::endl;
-    std::cout << "  Base: h=" << base_handling << " a=" << base_acceleration 
-              << " b=" << base_braking << " m=" << base_mass << std::endl;
-    std::cout << "  Actual: h=" << handling << " a=" << acceleration 
-              << " b=" << braking << " m=" << mass << std::endl;
-    std::cout << "  Nitro: " << nitro << "/" << max_nitro << std::endl;
-
+    
     b2BodyDef body = b2DefaultBodyDef();
     body.type = b2_dynamicBody;
     body.linearDamping = 2.0f;

@@ -204,14 +204,14 @@ if(TALLER_SERVER)
             src/server/CarStats.h
             src/server/race.h
             src/server/race.cpp
-            src/server/phase.cpp
-            src/server/phase.h
-            src/server/lobby.cpp
-            src/server/lobby.h
-            src/server/in_game.cpp
-            src/server/in_game.h
-            src/server/workshop.cpp
-            src/server/workshop.h
+            src/server/phase/phase.cpp
+            src/server/phase/phase.h
+            src/server/phase/lobby.cpp
+            src/server/phase/lobby.h
+            src/server/phase/in_game.cpp
+            src/server/phase/in_game.h
+            src/server/phase/workshop.cpp
+            src/server/phase/workshop.h
             src/server/car_command_processor.h
             src/server/car_command_processor.cpp
             src/server/results_handler.cpp

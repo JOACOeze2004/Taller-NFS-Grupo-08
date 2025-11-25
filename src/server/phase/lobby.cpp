@@ -1,8 +1,7 @@
 #include "lobby.h"
-#include "gameloop.h"
+#include "../gameloop.h"
 
 Lobby::Lobby(Gameloop* _gameloop, float _duration): Phase(_gameloop, _duration) {}
-
 
 void Lobby::execute(ClientCommand& command) {
     gameloop->process_command(command);

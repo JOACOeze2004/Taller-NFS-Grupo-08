@@ -1,11 +1,10 @@
 #ifndef TALLER_TP_WORKSHOP_H
 #define TALLER_TP_WORKSHOP_H
-#include "client_command.h"
 #include <map>
 #include <functional> 
 #include "phase.h"
-#include "../common/DTO.h"
-
+#include "../client_command.h"
+#include "../../common/DTO.h"
 
 class Workshop : public Phase {
 public:

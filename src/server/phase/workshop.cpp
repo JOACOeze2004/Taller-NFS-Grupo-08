@@ -1,7 +1,6 @@
 #include "workshop.h"
-
-#include "../common/constants.h"
-#include "gameloop.h"
+#include "../../common/constants.h"
+#include "../gameloop.h"
 
 Workshop::Workshop(Gameloop* _gameloop, float _duration)
     : Phase(_gameloop, _duration) { }
