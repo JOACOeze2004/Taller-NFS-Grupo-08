@@ -85,7 +85,6 @@ std::vector<GraphNode> World::create_nodes(std::vector<Corner>& corners) {
                 nodes[i].dist.push_back(dist);
             }
         }
-        std::cout << nodes[i].neighbors.size() << std::endl;
     }
 
     return nodes;
@@ -93,7 +92,7 @@ std::vector<GraphNode> World::create_nodes(std::vector<Corner>& corners) {
 
 bool World::is_visible(const Corner& _origin, const Corner& _traslation) const {
     b2Vec2 origin = {_origin.x, _origin.y};
-    b2Vec2 traslation = {_traslation.x, _traslation.y};
+    b2Vec2 traslation = {_traslation.x - origin.x, _traslation.y - origin.y};
     b2QueryFilter filter = b2DefaultQueryFilter();
 
     b2RayResult result = b2World_CastRayClosest(world, origin, traslation, filter);

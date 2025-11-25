@@ -32,7 +32,7 @@ void CarNPC::move(GraphNode& target) {
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
 
-    float accel = 80.0f;
+    float accel = 10.0f;
     float limit = MAX_SPEED;
 
     if (speed < limit) {
@@ -40,19 +40,20 @@ void CarNPC::move(GraphNode& target) {
         b2Vec2 force = {velocity.x * accel, velocity.y * accel};
         b2Body_ApplyForceToCenter(body_id, force, true);
     }
+    rotate(target);
 }
 
 void CarNPC::rotate(GraphNode& target) {
     b2Vec2 pos = b2Body_GetPosition(body_id);
     b2Vec2 dir = {target.x - pos.x, target.y - pos.y};
 
-    float target_angle = atan2f(dir.x, dir.y);
+    float target_angle = atan2f(dir.y, dir.x);
     b2Rot rot = b2Body_GetRotation(body_id);
     float car_angle = atan2(rot.s, rot.c);
 
     float diff = target_angle - car_angle;
 
-    b2Body_SetAngularVelocity(body_id, diff *4);
+    b2Body_SetAngularVelocity(body_id, diff *100);
 }
 
 CarDTO CarNPC::get_state() {
