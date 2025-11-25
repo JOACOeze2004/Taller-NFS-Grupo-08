@@ -46,6 +46,7 @@ class Car {
     void initialize_upgrade_actions();
     using UpgradeAction = std::function<void()>;
     std::unordered_map<Upgrades, std::pair<UpgradeAction, UpgradeAction>> upgrade_actions;
+    void recalculate_stats();
 
 public:
     explicit Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking, int _car_id);

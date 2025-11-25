@@ -265,12 +265,38 @@ void Car::update_nitro_usage(){
     }
 }
 
+void Car::recalculate_stats() {
+    float handling_base = base_handling + mass;
+    float acceleration_base = base_acceleration - mass;
+    float braking_base = base_braking - mass / 2.0f;
+
+    float handling_mult = 1.0f;
+    for (int i = 0; i < handling_upgrades_applied; ++i) {
+        handling_mult *= HANDLING_UPGRADE_FACTOR;
+    }
+
+    float acceleration_mult = 1.0f;
+    for (int i = 0; i < acceleration_upgrades_applied; ++i) {
+        acceleration_mult *= ACCELERATION_UPGRADE_FACTOR;
+    }
+
+    float braking_mult = 1.0f;
+    for (int i = 0; i < brake_upgrades_applied; ++i) {
+        braking_mult *= BRAKE_UPGRADE_FACTOR;
+    }
+
+    handling = handling_base * handling_mult;
+    acceleration = acceleration_base * acceleration_mult;
+    braking = braking_base * braking_mult;
+}
+
 CarDTO Car::get_state() const {
     b2Vec2 pos = b2Body_GetPosition(body_id);
     b2Rot rot = b2Body_GetRotation(body_id);
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
+    std::cout << "acceleracion: " << this->acceleration << " brakes: " << this->braking << " mass: " << this->mass << " handling: " << this->handling << std::endl;
     return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME, remaining_upgrades);
 }
 
@@ -358,6 +384,7 @@ void Car::brake_upgrade() {
 void Car::mass_upgrade() {
     if (upgrade(mass, MASS_UPGRADE_FACTOR)) {
         mass_upgrades_applied++;
+        recalculate_stats();
     }
 }
 
@@ -403,7 +430,9 @@ void Car::brake_downgrade() {
 }
 
 void Car::mass_downgrade() {
-    downgrade(mass, MASS_UPGRADE_FACTOR, mass_upgrades_applied);
+    if (downgrade(mass, MASS_UPGRADE_FACTOR, mass_upgrades_applied)){
+        recalculate_stats();
+    }
 }
 
 bool Car::downgrade(float& stat, float upgrade_factor, int& upgrades_applied) {
