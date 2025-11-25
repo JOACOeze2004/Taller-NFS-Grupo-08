@@ -2,6 +2,8 @@
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL.h>
 #include <iostream>
+#include <fcntl.h>
+#include <unistd.h>
 
 AudioManager::AudioManager() 
     : currentState(GameState::LOBBY)
@@ -15,13 +17,17 @@ AudioManager::~AudioManager() {
 }
 
 bool AudioManager::initialize() {
-    // Intentar inicializar SDL Audio con diferentes drivers
+    int devnull = open("/dev/null", O_WRONLY);
+    if (devnull != -1) {
+        dup2(devnull, STDERR_FILENO);
+        close(devnull);
+    }
+    
     const char* drivers[] = {"pulseaudio", "alsa", "dsp", "disk", "dummy", nullptr};
     bool audio_initialized = false;
     
     for (int i = 0; drivers[i] != nullptr && !audio_initialized; i++) {
         if (SDL_AudioInit(drivers[i]) == 0) {
-            std::cout << "Audio inicializado con driver: " << drivers[i] << std::endl;
             audio_initialized = true;
             break;
         }
@@ -29,15 +35,11 @@ bool AudioManager::initialize() {
     
     if (!audio_initialized) {
         if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-            std::cerr << "Advertencia: No se pudo inicializar SDL Audio: " << SDL_GetError() << std::endl;
-            std::cerr << "El juego continuará sin audio." << std::endl;
             return true;
         }
     }
 
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-        std::cerr << "Advertencia: No se pudo inicializar SDL_mixer: " << Mix_GetError() << std::endl;
-        std::cerr << "El juego continuará sin audio." << std::endl;
         SDL_QuitSubSystem(SDL_INIT_AUDIO);
         return true;
     }
@@ -55,8 +57,6 @@ bool AudioManager::initialize() {
 }
 
 void AudioManager::loadMusic() {
-    // Cargar música de diferentes estados
-    // Ajusta las rutas según tu estructura de archivos
     music[GameState::LOBBY] = Mix_LoadMUS("../assets/music/lobby.mp3");
     music[GameState::PLAYING] = Mix_LoadMUS("../assets/music/game.mp3");
     music[GameState::RESULTS] = Mix_LoadMUS("../assets/music/results.mp3");
@@ -69,7 +69,6 @@ void AudioManager::loadMusic() {
 }
 
 void AudioManager::loadSoundEffects() {
-    // Cargar efectos de sonido (archivos .mp3)
     soundEffects[SoundEffect::CRASH] = Mix_LoadWAV("../assets/sounds/crashing.mp3");
     soundEffects[SoundEffect::DEATH] = Mix_LoadWAV("../assets/sounds/death.mp3");
     soundEffects[SoundEffect::WIN] = Mix_LoadWAV("../assets/sounds/reach_finish.mp3");
@@ -91,7 +90,7 @@ void AudioManager::playMusicForState(GameState state) {
 
     auto it = music.find(state);
     if (it != music.end() && it->second) {
-        Mix_PlayMusic(it->second, -1); // -1 = loop infinito
+        Mix_PlayMusic(it->second, -1);
     }
 }
 
@@ -99,9 +98,8 @@ void AudioManager::changeState(GameState newState) {
     if (currentState == newState) return;
 
     currentState = newState;
-    Mix_FadeOutMusic(500); // Fade out de 500ms
+    Mix_FadeOutMusic(500);
     
-    // Esperar un poco antes de iniciar nueva música
     SDL_Delay(600);
     playMusicForState(newState);
 }
@@ -143,7 +141,7 @@ void AudioManager::playSoundEffect(SoundEffect effect) {
 
     auto it = soundEffects.find(effect);
     if (it != soundEffects.end() && it->second) {
-        Mix_PlayChannel(-1, it->second, 0); // -1 = primer canal disponible, 0 = sin loop
+        Mix_PlayChannel(-1, it->second, 0);
     }
 }
 
