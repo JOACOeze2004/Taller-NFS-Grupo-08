@@ -32,7 +32,7 @@ void CarNPC::move(GraphNode& target) {
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
 
-    float accel = 10.0f;
+    float accel = 6.0f;
     float limit = MAX_SPEED;
 
     if (speed < limit) {
@@ -41,19 +41,31 @@ void CarNPC::move(GraphNode& target) {
         b2Body_ApplyForceToCenter(body_id, force, true);
     }
     rotate(target);
+    apply_friction();
 }
 
 void CarNPC::rotate(GraphNode& target) {
     b2Vec2 pos = b2Body_GetPosition(body_id);
-    b2Vec2 dir = {target.x - pos.x, target.y - pos.y};
+    b2Vec2 dir = { target.x - pos.x, target.y - pos.y };
 
-    float target_angle = atan2f(dir.y, dir.x);
+    float targetAngle = atan2f(dir.y, dir.x);
     b2Rot rot = b2Body_GetRotation(body_id);
-    float car_angle = atan2(rot.s, rot.c);
 
-    float diff = target_angle - car_angle;
+    float carAngle = atan2f(rot.s, rot.c);
 
-    b2Body_SetAngularVelocity(body_id, diff *100);
+    float diff = targetAngle - carAngle;
+
+    while (diff >  std::numbers::pi) diff -= 2.0f * std::numbers::pi;
+    while (diff < -std::numbers::pi) diff += 2.0f * std::numbers::pi;
+
+    const float maxTorque = 50.0f;
+
+    float torque = diff * 20.0f;
+
+    if (torque >  maxTorque) torque =  maxTorque;
+    if (torque < -maxTorque) torque = -maxTorque;
+
+    b2Body_ApplyTorque(body_id, torque, true);
 }
 
 CarDTO CarNPC::get_state() {
@@ -65,3 +77,22 @@ CarDTO CarNPC::get_state() {
 
     return {x, y,0, angle, 0, false, 0, 0, 0, NPC_STATE, 0};
 }
+
+b2Vec2 CarNPC::get_forward() {
+    return b2Body_GetWorldVector(body_id, {1, 0});
+}
+
+void CarNPC::apply_friction() {
+    b2Vec2 right = b2Body_GetWorldVector(body_id, {0,1});
+
+    b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
+
+    float lateral_speed = b2Dot(right, vel);
+
+    b2Vec2 lateral_impulse = {
+        -lateral_speed*right.x*b2Body_GetMass(body_id),
+        -lateral_speed*right.y*b2Body_GetMass(body_id),
+    };
+    b2Body_ApplyLinearImpulseToCenter(body_id, lateral_impulse, true);
+}
+

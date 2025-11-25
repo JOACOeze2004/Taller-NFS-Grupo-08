@@ -21,6 +21,8 @@ public:
     explicit CarNPC(GraphNode& start_corner, b2WorldId& world);
     void move(GraphNode& target);
     b2Vec2 get_position();
+    b2Vec2 get_forward();
+    void apply_friction();
     CarDTO get_state();
 };
 

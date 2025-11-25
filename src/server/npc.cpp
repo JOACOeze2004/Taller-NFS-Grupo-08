@@ -28,7 +28,7 @@ void NPC::update() {
     float dy = target.y - car_pos.y;
     float dist = dx * dx + dy * dy;
 
-    if (dist < 2.0f) {
+    if (dist < 100.0f) {
         current_corner = next_corner;
         choose_next_corner();
     }
@@ -39,17 +39,37 @@ void NPC::update() {
 void NPC::choose_next_corner() {
     const auto& corner = (*corners)[current_corner];
 
+    b2Vec2 pos = car.get_position();
+    b2Vec2 forward = car.get_forward();
+
     std::vector<int> idx(corner.neighbors.size());
     std::iota(idx.begin(), idx.end(), 0);
 
-    std::sort(idx.begin(), idx.end(), [&]( int& a, const int& b) {
-        return corner.dist[a] < corner.dist[b];
+    std::vector<int> filtered;
+
+    for (int i : idx) {
+        int nb = corner.neighbors[i];
+        const auto& c = (*corners)[nb];
+
+        b2Vec2 toC = { c.x - pos.x, c.y - pos.y };
+
+        float dot = forward.x * toC.x + forward.y * toC.y;
+
+        if (dot > 0.0f) {
+            filtered.push_back(i);
+        }
+    }
+
+    if (filtered.empty()) {
+        filtered = idx;
+    }
+
+    std::sort(filtered.begin(), filtered.end(), [&](int a, int b) {
+        return corner.dist[a] < corner.dist[b] && (corner.dist[a] - corner.dist[b]) > 50;
     });
 
-    const int limit = std::min(3, static_cast<int>(idx.size()));
-    const int next = idx[rand() % limit];
-
-    next_corner = corner.neighbors[next];
+    int limit = std::min(3, (int)filtered.size());
+    next_corner = corner.neighbors[ filtered[rand() % limit] ];
 }
 
 CarDTO NPC::get_state() {
