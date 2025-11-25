@@ -39,11 +39,6 @@ void NPC::update() {
 void NPC::choose_next_corner() {
     const auto& corner = (*corners)[current_corner];
 
-    if (corner.neighbors.empty()) {
-        next_corner = 4;  // maaaaal la mayoria estan vacias por eso pongo esto.
-        return;
-    };
-
     std::vector<int> idx(corner.neighbors.size());
     std::iota(idx.begin(), idx.end(), 0);
 
