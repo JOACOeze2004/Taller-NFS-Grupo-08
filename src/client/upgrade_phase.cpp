@@ -1,5 +1,6 @@
 #include "upgrade_phase.h"
 #include <iostream>
+#include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 
@@ -41,6 +42,16 @@ void UpgradePhase::load_upgrade_sprites() {
     arrow_data = SpriteLoader::loadArrowSprite(yaml_path);
 }
 
+Upgrades UpgradePhase::getUpgradeType(const std::string& upgrade_name) {
+    if (upgrade_name == "mass") return MASS_UPGRADE;
+    if (upgrade_name == "acceleration") return ACCELERATION_UPGRADE;
+    if (upgrade_name == "handling") return HANDLING_UPGRADE;
+    if (upgrade_name == "nitro") return NITRO_UPGRADE;
+    if (upgrade_name == "life") return LIFE_UPGRADE;
+    if (upgrade_name == "brakes") return BRAKE_UPGRADE;
+    return NONE_UPGRADE;
+}
+
 ButtonType UpgradePhase::getButtonType(const std::string& button_name) {
     if (button_name == "BUTTON_LIFE_UP") return BUTTON_LIFE_UP;
     if (button_name == "BUTTON_LIFE_DOWN") return BUTTON_LIFE_DOWN;
@@ -61,17 +72,26 @@ void UpgradePhase::init_upgrade_buttons() {
     upgrade_buttons.clear();
     arrow_buttons.clear();
     
-    int start_x = (screen_width - UPGRADE_BUTTON_WIDTH) / 2;
+    int total_width = 2 * UPGRADE_BUTTON_WIDTH + UPGRADE_COLUMN_SPACING;
+    int left_column_x = (screen_width - total_width) / 2;
+    int right_column_x = left_column_x + UPGRADE_BUTTON_WIDTH + UPGRADE_COLUMN_SPACING;
 
-    for (const auto& upgrade : upgrade_data) {
+    for (size_t i = 0; i < upgrade_data.size(); ++i) {
+        const auto& upgrade = upgrade_data[i];
         UpgradeButton btn;
+        
+        bool is_left_column = (i < 3);
+        int column_x = is_left_column ? left_column_x : right_column_x;
+        int row_in_column = is_left_column ? i : (i - 3);
+        
         btn.rect = {
-            start_x,
-            UPGRADE_START_Y + upgrade.order * (UPGRADE_BUTTON_HEIGHT + UPGRADE_BUTTON_SPACING),
+            column_x,
+            UPGRADE_START_Y + row_in_column * (UPGRADE_BUTTON_HEIGHT + UPGRADE_BUTTON_SPACING),
             UPGRADE_BUTTON_WIDTH,
             UPGRADE_BUTTON_HEIGHT
         };
-        btn.upgrade_type = NONE_UPGRADE;
+
+        btn.upgrade_type = getUpgradeType(upgrade.name);
         btn.title = upgrade.title;
         btn.description = upgrade.description;
         btn.icon_src_rect = upgrade.sprite;
@@ -109,8 +129,8 @@ void UpgradePhase::render_background() {
 void UpgradePhase::render_title() {
     if (!text) return;
     std::string title = "AVAILABLE UPGRADES";
-    int title_y = 30;
-    int est_width = static_cast<int>(title.size()) * 10;
+    int title_y = 20;
+    int est_width = static_cast<int>(title.size()) * 14;
     int title_x = (screen_width - est_width) / 2;
     text->render(renderer, title, title_x, title_y, COLOR_UPGRADE_TITLE);
 }
@@ -127,13 +147,13 @@ void UpgradePhase::render_remaining_upgrades(int remaining_upgrades) {
         info = "You have " + std::to_string(remaining_upgrades) + " upgrade points to spend";
     }
     
-    int est_width = static_cast<int>(info.size()) * 9;
+    int est_width = static_cast<int>(info.size()) * 11;
     int info_x = (screen_width - est_width) / 2;
-    int info_y = 50;
+    int info_y = 55;
     text->render(renderer, info, info_x, info_y, COLOR_UPGRADE_INFO);
 }
 
-void UpgradePhase::render_upgrade_buttons() {
+void UpgradePhase::render_upgrade_buttons(const std::map<Upgrades, std::chrono::seconds>& prices) {
     
     if (handler) {
         handler->clear_buttons();
@@ -178,7 +198,7 @@ void UpgradePhase::render_upgrade_buttons() {
             }
             SDL_Rect icon_dst = {
                 button.rect.x + (button.rect.w - dest_w)/2,
-                button.rect.y + (button.rect.h - dest_h)/2,
+                button.rect.y + (button.rect.h - dest_h)/2 - 10,
                 dest_w,
                 dest_h
             };
@@ -202,14 +222,30 @@ void UpgradePhase::render_upgrade_buttons() {
 
         if (text) {
             int title_y = button.rect.y + UPGRADE_TITLE_Y_OFFSET;
-            int est_title_width = static_cast<int>(button.title.size()) * 8;
+            int est_title_width = static_cast<int>(button.title.size()) * 14;
             int title_x = button.rect.x + (button.rect.w - est_title_width) / 2;
             text->render(renderer, button.title, title_x, title_y, COLOR_WHITE);
             
             int desc_y = button.rect.y + button.rect.h - UPGRADE_DESC_Y_OFFSET;
-            int est_desc_width = static_cast<int>(button.description.size()) * 7;
+            int est_desc_width = static_cast<int>(button.description.size()) * 11;
             int desc_x = button.rect.x + (button.rect.w - est_desc_width) / 2;
             text->render(renderer, button.description, desc_x, desc_y, COLOR_UPGRADE_DESC);
+            
+            
+
+            auto it = prices.find(button.upgrade_type);
+            if (it != prices.end()) {
+                int seconds = static_cast<int>(it->second.count());
+                std::string price_text = "Cost: " + std::to_string(seconds) + "s";
+                int price_y = desc_y + 28;
+                int max_y = button.rect.y + button.rect.h - 10;
+                if (price_y > max_y) price_y = max_y;
+                
+                int est_price_width = static_cast<int>(price_text.size()) * 11;
+                int price_x = button.rect.x + (button.rect.w - est_price_width) / 2;
+                SDL_Color price_color = {255, 215, 0, 255}; 
+                text->render(renderer, price_text, price_x, price_y, price_color);
+            }
         }
     }
 }
@@ -217,19 +253,20 @@ void UpgradePhase::render_upgrade_buttons() {
 void UpgradePhase::render_instructions() {
     if (!text) return;
     std::string instruction = "Use LEFT/RIGHT arrows to downgrade/upgrade";
-    int est_width = static_cast<int>(instruction.size()) * 10;
+    int est_width = static_cast<int>(instruction.size()) * 12;
     int x = (screen_width - est_width) / 2;
-    int y = screen_height - 30;
+    int y = screen_height - 40;
     text->render(renderer, instruction, x, y, COLOR_UPGRADE_INFO);
 }
 
-void UpgradePhase::render(int remaining_upgrades) {
+void UpgradePhase::render(int remaining_upgrades, const std::map<Upgrades, std::chrono::seconds>& prices) {
     
     render_background();
     render_title();
     render_remaining_upgrades(remaining_upgrades);
-    render_upgrade_buttons();
+    render_upgrade_buttons(prices);
     render_instructions();
+
     
 }
 

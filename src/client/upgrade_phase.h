@@ -49,11 +49,12 @@ private:
     
     void init_upgrade_buttons();
     void load_upgrade_sprites();
+    Upgrades getUpgradeType(const std::string& upgrade_name);
     ButtonType getButtonType(const std::string& button_name);
     void load_textures();
     void render_background();
     void render_title();
-    void render_upgrade_buttons();
+    void render_upgrade_buttons(const std::map<Upgrades, std::chrono::seconds>& prices);
     void render_instructions();
     void render_remaining_upgrades(int remaining_upgrades);
 
@@ -64,7 +65,7 @@ public:
     
     Upgrades show_and_wait_selection();
     
-    void render(int remaining_upgrades);
+    void render(int remaining_upgrades, const std::map<Upgrades, std::chrono::seconds>& prices);
 };
 
 #endif  // TALLER_TP_UPGRADE_PHASE_H
