@@ -26,7 +26,6 @@ error() { echo -e "${RED}[error]${NC}   $*"; }
 log "Starting installer for '${GAME_NAME}'"
 info "Root dir: $ROOT_DIR"
 
-# Clean up problematic Kitware repo if it exists
 if [[ -f /etc/apt/sources.list.d/kitware.list ]]; then
   warn "Found problematic Kitware repository, removing it..."
   sudo rm -f /etc/apt/sources.list.d/kitware.list
@@ -41,7 +40,22 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
   ca-certificates gnupg software-properties-common lsb-release curl wget \
   build-essential git pkg-config ninja-build unzip zip libssl-dev
 
-# Function to check if CMake version is sufficient
+log "Cloning game repository"
+: "${USER:=$(whoami)}"
+: "${SUDO_USER:=$USER}"
+
+INSTALL_DIR="/home/$SUDO_USER/Documents/Taller-NFS-Grupo-08"
+
+if [[ -d "$INSTALL_DIR" ]]; then
+    warn "Directory already exists, skipping clone: $INSTALL_DIR"
+else
+    git clone https://github.com/JOACOeze2004/Taller-NFS-Grupo-08.git "$INSTALL_DIR"
+    log "Repository cloned into $INSTALL_DIR"
+fi
+ROOT_DIR="$INSTALL_DIR"
+BUILD_DIR="$ROOT_DIR/build"
+info "Root dir: $ROOT_DIR"
+
 check_cmake_version() {
   if ! command -v cmake >/dev/null 2>&1; then
     return 1
@@ -58,7 +72,6 @@ check_cmake_version() {
   return 1
 }
 
-# Check current CMake
 CMAKE_OK=false
 if CMAKE_VERSION=$(check_cmake_version); then
   CMAKE_OK=true
@@ -72,11 +85,9 @@ else
   fi
 fi
 
-# Install CMake if needed
 if [[ "$CMAKE_OK" == "false" ]]; then
   log "Installing modern CMake automatically from official source"
   
-  # Determine architecture
   ARCH=$(uname -m)
   if [[ "$ARCH" == "x86_64" ]]; then
     CMAKE_ARCH="x86_64"
@@ -87,7 +98,6 @@ if [[ "$CMAKE_OK" == "false" ]]; then
     exit 1
   fi
   
-  # CMake version to install
   CMAKE_VERSION_TO_INSTALL="3.28.3"
   CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION_TO_INSTALL}/cmake-${CMAKE_VERSION_TO_INSTALL}-linux-${CMAKE_ARCH}.tar.gz"
   CMAKE_TAR="cmake-${CMAKE_VERSION_TO_INSTALL}-linux-${CMAKE_ARCH}.tar.gz"
@@ -96,10 +106,8 @@ if [[ "$CMAKE_OK" == "false" ]]; then
   log "Downloading CMake ${CMAKE_VERSION_TO_INSTALL} for ${CMAKE_ARCH}"
   cd /tmp
   
-  # Remove old CMake installation if exists
   sudo rm -rf /opt/cmake
   
-  # Download CMake
   if [[ -f "$CMAKE_TAR" ]]; then
     rm -f "$CMAKE_TAR"
   fi
@@ -115,18 +123,14 @@ if [[ "$CMAKE_OK" == "false" ]]; then
   log "Installing CMake to /opt/cmake"
   sudo mv "$CMAKE_DIR" /opt/cmake
   
-  # Create symlinks
   sudo ln -sf /opt/cmake/bin/cmake /usr/local/bin/cmake
   sudo ln -sf /opt/cmake/bin/ctest /usr/local/bin/ctest
   sudo ln -sf /opt/cmake/bin/cpack /usr/local/bin/cpack
   
-  # Clean up
   rm -f "$CMAKE_TAR"
   
-  # Update PATH for current session
   export PATH="/usr/local/bin:$PATH"
   
-  # Verify installation
   if CMAKE_VERSION=$(check_cmake_version); then
     log "Successfully installed CMake $CMAKE_VERSION"
   else
@@ -146,12 +150,12 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
   libwavpack1 libwavpack-dev \
   libx11-xcb1 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
   libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0 \
-  libxcb-shape0 || true
+  libxcb-shape0 \
+  valgrind || true
 
 log "Configuring and building project (Release)"
 mkdir -p "$BUILD_DIR"
 
-# Clean build if CMake was just installed
 if [[ "$CMAKE_OK" == "false" ]]; then
   log "Cleaning previous build configuration due to CMake update"
   rm -rf "$BUILD_DIR"/*
@@ -198,39 +202,29 @@ else
   echo "# Placeholder server config" | sudo tee "$CFG_DIR/server_config.yaml" >/dev/null
 fi
 
-log "Copying assets to $VAR_DIR"
+mkdir -p "$CFG_DIR"
+mkdir -p "$VAR_DIR/game"
+
+if [[ -d "$ROOT_DIR/config" ]]; then
+  sudo cp -r "$ROOT_DIR/config/"* "$CFG_DIR/" || true
+else
+  echo "# Placeholder client config" | sudo tee "$CFG_DIR/client_config.yaml" >/dev/null
+  echo "# Placeholder server config" | sudo tee "$CFG_DIR/server_config.yaml" >/dev/null
+fi
+
 if [[ -d "$ROOT_DIR/assets" ]]; then
-  sudo cp -r "$ROOT_DIR/assets" "$VAR_DIR/" || true
-  info "Copied assets/ directory"
-else
-  warn "Assets directory not found at $ROOT_DIR/assets"
+  sudo cp -r "$ROOT_DIR/assets" "$VAR_DIR/game/" || true
 fi
 
-log "Copying complete src/ structure to $VAR_DIR"
 if [[ -d "$ROOT_DIR/src" ]]; then
-  sudo cp -r "$ROOT_DIR/src" "$VAR_DIR/" || true
-  info "Copied src/ directory with all YAMLs"
-else
-  warn "Source directory not found at $ROOT_DIR/src"
+  sudo cp -r "$ROOT_DIR/src" "$VAR_DIR/game/" || true
 fi
 
-log "Creating optimized directory structure for asset loading"
-
-# Create main game directory structure
-sudo mkdir -p "$VAR_DIR/game"
-
-# Copy or move everything to the game directory
-if [[ -d "$VAR_DIR/assets" ]]; then
-  sudo cp -r "$VAR_DIR/assets" "$VAR_DIR/game/" || true
-fi
-
-if [[ -d "$VAR_DIR/src" ]]; then
-  sudo cp -r "$VAR_DIR/src" "$VAR_DIR/game/" || true
-fi
+sudo ln -sfn "$VAR_DIR/game/src" /usr/src
+sudo ln -sfn "$VAR_DIR/game/assets" /usr/assets
 
 log "Creating symlink structure for multiple path resolution strategies"
 
-# Strategy 1: Symlinks in /usr for ../assets and ../src paths
 sudo rm -f /usr/assets /usr/src 2>/dev/null || true
 sudo ln -sf "$VAR_DIR/game/assets" /usr/assets
 sudo ln -sf "$VAR_DIR/game/src" /usr/src
@@ -247,18 +241,15 @@ else
   warn "Failed to create symlink /usr/src"
 fi
 
-# Strategy 2: Symlinks in /var/need_for_speed for working directory approach
 sudo ln -sf "$VAR_DIR/game/assets" "$VAR_DIR/assets" 2>/dev/null || true
 sudo ln -sf "$VAR_DIR/game/src" "$VAR_DIR/src" 2>/dev/null || true
 
-# Strategy 3: Create assets and src in the parent directory of /usr/bin (root)
 sudo ln -sf "$VAR_DIR/game/assets" /assets 2>/dev/null || true
 sudo ln -sf "$VAR_DIR/game/src" /src 2>/dev/null || true
 
 log "Creating enhanced launcher scripts on Desktop"
 mkdir -p "$DESKTOP_DIR"
 
-# Client launcher with multiple path strategies
 cat > "$DESKTOP_DIR/run_client.sh" <<EOFCLIENT
 #!/usr/bin/env bash
 
@@ -297,7 +288,6 @@ EOFCLIENT
 chmod +x "$DESKTOP_DIR/run_client.sh"
 log "Client launcher created -> $DESKTOP_DIR/run_client.sh"
 
-# Server launcher with multiple path strategies
 cat > "$DESKTOP_DIR/run_server.sh" <<EOFSERVER
 #!/usr/bin/env bash
 
@@ -335,7 +325,6 @@ EOFSERVER
 chmod +x "$DESKTOP_DIR/run_server.sh"
 log "Server launcher created -> $DESKTOP_DIR/run_server.sh"
 
-# Set proper permissions
 sudo chown -R "$(id -u):$(id -g)" "$VAR_DIR" || true
 sudo chmod -R 755 "$VAR_DIR/game" || true
 
@@ -357,12 +346,6 @@ echo "  • Game data: ${VAR_DIR}/game"
 echo "  • Assets: ${VAR_DIR}/game/assets"
 echo "  • Source YAMLs: ${VAR_DIR}/game/src"
 echo
-echo "Symlinks for path resolution:"
-echo "  • /usr/assets -> ${VAR_DIR}/game/assets"
-echo "  • /usr/src -> ${VAR_DIR}/game/src"
-echo "  • /assets -> ${VAR_DIR}/game/assets"
-echo "  • /src -> ${VAR_DIR}/game/src"
-echo
 echo "Desktop Launchers:"
 echo "  • ${DESKTOP_DIR}/run_client.sh"
 echo "  • ${DESKTOP_DIR}/run_server.sh"
@@ -372,14 +355,16 @@ info "         HOW TO RUN THE GAME"
 info "=========================================="
 echo
 echo "1. START THE SERVER:"
-echo "   ${DESKTOP_DIR}/run_server.sh [PORT]"
-echo "   Example: ${DESKTOP_DIR}/run_server.sh 8080"
+echo "   ${DESKTOP_DIR}/run_server.sh"
+echo "   Example: ${DESKTOP_DIR}/run_server.sh"
 echo "   (Default port: 8080)"
+echo "   If you need yo change the port, go to run_server.sh and change the var PORT"
 echo
 echo "2. START THE CLIENT:"
-echo "   ${DESKTOP_DIR}/run_client.sh [HOST] [PORT]"
-echo "   Example: ${DESKTOP_DIR}/run_client.sh localhost 8080"
-echo "   (Defaults: localhost:8080)"
+echo "   ${DESKTOP_DIR}/run_client.sh"
+echo "   Example: ${DESKTOP_DIR}/run_client.sh"
+echo "   (Defaults: localhost 8080)"
+echo "   If you need yo change the host and the port, go to run_client.sh and change the vars PORT and HOST "
 echo
 echo "3. Or simply double-click the .sh files on your Desktop!"
 echo

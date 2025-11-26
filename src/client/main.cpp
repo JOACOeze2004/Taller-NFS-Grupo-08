@@ -14,6 +14,7 @@
 #include "pantallas/login_window.h"
 
 #include "client.h"
+#include "audio_manager.h"
 
 using namespace SDL2pp;
 
@@ -25,6 +26,12 @@ int main(int argc, char *argv[]) try {
     const std::string host = argv[HOST];
     const std::string port = argv[PORT];
 
+    AudioManager audioManager;
+    if (!audioManager.initialize()) {
+        std::cerr << "Error al inicializar AudioManager" << std::endl;
+    }
+    audioManager.changeState(GameState::LOBBY);
+
     QApplication app(argc, argv);
     auto loginWindow = new LoginWindow();
     bool startPressed = false;
@@ -34,9 +41,12 @@ int main(int argc, char *argv[]) try {
     QObject::connect(loginWindow, &LoginWindow::startButtonClicked, [&]() {
         playerConfig = loginWindow->getPlayerConfig();
         try {
-            client = new Client(host, port);
+            client = new Client(host, port, &audioManager);
             client->send_config(playerConfig, loginWindow->getLobbyAction(), loginWindow->getSelectedGameId());
             loginWindow->close();
+            
+            audioManager.changeState(GameState::PLAYING);
+            
             client->run();
             startPressed = true;
             QApplication::quit();
@@ -50,6 +60,8 @@ int main(int argc, char *argv[]) try {
     QApplication::exec();
 
     if (startPressed && client) {
+        audioManager.changeState(GameState::RESULTS);
+        
         auto resultsWindow = new FinalResultsWindow();
 
         if (client->has_final_results()) {

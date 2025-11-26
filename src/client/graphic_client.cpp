@@ -8,19 +8,22 @@
 #include <cmath>
 #include "text_renderer.h"
 #include "upgrade_phase.h"
+#include "audio_manager.h"
 
-GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _handler)
+GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _handler, AudioManager* audio)
         : renderer(nullptr), bg_texture(nullptr), window(nullptr),
             player_car_id(-1), camera_x(0.0f), camera_y(0.0f), 
             screen_width(DEFAULT_SCREEN_WIDTH), screen_height(DEFAULT_SCREEN_HEIGHT), 
             text(nullptr), handler(_handler), 
-            ready_sent(false), upgrade_phase(nullptr) {
+            ready_sent(false), upgrade_phase(nullptr), audio_manager(audio),
+            previous_collision(NONE_COLLISION), previous_using_nitro(false), previous_checkpoint_count(0) {
 
     initialize_sdl();
     initialize_window();
     initialize_renderer();
     initialize_image_and_ttf();
     initialize_resource_manager();
+    load_sprites_config();
     load_core_textures();
     load_map_texture(initial_snapshot.map);
     initialize_text_renderer();
@@ -31,6 +34,13 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
     
     initialize_upgrade_phase();
     draw(initial_snapshot);
+}
+
+void GraphicClient::load_sprites_config() {
+    const std::string yaml_path = "../src/client/checkpoints_hints.yaml";
+
+    checkpoint_sprites = SpriteLoader::loadCheckpointSprites(yaml_path);
+    hint_sprite = SpriteLoader::loadHintSprite(yaml_path);
 }
 
 void GraphicClient::initialize_sdl() {
@@ -138,8 +148,10 @@ void GraphicClient::initialize_upgrade_phase() {
 
 void GraphicClient::update_from_snapshot(const Snapshot& snapshot) {
 
+    human_count = 0;
     for (auto& [id, car] : snapshot.cars) {
         update_car(id, car);
+        if (car.state != NPC_STATE) ++human_count;
     }
 
     update_camera();
@@ -155,6 +167,38 @@ void GraphicClient::update_from_snapshot(const Snapshot& snapshot) {
         }
     } else {
         camera_id = player_car_id;
+    }
+    
+    if (audio_manager && player_it != snapshot.cars.end()) {
+        const CarDTO& player_car = player_it->second;
+
+        //Detect transition from lobby to race and play start sound once
+        static int previous_state = snapshot.state;
+        if (previous_state == IN_LOBBY && snapshot.state == IN_RACE) {
+            audio_manager->playSoundEffect(SoundEffect::RACE_START);
+        }
+        previous_state = snapshot.state;
+        
+        if (snapshot.collision != NONE_COLLISION && previous_collision == NONE_COLLISION) {
+            if (snapshot.collision == HEAVY_COLLISION) {
+                audio_manager->playSoundEffect(SoundEffect::CRASH);
+            }
+        }
+        previous_collision = snapshot.collision;
+        
+        bool using_nitro = player_car.remaining_nitro > 0.0f && player_car.nitro > 0.0f;
+        if (using_nitro && !previous_using_nitro) {
+            audio_manager->playSoundEffect(SoundEffect::NITRO);
+        }
+        previous_using_nitro = using_nitro;
+        
+        if (player_car.state == DEAD) {
+            audio_manager->playSoundEffect(SoundEffect::DEATH);
+        }
+        
+        if (player_car.state == FINISHED && snapshot.state == IN_RACE) {
+            audio_manager->playSoundEffect(SoundEffect::WIN);
+        }
     }
 }
 
@@ -266,7 +310,7 @@ void GraphicClient::draw(const Snapshot& snapshot) {
 void GraphicClient::draw_workshop_state(const Snapshot& snapshot) {
     auto player_it = snapshot.cars.find(player_car_id);
     int remaining_upgrades = (player_it != snapshot.cars.end()) ? player_it->second.remaining_upgrades : 0;
-    upgrade_phase->render(remaining_upgrades);
+    upgrade_phase->render(remaining_upgrades, snapshot.prices);
 }
 
 void GraphicClient::draw_lobby_state(const Snapshot& snapshot) {
@@ -277,7 +321,7 @@ void GraphicClient::draw_lobby_state(const Snapshot& snapshot) {
     draw_game_id(snapshot.game_id);
     
     if (snapshot.is_owner) {
-        draw_ready_btn(static_cast<int>(snapshot.cars.size()), ready_sent);
+        draw_ready_btn(human_count, ready_sent);
     }
 }
 
@@ -295,7 +339,7 @@ void GraphicClient::draw_race_state(const Snapshot& snapshot) {
         draw_state(player_it->second.state);
         draw_results(snapshot.cars_finished);
     } else {
-        draw_position(snapshot.position, snapshot.cars.size());
+        draw_position(snapshot.position, human_count);
         draw_time(snapshot.time_ms);
     }
 } 
@@ -455,46 +499,44 @@ void GraphicClient::draw_checkpoint(CheckpointCoords checkpoint, int type) {
 
     if (checkpoint.x >= camera_x && checkpoint.x <= camera_x + viewport_width &&
         checkpoint.y >= camera_y && checkpoint.y <= camera_y + viewport_height) {
-        
+
         float screen_x = (checkpoint.x - camera_x) * ZOOM_FACTOR;
         float screen_y = (checkpoint.y - camera_y) * ZOOM_FACTOR;
 
-        const float dst_w = 60.0f;
-        const float dst_h = 90.0f;
+        const float dst_w = CHECKPOINT_DST_W;
+        const float dst_h = CHECKPOINT_DST_H;
         SDL_FRect dst_rect = {screen_x - dst_w * 0.5f, screen_y - dst_h * 0.5f, dst_w, dst_h};
 
-        if (type == 1){
-            SDL_Rect src_rect = {290, 650, 95, 120};
-            SDL_RenderCopyF(renderer, checkpoint_texture, &src_rect, &dst_rect);
-        }else if (type == 2){
-            SDL_Rect src_rect = {410, 20, 90, 127};
-            SDL_RenderCopyF(renderer, checkpoint_texture, &src_rect, &dst_rect);
-        } else {
-            SDL_Rect src_rect = {290, 175, 95, 120};
-            SDL_RenderCopyF(renderer, checkpoint_texture, &src_rect, &dst_rect);
+        SDL_Rect src_rect = {290, 175, 95, 120};
+        for (const auto& sprite : checkpoint_sprites) {
+            if (sprite.type == type) {
+                src_rect = sprite.rect;
+                break;
+            }
         }
-    }    
-} 
+        SDL_RenderCopyF(renderer, checkpoint_texture, &src_rect, &dst_rect);
+    }
+}
 
 void GraphicClient::draw_hint(HintCoords hint) {
     if (!hint_texture) return;
+
     const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
     const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
+
     if (hint.x >= camera_x && hint.x <= camera_x + viewport_width &&
         hint.y >= camera_y && hint.y <= camera_y + viewport_height) {
-        
+
         float screen_x = (hint.x - camera_x) * ZOOM_FACTOR;
         float screen_y = (hint.y - camera_y) * ZOOM_FACTOR;
 
-        SDL_Rect src_rect = {260, 20, 120, 150};
-        SDL_FRect dst_rect = {screen_x, screen_y, 40.0f, 60.0f};
+        SDL_FRect dst_rect = {screen_x, screen_y, HINT_DST_W, HINT_DST_H};
+        double angle_deg = hint.angle + 180.0;
+        SDL_FPoint center = {15.0f, 15.0f};
 
-        double angle_deg = hint.angle + 180;
-        SDL_FPoint center = {15.0f, 15.0f}; 
-                    
-        SDL_RenderCopyExF(renderer, hint_texture, &src_rect, &dst_rect, angle_deg, &center, SDL_FLIP_NONE);
+        SDL_RenderCopyExF(renderer, hint_texture, &hint_sprite.rect,
+                         &dst_rect, angle_deg, &center, SDL_FLIP_NONE);
     }
-
 }
 
 
@@ -578,7 +620,7 @@ void GraphicClient::draw_minimap(const CheckpointCoords& checkpoint, int checkpo
 
     for (const auto& [id, car] : cars) {
         if (car.x >= src_rect.x && car.x <= src_rect.x + src_rect.w &&
-            car.y >= src_rect.y && car.y <= src_rect.y + src_rect.h && car.state == IN_GAME) {
+            car.y >= src_rect.y && car.y <= src_rect.y + src_rect.h && (car.state == IN_GAME || car.state == NPC_STATE)) {
             
             float car_minimap_x = minimap_x + (car.x - src_rect.x) * scale - 3.0f;
             float car_minimap_y = minimap_y + (car.y - src_rect.y) * scale - 3.0f;
@@ -703,15 +745,16 @@ void GraphicClient::draw_minimap(const CheckpointCoords& checkpoint, int checkpo
 void GraphicClient::draw_cars() {
     const float viewport_width = static_cast<float>(screen_width) / ZOOM_FACTOR;
     const float viewport_height = static_cast<float>(screen_height) / ZOOM_FACTOR;
-
+  
     for (const auto& [id, car_dto_world] : cars) {
         if (car_dto_world.x >= camera_x && car_dto_world.x <= camera_x + viewport_width &&
-            car_dto_world.y >= camera_y && car_dto_world.y <= camera_y + viewport_height && car_dto_world.state == IN_GAME) {
+            car_dto_world.y >= camera_y && car_dto_world.y <= camera_y + viewport_height && (car_dto_world.state == IN_GAME || car_dto_world.state == NPC_STATE)) {
             
             CarDTO adjusted = car_dto_world;
             adjusted.x = (car_dto_world.x - camera_x) * ZOOM_FACTOR;
             adjusted.y = (car_dto_world.y - camera_y) * ZOOM_FACTOR;
-
+            
+            
             auto it = car_objects.find(id);
             if (it == car_objects.end()) {
                 car_objects[id] = std::make_unique<Car>(adjusted.x, adjusted.y, adjusted.angle, renderer, resources.get(), car_dto_world.car_id, ZOOM_FACTOR);

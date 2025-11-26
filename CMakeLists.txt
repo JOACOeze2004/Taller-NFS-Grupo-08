@@ -151,6 +151,10 @@ if(TALLER_CLIENT)
             src/client/pantallas/results_table_widget.h
             src/client/pantallas/style_manager.cpp
             src/client/pantallas/style_manager.h
+            src/client/audio_manager.h
+            src/client/audio_manager.cpp
+            src/client/sprite_loader.cpp
+            src/client/sprite_loader.h
     )
 
     # Make them depend on taller_common lib
@@ -166,7 +170,7 @@ if(TALLER_CLIENT)
     target_include_directories(taller_client PRIVATE ${libSDL2pp_SOURCE_DIR})
 
     # Link the taller_common lib target
-    target_link_libraries(taller_client taller_common SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2pp::SDL2pp Qt5::Widgets yaml-cpp)
+    target_link_libraries(taller_client taller_common SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2pp::SDL2pp Qt5::Widgets yaml-cpp SDL2_mixer)
 endif()
 
 if(TALLER_SERVER)
@@ -200,14 +204,27 @@ if(TALLER_SERVER)
             src/server/CarStats.h
             src/server/race.h
             src/server/race.cpp
-            src/server/phase.cpp
-            src/server/phase.h
-            src/server/lobby.cpp
-            src/server/lobby.h
-            src/server/in_game.cpp
-            src/server/in_game.h
-            src/server/workshop.cpp
-            src/server/workshop.h)
+            src/server/phase/phase.cpp
+            src/server/phase/phase.h
+            src/server/phase/lobby.cpp
+            src/server/phase/lobby.h
+            src/server/phase/in_game.cpp
+            src/server/phase/in_game.h
+            src/server/phase/workshop.cpp
+            src/server/phase/workshop.h
+            src/server/phase/countdown.h
+            src/server/phase/countdown.cpp
+            src/server/car_command_processor.h
+            src/server/car_command_processor.cpp
+            src/server/results_handler.cpp
+            src/server/results_handler.h
+            src/server/npc.h
+            src/server/npc.cpp
+            src/server/car_npc.h
+            src/server/car_npc.cpp
+            src/server/upgrade_handler.h
+            src/server/upgrade_handler.cpp
+            )
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)
@@ -268,7 +285,7 @@ if(TALLER_EDITOR)
     target_include_directories(taller_editor PRIVATE ${libSDL2pp_SOURCE_DIR})
 
     # Link the taller_common lib target
-    target_link_libraries(taller_editor taller_common SDL2pp::SDL2pp Qt5::Widgets yaml-cpp)
+    target_link_libraries(taller_editor taller_common SDL2pp::SDL2pp Qt5::Widgets yaml-cpp SDL2_mixer)
 endif()
 
 
@@ -291,7 +308,24 @@ if(TALLER_TESTS)
 
     # target for testing
     # HEY!! TODO XXX: Change the name of the executable to the one you like!
-    add_executable(taller_tests)
+    add_executable(taller_tests
+        tests/test_client_protocol.cpp
+        tests/test_server_protocol.cpp
+        tests/test_integration.cpp
+
+        src/client/client_protocol.cpp
+        src/server/server_protocol.cpp
+    
+    )
+
+    target_compile_definitions(taller_tests PRIVATE TESTS)
+
+    target_sources(taller_tests
+        PRIVATE
+        ../src/common/protocol.cpp
+        ../src/common/mocked_socket.cpp
+        tests/test_protocol.cpp
+    )
 
     # HEY!! TODO XXX: I'm assuming that the code under testing is in taller_common
     # Change this if you have to.

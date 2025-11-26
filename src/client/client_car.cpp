@@ -25,52 +25,25 @@ Car::Car(float x, float y, float angle, SDL_Renderer* renderer, ResourceManager*
 Car::~Car() {
 }
 
-
-
 void Car::loadSpriteConfig(int car_id) {
     if (!texture) {
         return;
     }
-    
     if (car_id < MIN_CAR_ID || car_id > MAX_CAR_ID) {
-        std::cerr << "Warning: car_id " << car_id << " out of range [" 
-                  << MIN_CAR_ID << ", " << MAX_CAR_ID << "]. Using default." << std::endl;
         car_id = MIN_CAR_ID;
     }
-    
-    if (!tryLoadYamlConfig(YAML_CONFIG_PATH, car_id)) {
-        setDefaultSprite();
-    }
-}
+    std::vector<SpriteData> car_sprites = SpriteLoader::loadCarSprites(YAML_CONFIG_PATH);
 
-bool Car::tryLoadYamlConfig(const std::string& yaml_path, int car_id) {
-    std::ifstream file(yaml_path);
-    if (!file.good()) {
-        return false;
+    bool found = false;
+    for (const auto& sprite : car_sprites) {
+        if (sprite.id == car_id) {
+            srcRect = sprite.rect;
+            found = true;
+            break;
+        }
     }
-    
-    try {
-        YAML::Node config = YAML::LoadFile(yaml_path);
-        
-        if (!config["cars"] || !config["cars"].IsSequence()) {
-            return false;
-        }
-        
-        if (static_cast<std::size_t>(car_id) >= config["cars"].size()) {
-            return false;
-        }
-        
-        YAML::Node carSprite = config["cars"][car_id]["sprite"];
-        srcRect.x = carSprite["x"].as<int>();
-        srcRect.y = carSprite["y"].as<int>();
-        srcRect.w = carSprite["width"].as<int>();
-        srcRect.h = carSprite["height"].as<int>();
-        
-        return true;
-        
-    } catch (const YAML::Exception& e) {
-        std::cerr << "Error parsing YAML file " << yaml_path << ": " << e.what() << std::endl;
-        return false;
+    if (!found) {
+        setDefaultSprite();
     }
 }
 
@@ -89,14 +62,17 @@ void Car::update_from_dto(const CarDTO& state) {
     life = state.life;
     nitro = state.nitro;
     nitro_remaining = state.remaining_nitro;
+    this->state = state.state;
 }
 
 void Car::render() {
     if (texture && srcRect.w > 0 && srcRect.h > 0) {
-        renderNitro();
+        if(state != NPC_STATE){
+            renderLife();
+            renderNitroBar();
+            renderNitro();
+        }
         renderTexture();
-        renderLife();
-        renderNitroBar();
     } else {
         renderFallback();
     }

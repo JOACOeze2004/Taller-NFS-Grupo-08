@@ -4,8 +4,8 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "CarStats.h"
 #include "../common/constants.h"
+#include "CarStats.h"
 
 ParserYaml::ParserYaml() : cars_file(YAML::LoadFile(MAPS_PATH)) {}
 
@@ -26,7 +26,7 @@ std::vector<StaticBody> ParserYaml::parse_map(std::string& map_name) {
 
     std::vector<StaticBody> boxes;
     for (const auto& layer : map["layers"]) {
-        if (layer["type"].as<std::string>() != "objectgroup") continue;
+        if (layer["name"].as<std::string>() != "BOXES") continue;
         for (const auto& obj : layer["objects"]) {
             StaticBody box;
             box.id = obj["id"].as<int>();
@@ -39,6 +39,35 @@ std::vector<StaticBody> ParserYaml::parse_map(std::string& map_name) {
     }
 
     return boxes;
+}
+
+std::vector<Corner> ParserYaml::parse_corners(std::string& map_name) {
+    YAML::Node map;
+    if (map_name == LIBERTY_CITY_STR ) {
+        map = YAML::LoadFile(LIBERTY_CITY_PATH);
+    }
+    else if (map_name == SAN_ANDREAS_STR) {
+        map = YAML::LoadFile(SAN_ANDREAS_PATH);
+    }
+    else if (map_name == VICE_CITY_STR) {
+        map = YAML::LoadFile(VICE_CITY_PATH);
+    }
+    else {
+        throw std::invalid_argument(UNKNOWN_PATH);
+    }
+
+    std::vector<Corner> corners;
+    for (const auto& layer : map["layers"]) {
+        if (layer["name"].as<std::string>() != "ESQUINAS") continue;
+        for (const auto& obj : layer["objects"]) {
+            Corner corner;
+            corner.x = obj["x"].as<float>();
+            corner.y = obj["y"].as<float>();
+            corners.push_back(corner);
+        }
+    }
+
+    return corners;
 }
 
 CarStats ParserYaml::parse_car(const int car_id) {

@@ -1,6 +1,10 @@
 #include "world.h"
+
+#include <iostream>
 #include <vector>
+
 #include "car.h"
+
 
 World::World() {
     b2WorldDef world_def = b2DefaultWorldDef();
@@ -45,6 +49,9 @@ void World::update() {
         else if (car_a) {
             car_a->handle_hit(event.normal, event.approachSpeed, false);
         }
+        else if (car_b) {
+            car_b->handle_hit(event.normal, event.approachSpeed, false);
+        }
     }
 }
 
@@ -56,6 +63,44 @@ void World::generate_map(std::string& map_name) {
     std::vector<StaticBody> boxes = parser.parse_map(map_name);
 
     create_collisions(boxes);
+}
+
+std::vector<GraphNode> World::generate_corners(std::string& map_name) {
+    std::vector<Corner> corners = parser.parse_corners(map_name);
+    return create_nodes(corners);
+}
+
+std::vector<GraphNode> World::create_nodes(std::vector<Corner>& corners) {
+    std::vector<GraphNode> nodes;
+    nodes.resize(corners.size());
+
+    for (size_t i=0; i < corners.size(); i++) {
+        nodes[i].x = corners[i].x;
+        nodes[i].y = corners[i].y;
+
+        for (size_t j =0; j < corners.size(); j++) {
+            if ( i == j) continue;
+            if (is_visible(corners[i], corners[j])) {
+                float dx = corners[j].x - corners[i].x;
+                float dy = corners[j].y - corners[i].y;
+                float dist = dx*dx + dy*dy;
+                nodes[i].neighbors.push_back(static_cast<int>(j));
+                nodes[i].dist.push_back(dist);
+            }
+        }
+    }
+
+    return nodes;
+}
+
+bool World::is_visible(const Corner& _origin, const Corner& _traslation) const {
+    b2Vec2 origin = {_origin.x, _origin.y};
+    b2Vec2 traslation = {_traslation.x - origin.x, _traslation.y - origin.y};
+    b2QueryFilter filter = b2DefaultQueryFilter();
+
+    b2RayResult result = b2World_CastRayClosest(world, origin, traslation, filter);
+
+    return result.hit == false;
 }
 
 void World::create_collisions(std::vector<StaticBody>& boxes) {

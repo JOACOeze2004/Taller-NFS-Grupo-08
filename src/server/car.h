@@ -2,7 +2,9 @@
 #define TALLER_TP_CAR_H
 
 #include "car_state.h"
+#include "functional"
 #include "../common/car_DTO.h"
+#include "../common/DTO.h"
 #include "../common/constants.h"
 #include <box2d/box2d.h>
 
@@ -12,16 +14,18 @@ constexpr float ACCELERATION = 80.0f - MASS;
 constexpr float BRAKING = 20.0f - MASS/2;
 
 class Car {
-    float NITRO = MAX_NITRO;
+    float max_nitro = MAX_NITRO;
     float max_speed = MAX_SPEED;
+    float max_life = MAX_LIFE;
+
     CarState state;
     float mass;
     float handling = HANDLING;
     float acceleration = ACCELERATION;
     float braking = BRAKING;
     int car_id;
-    int life = MAX_LIFE;
-    int nitro = NITRO;
+    int life = max_life;
+    int nitro = MAX_NITRO;
     b2BodyId body_id;
     bool nitro_activated = false;
     int nitro_consuption = NITRO_CONSUMPTION;
@@ -38,6 +42,11 @@ class Car {
     int life_upgrades_applied = 0;
     int brake_upgrades_applied = 0;
     int mass_upgrades_applied = 0;
+
+    void initialize_upgrade_actions();
+    using UpgradeAction = std::function<void()>;
+    std::unordered_map<Upgrades, std::pair<UpgradeAction, UpgradeAction>> upgrade_actions;
+    void recalculate_stats();
 
 public:
     explicit Car(b2WorldId world, float _mass, float _handling, float _acceleration, float _braking, int _car_id);
@@ -84,6 +93,9 @@ public:
     
     bool upgrade(float& stat, float upgrade_factor);
     bool downgrade(float& stat, float upgrade_factor, int& upgrades_applied);
+
+    bool apply_upgrade(Upgrades type, bool is_upgrade);
+    int get_id() const;
 
 private:
     float calculate_torque() const;

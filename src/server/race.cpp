@@ -192,3 +192,28 @@ void Race::reset_race() {
 void Race::activate_win(int& id) {
     finished[id] = true;
 }
+
+void Race::update_cars() {
+    for (auto& [id, car] : *cars) {
+        car.update_nitro_usage();
+        car.apply_nitro_force();
+    }
+}
+
+bool Race::all_cars_done() {
+    int cars_finished_or_dead = 0;
+    for (auto& [id, car] : *cars) {
+        if (car_finished(id) || car_dead(id)) {
+            cars_finished_or_dead++;
+        }
+    }
+    return cars_finished_or_dead == (int)cars->size();
+}
+
+void Race::spawn_cars(){
+    auto start = get_start();
+    auto start_angle = get_start_angle();
+    for (auto& [id, car] : *cars) {
+        car.set_spawn(start.x, start.y, start_angle.x, start_angle.y);
+    }
+}

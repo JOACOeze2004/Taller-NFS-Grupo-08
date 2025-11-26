@@ -11,7 +11,7 @@ constexpr float ZOOM_FACTOR = 2.0f;
 // FONTS
 constexpr const char* DEFAULT_FONT_PATH = "../assets/fonts/DejaVuSans.ttf";
 constexpr int DEFAULT_FONT_SIZE = 24;
-constexpr int UPGRADE_FONT_SIZE = 18;
+constexpr int UPGRADE_FONT_SIZE = 24;
 
 // TEXTURE PATHS
 // Gameplay
@@ -82,7 +82,7 @@ constexpr SDL_Color COLOR_PANEL_BORDER = {255, 215, 0, 255};
 constexpr SDL_Color COLOR_HEADER_TEXT = {200, 200, 200, 255};
 
 // Upgrade Phase
-constexpr SDL_Color COLOR_UPGRADE_BG = {20, 20, 40, 100};
+constexpr SDL_Color COLOR_UPGRADE_BG = {20, 20, 40, 80};
 constexpr SDL_Color COLOR_UPGRADE_BUTTON_BG = {60, 90, 150, 220};
 constexpr SDL_Color COLOR_UPGRADE_BUTTON_BORDER = {140, 170, 210, 255};
 constexpr SDL_Color COLOR_UPGRADE_TITLE = {255, 215, 0, 255};
@@ -108,16 +108,18 @@ constexpr int RESULTS_COL_NAME_X = 120;
 constexpr int RESULTS_COL_TIME_X_OFFSET = 180;
 
 // Upgrade Phase
-constexpr int UPGRADE_BUTTON_WIDTH = 380;
-constexpr int UPGRADE_BUTTON_HEIGHT = 120;
-constexpr int UPGRADE_BUTTON_SPACING = 10;
-constexpr int UPGRADE_START_Y = 80;
-constexpr int UPGRADE_ICON_SIZE = 64;
-constexpr int UPGRADE_ARROW_SIZE = 40;
-constexpr int UPGRADE_ARROW_GAP = 50;
+constexpr int UPGRADE_BUTTON_WIDTH = 420;
+constexpr int UPGRADE_BUTTON_HEIGHT = 200;
+constexpr int UPGRADE_BUTTON_SPACING = 20;
+constexpr int UPGRADE_COLUMN_SPACING = 60;
+constexpr int UPGRADE_START_Y = 100;
+constexpr int UPGRADE_ICON_SIZE = 100;
+constexpr int UPGRADE_ARROW_SIZE = 50;
+constexpr int UPGRADE_ARROW_GAP = 55;
 constexpr int UPGRADE_ICON_PADDING = 12;
-constexpr int UPGRADE_TITLE_Y_OFFSET = 6;
-constexpr int UPGRADE_DESC_Y_OFFSET = 22;
+constexpr int UPGRADE_TITLE_Y_OFFSET = 10;
+constexpr int UPGRADE_DESC_Y_OFFSET = 60;
+constexpr int UPGRADE_TEXT_LEFT_MARGIN = 20;
 
 // Speedometer
 constexpr int SPEEDOMETER_SRC_X = 40;
@@ -147,23 +149,7 @@ constexpr float CHECKPOINT_DST_W = 60.0f;
 constexpr float CHECKPOINT_DST_H = 90.0f;
 
 // Hint Arrow
-constexpr int HINT_SRC_X = 260;
-constexpr int HINT_SRC_Y = 20;
-constexpr int HINT_SRC_W = 120;
-constexpr int HINT_SRC_H = 150;
 constexpr float HINT_DST_W = 40.0f;
 constexpr float HINT_DST_H = 60.0f;
-constexpr float HINT_CENTER_X = 15.0f;
-constexpr float HINT_CENTER_Y = 15.0f;
-constexpr double HINT_ANGLE_OFFSET = 180.0;
-
-// CHECKPOINT SPRITES
-struct CheckpointSprite {
-    int x, y, w, h;
-};
-
-constexpr CheckpointSprite CHECKPOINT_TYPE_1 = {290, 650, 95, 120};
-constexpr CheckpointSprite CHECKPOINT_TYPE_2 = {410, 20, 90, 127};
-constexpr CheckpointSprite CHECKPOINT_DEFAULT = {290, 175, 95, 120};
 
 #endif // CLIENT_CONFIG_H

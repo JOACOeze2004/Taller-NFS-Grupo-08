@@ -18,6 +18,7 @@
 #define MAX_NAME_LEN 16
 #define MAX_RACES 8
 #define RACE_START_TIME 3000
+#define MAX_NPCS 30
 
 // WORKSHOP
 #define ACCELERATION_PRICE 30

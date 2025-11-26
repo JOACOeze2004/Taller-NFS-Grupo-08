@@ -1,0 +1,50 @@
+checkpoints:
+  - id: 0
+    name: "checkpoint_default"
+    type: 0
+    description: "Standard checkpoint flag"
+    sprite:
+      x: 290
+      y: 175
+      width: 95
+      height: 120
+
+  - id: 1
+    name: "checkpoint_type_1"
+    type: 1
+    description: "Green checkpoint variant"
+    sprite:
+      x: 290
+      y: 650
+      width: 95
+      height: 120
+
+  - id: 2
+    name: "checkpoint_type_2"
+    type: 2
+    description: "Yellow checkpoint variant"
+    sprite:
+      x: 410
+      y: 20
+      width: 90
+      height: 127
+
+hints:
+  - id: 0
+    name: "hint_arrow"
+    description: "Directional arrow indicator"
+    sprite:
+      x: 260
+      y: 20
+      width: 120
+      height: 150
+    render:
+      dst_width: 40.0
+      dst_height: 60.0
+      center_x: 15.0
+      center_y: 15.0
+      angle_offset: 180.0
+
+sprite_sheets:
+  checkpoints: "../assets/need-for-speed/sprits/checkpoints.png"
+  hints: "../assets/need-for-speed/sprits/Hints.png"

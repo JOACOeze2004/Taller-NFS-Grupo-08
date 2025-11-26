@@ -19,6 +19,7 @@ struct LobbyCarDTO {
 
 enum State{
     IN_LOBBY,
+    IN_COUNTDOWN,
     IN_RACE,
     IN_WORK_SHOP,
     FINAL_RESULTS

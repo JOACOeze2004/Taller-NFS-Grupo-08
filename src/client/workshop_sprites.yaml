@@ -1,0 +1,95 @@
+upgrades:
+  - id: 0
+    name: "mass"
+    title: "MASS"
+    description: "Increases car mass"
+    order: 0
+    sprite:
+      x: 305
+      y: 430
+      width: 275
+      height: 140
+    buttons:
+      left: "BUTTON_CONTROL_DOWN"
+      right: "BUTTON_CONTROL_UP"
+
+  - id: 1
+    name: "acceleration"
+    title: "ACCELERATION"
+    description: "Improves acceleration"
+    order: 1
+    sprite:
+      x: 350
+      y: 310
+      width: 180
+      height: 110
+    buttons:
+      left: "BUTTON_ACCELERATION_DOWN"
+      right: "BUTTON_ACCELERATION_UP"
+
+  - id: 2
+    name: "handling"
+    title: "HANDLING"
+    description: "Improves car handling"
+    order: 2
+    sprite:
+      x: 360
+      y: 710
+      width: 170
+      height: 170
+    buttons:
+      left: "BUTTON_HANDLING_DOWN"
+      right: "BUTTON_HANDLING_UP"
+
+  - id: 3
+    name: "nitro"
+    title: "NITRO"
+    description: "Temporary speed boost"
+    order: 3
+    sprite:
+      x: 372
+      y: 175
+      width: 135
+      height: 140
+    buttons:
+      left: "BUTTON_NITRO_DOWN"
+      right: "BUTTON_NITRO_UP"
+
+  - id: 4
+    name: "life"
+    title: "LIFE"
+    description: "Increases car durability"
+    order: 4
+    sprite:
+      x: 355
+      y: 10
+      width: 180
+      height: 170
+    buttons:
+      left: "BUTTON_LIFE_DOWN"
+      right: "BUTTON_LIFE_UP"
+
+  - id: 5
+    name: "brakes"
+    title: "BRAKES"
+    description: "Improves braking ability"
+    order: 5
+    sprite:
+      x: 350
+      y: 565
+      width: 180
+      height: 145
+    buttons:
+      left: "BUTTON_VELOCITY_DOWN"
+      right: "BUTTON_VELOCITY_UP"
+
+arrows:
+  sprite:
+    x: 550
+    y: 340
+    width: 240
+    height: 230
+
+sprite_sheets:
+  icons: "../assets/need-for-speed/sprits/Workshop_icons_1.png"
+  arrows: "../assets/need-for-speed/sprits/workshop_arrow_spritesheet.png"

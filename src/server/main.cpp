@@ -10,7 +10,7 @@ int main(int const argc, char* argv[]) try {
     }
 
     const std::string port = argv[SERVER_PORT];
-
+    std::srand(std::time(nullptr));
     Server server(port);
     server.run();
 

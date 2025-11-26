@@ -5,6 +5,7 @@
 #include <string>
 #include "../common/car_DTO.h"
 #include "resource_manager.h"
+#include "sprite_loader.h"
 
 class Car {
 public:
@@ -65,6 +66,7 @@ private:
     float nitro_remaining;
     int life;
     float render_scale;
+    int state;  
     
     SDL_Renderer* renderer;
     SDL_Texture* texture = nullptr;
@@ -72,7 +74,6 @@ private:
     SDL_Rect srcRect{0, 0, 0, 0};
     
     void loadSpriteConfig(int car_id);
-    bool tryLoadYamlConfig(const std::string& yaml_path, int car_id);
     void setDefaultSprite();
     
     void renderTexture();
