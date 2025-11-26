@@ -68,9 +68,9 @@ int main(int argc, char *argv[]) try {
 
         if (client->has_final_results()) {
             FinalScoreList results = client->get_final_results();
-            resultsWindow->displayResults(results);
+            resultsWindow->displayResults(results, playerConfig.playerName);
         } else {
-            resultsWindow->displayResults(FinalScoreList());
+            resultsWindow->displayResults(FinalScoreList(), playerConfig.playerName);
         }
 
         resultsWindow->show();
