@@ -382,6 +382,12 @@ EOFEDITOR
 chmod +x "$DESKTOP_DIR/run_editor.sh"
 log "Editor launcher created -> $DESKTOP_DIR/run_editor.sh"
 
+if [[ -f "$ROOT_DIR/run_tests.sh" ]]; then
+  cp "$ROOT_DIR/run_tests.sh" "$DESKTOP_DIR/run_tests.sh"
+  chmod +x "$DESKTOP_DIR/run_tests.sh"
+  log "Test launcher copied -> $DESKTOP_DIR/run_tests.sh"
+fi
+
 sudo chown -R "$(id -u):$(id -g)" "$VAR_DIR" || true
 sudo chmod -R 755 "$VAR_DIR/game" || true
 
@@ -408,6 +414,7 @@ echo "Desktop Launchers:"
 echo "  • ${DESKTOP_DIR}/run_client.sh"
 echo "  • ${DESKTOP_DIR}/run_server.sh"
 echo "  • ${DESKTOP_DIR}/run_editor.sh"
+echo "  • ${DESKTOP_DIR}/run_tests.sh"
 echo
 info "=========================================="
 info "         HOW TO RUN THE GAME"
@@ -419,6 +426,10 @@ echo "   Example: ${DESKTOP_DIR}/run_server.sh"
 echo "   (Default port: 8080)"
 echo "   If you need to change the port, go to run_server.sh and change the var PORT"
 echo
+echo "   To run with Valgrind (memory leak detection):"
+echo "   ${DESKTOP_DIR}/run_server.sh --valgrind"
+echo "   ${DESKTOP_DIR}/run_server.sh --valgrind 8080"
+echo
 echo "2. START THE CLIENT:"
 echo "   ${DESKTOP_DIR}/run_client.sh"
 echo "   Example: ${DESKTOP_DIR}/run_client.sh"
@@ -429,7 +440,10 @@ echo "3. START THE EDITOR:"
 echo "   ${DESKTOP_DIR}/run_editor.sh"
 echo "   Example: ${DESKTOP_DIR}/run_editor.sh"
 echo
-echo "4. Or simply double-click the .sh files on your Desktop!"
+echo "4. RUN TESTS:"
+echo "   ${DESKTOP_DIR}/run_tests.sh"
+echo
+echo "5. Or simply double-click the .sh files on your Desktop!"
 echo
 info "=========================================="
 echo
