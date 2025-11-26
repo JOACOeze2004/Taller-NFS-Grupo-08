@@ -4,6 +4,8 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QDateTime>
+#include <QDir>
+#include <QDebug>
 
 bool TrackFileManager::saveTrackWithDialog(QWidget* parent,
                                            const RaceTrackData& data,
@@ -23,14 +25,27 @@ bool TrackFileManager::saveTrackWithDialog(QWidget* parent,
         return false;
     }
 
-    QString defaultPath = getDefaultSavePath(currentCity, trackName);
-    QString filePath = QFileDialog::getSaveFileName(parent,
-        "Guardar Recorrido",
-        defaultPath,
-        "Archivos de Recorrido (*.yaml *.yml)");
+    QString serverTracksDir = getServerTracksDirectory();
+    QDir dir;
+    if (!dir.exists(serverTracksDir)) {
+        if (!dir.mkpath(serverTracksDir)) {
+            QMessageBox::critical(parent, "Error",
+                QString("No se pudo crear el directorio: %1").arg(serverTracksDir));
+            return false;
+        }
+    }
 
-    if (filePath.isEmpty()) {
-        return false;
+    QString filePath = getDefaultSavePath(currentCity, trackName);
+
+    if (QFile::exists(filePath)) {
+        auto reply = QMessageBox::question(parent, "Archivo Existente",
+            QString("El archivo '%1' ya existe.\n¿Deseas sobrescribirlo?")
+                .arg(QFileInfo(filePath).fileName()),
+            QMessageBox::Yes | QMessageBox::No);
+
+        if (reply != QMessageBox::Yes) {
+            return false;
+        }
     }
 
     RaceTrackData completeData = data;
@@ -62,9 +77,11 @@ bool TrackFileManager::saveTrackWithDialog(QWidget* parent,
 bool TrackFileManager::loadTrackWithDialog(QWidget* parent,
                                            RaceTrackData& data,
                                            QString& currentCity) {
+    QString serverTracksDir = getServerTracksDirectory();
+
     QString filePath = QFileDialog::getOpenFileName(parent,
         "Cargar Recorrido",
-        "../tracks",
+        serverTracksDir,
         "Archivos de Recorrido (*.yaml *.yml)");
 
     if (filePath.isEmpty()) {
@@ -97,17 +114,37 @@ bool TrackFileManager::loadTrackWithDialog(QWidget* parent,
     return true;
 }
 
-QString TrackFileManager::getDefaultSavePath(const QString& cityId, const QString& trackName) {
-    return QString("../tracks/%1_%2.yaml")
-        .arg(cityId)
-        .arg(QString(trackName).replace(" ", "_"));
+QString TrackFileManager::getServerTracksDirectory() {
+    QStringList possiblePaths = {
+        "../src/server/tracks",
+        "../../src/server/tracks",
+        "../../../src/server/tracks",
+        "src/server/tracks"
+    };
+
+    for (const QString& path : possiblePaths) {
+        QDir dir(path);
+        if (dir.exists()) {
+            return dir.absolutePath();
+        }
+    }
+    return "../src/server/tracks";
 }
 
-bool TrackFileManager::confirmCityChange(QWidget* parent, 
+QString TrackFileManager::getDefaultSavePath(const QString& cityId, const QString& trackName) {
+    QString serverTracksDir = getServerTracksDirectory();
+    QString sanitizedName = QString(trackName).replace(" ", "_");
+    return QString("%1/%2_%3.yaml")
+        .arg(serverTracksDir)
+        .arg(cityId)
+        .arg(sanitizedName);
+}
+
+bool TrackFileManager::confirmCityChange(QWidget* parent,
                                          const QString& trackCity,
                                          const QString& currentCity) {
     auto reply = QMessageBox::question(parent, "Ciudad Diferente",
-        QString("Esta recorrido es para '%1' pero estás editando '%2'.\n"
+        QString("Este recorrido es para '%1' pero estás editando '%2'.\n"
                 "¿Cambiar al mapa correcto?")
             .arg(trackCity)
             .arg(currentCity),
