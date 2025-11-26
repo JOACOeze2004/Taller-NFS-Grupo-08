@@ -8,4 +8,4 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 PORT="${1:-8080}"
 
-exec /usr/bin/$BIN_SERVER_NAME "$PORT"
+/usr/bin/$BIN_SERVER_NAME "$PORT"

@@ -29,23 +29,23 @@ info "Root dir: $ROOT_DIR"
 
 if [[ -f /etc/apt/sources.list.d/kitware.list ]]; then
   warn "Found problematic Kitware repository, removing it..."
-  sudo rm -f /etc/apt/sources.list.d/kitware.list
-  sudo rm -f /usr/share/keyrings/kitware-archive-keyring.gpg
+  rm -f /etc/apt/sources.list.d/kitware.list
+  rm -f /usr/share/keyrings/kitware-archive-keyring.gpg
 fi
 
 log "Updating APT indexes"
-sudo apt-get update -y
+apt-get update -y
 
 log "Installing base tools"
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+DEBIAN_FRONTEND=noninteractive apt-get install -y \
   ca-certificates gnupg software-properties-common lsb-release curl wget \
   build-essential git pkg-config ninja-build unzip zip libssl-dev
 
 log "Cloning game repository"
 : "${USER:=$(whoami)}"
-: "${SUDO_USER:=$USER}"
+: "${USER:=$USER}"
 
-INSTALL_DIR="/home/$SUDO_USER/Documents/Taller-NFS-Grupo-08"
+INSTALL_DIR="/home/$USER/Documents/Taller-NFS-Grupo-08"
 
 if [[ -d "$INSTALL_DIR" ]]; then
     warn "Directory already exists, skipping clone: $INSTALL_DIR"
@@ -107,7 +107,7 @@ if [[ "$CMAKE_OK" == "false" ]]; then
   log "Downloading CMake ${CMAKE_VERSION_TO_INSTALL} for ${CMAKE_ARCH}"
   cd /tmp
   
-  sudo rm -rf /opt/cmake
+  rm -rf /opt/cmake
   
   if [[ -f "$CMAKE_TAR" ]]; then
     rm -f "$CMAKE_TAR"
@@ -122,11 +122,11 @@ if [[ "$CMAKE_OK" == "false" ]]; then
   tar -xzf "$CMAKE_TAR"
   
   log "Installing CMake to /opt/cmake"
-  sudo mv "$CMAKE_DIR" /opt/cmake
+  mv "$CMAKE_DIR" /opt/cmake
   
-  sudo ln -sf /opt/cmake/bin/cmake /usr/local/bin/cmake
-  sudo ln -sf /opt/cmake/bin/ctest /usr/local/bin/ctest
-  sudo ln -sf /opt/cmake/bin/cpack /usr/local/bin/cpack
+  ln -sf /opt/cmake/bin/cmake /usr/local/bin/cmake
+  ln -sf /opt/cmake/bin/ctest /usr/local/bin/ctest
+  ln -sf /opt/cmake/bin/cpack /usr/local/bin/cpack
   
   rm -f "$CMAKE_TAR"
   
@@ -141,7 +141,7 @@ if [[ "$CMAKE_OK" == "false" ]]; then
 fi
 
 log "Installing dependencies: Qt5, YAML-CPP, SDL2 and codec libs"
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+DEBIAN_FRONTEND=noninteractive apt-get install -y \
   qt5-qmake qtbase5-dev qtchooser qtbase5-dev-tools \
   libyaml-cpp-dev \
   libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-mixer-dev \
@@ -197,61 +197,61 @@ if [[ ! -x "$SRC_EDITOR_BIN" ]]; then
 fi
 
 if [[ -f "$SRC_CLIENT_BIN" ]]; then
-  sudo install -m 755 "$SRC_CLIENT_BIN" "$BIN_DIR/$BIN_CLIENT_NAME"
+  install -m 755 "$SRC_CLIENT_BIN" "$BIN_DIR/$BIN_CLIENT_NAME"
   log "Installed client -> $BIN_DIR/$BIN_CLIENT_NAME"
 fi
 
 if [[ -f "$SRC_SERVER_BIN" ]]; then
-  sudo install -m 755 "$SRC_SERVER_BIN" "$BIN_DIR/$BIN_SERVER_NAME"
+  install -m 755 "$SRC_SERVER_BIN" "$BIN_DIR/$BIN_SERVER_NAME"
   log "Installed server -> $BIN_DIR/$BIN_SERVER_NAME"
 fi
 
 if [[ -f "$SRC_EDITOR_BIN" ]]; then
-  sudo install -m 755 "$SRC_EDITOR_BIN" "$BIN_DIR/$BIN_EDITOR_NAME"
+  install -m 755 "$SRC_EDITOR_BIN" "$BIN_DIR/$BIN_EDITOR_NAME"
   log "Installed editor -> $BIN_DIR/$BIN_EDITOR_NAME"
 fi
 
 log "Preparing configuration and data directories"
-sudo mkdir -p "$CFG_DIR" "$VAR_DIR"
-sudo chown -R "$(id -u):$(id -g)" "$CFG_DIR" "$VAR_DIR" || true
+mkdir -p "$CFG_DIR" "$VAR_DIR"
+chown -R "$(id -u):$(id -g)" "$CFG_DIR" "$VAR_DIR" || true
 
 if [[ -d "$ROOT_DIR/config" ]]; then
   info "Copying config files from repo/config -> $CFG_DIR"
-  sudo cp -r "$ROOT_DIR/config/"* "$CFG_DIR/" || true
+  cp -r "$ROOT_DIR/config/"* "$CFG_DIR/" || true
 else
   info "No config/ folder found. Creating placeholder configs"
-  echo "# Placeholder client config" | sudo tee "$CFG_DIR/client_config.yaml" >/dev/null
-  echo "# Placeholder server config" | sudo tee "$CFG_DIR/server_config.yaml" >/dev/null
-  echo "# Placeholder editor config" | sudo tee "$CFG_DIR/editor_config.yaml" >/dev/null
+  echo "# Placeholder client config" | tee "$CFG_DIR/client_config.yaml" >/dev/null
+  echo "# Placeholder server config" | tee "$CFG_DIR/server_config.yaml" >/dev/null
+  echo "# Placeholder editor config" | tee "$CFG_DIR/editor_config.yaml" >/dev/null
 fi
 
 mkdir -p "$CFG_DIR"
 mkdir -p "$VAR_DIR/game"
 
 if [[ -d "$ROOT_DIR/config" ]]; then
-  sudo cp -r "$ROOT_DIR/config/"* "$CFG_DIR/" || true
+  cp -r "$ROOT_DIR/config/"* "$CFG_DIR/" || true
 else
-  echo "# Placeholder client config" | sudo tee "$CFG_DIR/client_config.yaml" >/dev/null
-  echo "# Placeholder server config" | sudo tee "$CFG_DIR/server_config.yaml" >/dev/null
-  echo "# Placeholder editor config" | sudo tee "$CFG_DIR/editor_config.yaml" >/dev/null
+  echo "# Placeholder client config" | tee "$CFG_DIR/client_config.yaml" >/dev/null
+  echo "# Placeholder server config" | tee "$CFG_DIR/server_config.yaml" >/dev/null
+  echo "# Placeholder editor config" | tee "$CFG_DIR/editor_config.yaml" >/dev/null
 fi
 
 if [[ -d "$ROOT_DIR/assets" ]]; then
-  sudo cp -r "$ROOT_DIR/assets" "$VAR_DIR/game/" || true
+  cp -r "$ROOT_DIR/assets" "$VAR_DIR/game/" || true
 fi
 
 if [[ -d "$ROOT_DIR/src" ]]; then
-  sudo cp -r "$ROOT_DIR/src" "$VAR_DIR/game/" || true
+  cp -r "$ROOT_DIR/src" "$VAR_DIR/game/" || true
 fi
 
-sudo ln -sfn "$VAR_DIR/game/src" /usr/src
-sudo ln -sfn "$VAR_DIR/game/assets" /usr/assets
+ln -sfn "$VAR_DIR/game/src" /usr/src
+ln -sfn "$VAR_DIR/game/assets" /usr/assets
 
 log "Creating symlink structure for multiple path resolution strategies"
 
-sudo rm -f /usr/assets /usr/src 2>/dev/null || true
-sudo ln -sf "$VAR_DIR/game/assets" /usr/assets
-sudo ln -sf "$VAR_DIR/game/src" /usr/src
+rm -f /usr/assets /usr/src 2>/dev/null || true
+ln -sf "$VAR_DIR/game/assets" /usr/assets
+ln -sf "$VAR_DIR/game/src" /usr/src
 
 if [[ -L /usr/assets ]]; then
   info "Created: /usr/assets -> $VAR_DIR/game/assets"
@@ -265,11 +265,11 @@ else
   warn "Failed to create symlink /usr/src"
 fi
 
-sudo ln -sf "$VAR_DIR/game/assets" "$VAR_DIR/assets" 2>/dev/null || true
-sudo ln -sf "$VAR_DIR/game/src" "$VAR_DIR/src" 2>/dev/null || true
+ln -sf "$VAR_DIR/game/assets" "$VAR_DIR/assets" 2>/dev/null || true
+ln -sf "$VAR_DIR/game/src" "$VAR_DIR/src" 2>/dev/null || true
 
-sudo ln -sf "$VAR_DIR/game/assets" /assets 2>/dev/null || true
-sudo ln -sf "$VAR_DIR/game/src" /src 2>/dev/null || true
+ln -sf "$VAR_DIR/game/assets" /assets 2>/dev/null || true
+ln -sf "$VAR_DIR/game/src" /src 2>/dev/null || true
 
 log "Creating enhanced launcher scripts on Desktop"
 mkdir -p "$DESKTOP_DIR"
@@ -382,8 +382,8 @@ EOFEDITOR
 chmod +x "$DESKTOP_DIR/run_editor.sh"
 log "Editor launcher created -> $DESKTOP_DIR/run_editor.sh"
 
-sudo chown -R "$(id -u):$(id -g)" "$VAR_DIR" || true
-sudo chmod -R 755 "$VAR_DIR/game" || true
+chown -R "$(id -u):$(id -g)" "$VAR_DIR" || true
+chmod -R 755 "$VAR_DIR/game" || true
 
 log "Installation finished successfully!"
 echo
