@@ -167,6 +167,17 @@ fi
 
 cmake --build "$BUILD_DIR" -j"$(nproc)"
 
+log "Running tests"
+/bin/bash -c "$BUILD_DIR/taller_tests"
+TEST_RESULT=$?
+
+if [[ $TEST_RESULT -eq 0 ]]; then
+  log "Tests passed successfully"
+else
+  error "Tests failed. Aborting installation."
+  exit 1
+fi
+
 log "Installing executables into ${BIN_DIR}"
 SRC_CLIENT_BIN="$BUILD_DIR/taller_client"
 SRC_SERVER_BIN="$BUILD_DIR/taller_server"

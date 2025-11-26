@@ -74,8 +74,11 @@ TEST(ProtocolTest, SendAndReceiveFloat) {
     ASSERT_EQ(socket.get_written_bytes().size(), 4);
 
     uint32_t raw;
-    std::memcpy(&raw, socket.get_written_bytes().data(), 4);
-    EXPECT_EQ(raw, htonl(*reinterpret_cast<uint32_t*>(&f)));
+    std::memcpy(&raw, socket.get_written_bytes().data(), sizeof(raw));
+
+    uint32_t f_bits;
+    std::memcpy(&f_bits, &f, sizeof(f));
+    EXPECT_EQ(raw, htonl(f_bits));
 
     socket.inject_bytes(socket.get_written_bytes());
     float f2 = proto.receive_float();
