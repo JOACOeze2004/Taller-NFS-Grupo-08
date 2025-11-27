@@ -99,7 +99,7 @@ private:
             for (auto& [id, car] : cars) {
                 Snapshot dto = build_base_snapshot(cars_DTO, state, time_ms, id);
                 custom_snapshot(dto, id);
-                monitor.broadcast(dto, game_id, id);
+                monitor.broadcast(dto, std::string(game_id) , id);
             }
         }
     };

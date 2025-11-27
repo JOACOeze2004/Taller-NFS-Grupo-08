@@ -152,11 +152,10 @@ void Car::activate_lose_race() {
 }
 
 void Car::activate_infinite_nitro() {
-    if (nitro >= max_nitro+1) {
-        nitro = max_nitro;
-    }
-    else {
-        nitro = max_nitro + 1;
+    if (nitro_recharge > NITRO_RECHARGE_RATE) {
+        nitro_recharge = NITRO_RECHARGE_RATE;
+    } else {
+        nitro_recharge = NITRO_RECHARGE_RATE * 50;
     }
 }
 
@@ -246,7 +245,7 @@ void Car::update_nitro_usage(){
             nitro_activated = false;
         }
     }else{
-        nitro += NITRO_RECHARGE_RATE;        
+        nitro += nitro_recharge;        
         if (nitro >= max_nitro){
             nitro = max_nitro;
         }        

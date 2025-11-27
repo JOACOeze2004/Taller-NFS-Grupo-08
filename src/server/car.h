@@ -29,6 +29,7 @@ class Car {
     b2BodyId body_id;
     bool nitro_activated = false;
     int nitro_consuption = NITRO_CONSUMPTION;
+    int nitro_recharge = NITRO_RECHARGE_RATE;
     int remaining_upgrades;
     
     float base_mass;

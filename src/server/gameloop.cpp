@@ -123,6 +123,7 @@ void Gameloop::add_car(const int client_id, const int car_id, const std::string&
     std::forward_as_tuple(client_id),
     std::forward_as_tuple(world.get_id(), mass, handling, acceleration, braking, car_id));
 }
+
 void Gameloop::push_command(const ClientCommand& cmd) { this->cmd_queue.push(cmd); }
 
 void Gameloop::update_positions() {
