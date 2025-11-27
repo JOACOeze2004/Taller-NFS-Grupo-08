@@ -487,8 +487,22 @@ void GraphicClient::draw_state(int state) {
 void GraphicClient::draw_game_id(int id) {
     if (!text) return; 
     std::string msg = "GAME ID: " + std::to_string(id);
-    SDL_Color color{255, 0, 0, 255};
-    text->render(renderer, msg, screen_width - 150, 200, color);
+
+    int x = screen_width - 150;
+    int y = 200;
+
+    SDL_Color black{0, 0, 0, 255};
+    text->render(renderer, msg, x - 1, y - 1, black);
+    text->render(renderer, msg, x, y - 1, black);
+    text->render(renderer, msg, x + 1, y - 1, black);
+    text->render(renderer, msg, x - 1, y, black);
+    text->render(renderer, msg, x + 1, y, black);
+    text->render(renderer, msg, x - 1, y + 1, black);
+    text->render(renderer, msg, x, y + 1, black);
+    text->render(renderer, msg, x + 1, y + 1, black);
+
+    SDL_Color white{255, 255, 255, 255};
+    text->render(renderer, msg, x, y, white);
 }
 
 void GraphicClient::draw_checkpoint(CheckpointCoords checkpoint, int type) {
@@ -543,8 +557,22 @@ void GraphicClient::draw_hint(HintCoords hint) {
 void GraphicClient::draw_position(int position, int total_cars) {
     if (!text) return;
     std::string msg = "POSITION: " + std::to_string(position) + " / " + std::to_string(total_cars);
-    SDL_Color color{255, 255, 255, 255};
-    text->render(renderer, msg, 500, 30, color);
+
+    int x = 500;
+    int y = 30;
+
+    SDL_Color black{0, 0, 0, 255};
+    text->render(renderer, msg, x - 1, y - 1, black);
+    text->render(renderer, msg, x, y - 1, black);
+    text->render(renderer, msg, x + 1, y - 1, black);
+    text->render(renderer, msg, x - 1, y, black);
+    text->render(renderer, msg, x + 1, y, black);
+    text->render(renderer, msg, x - 1, y + 1, black);
+    text->render(renderer, msg, x, y + 1, black);
+    text->render(renderer, msg, x + 1, y + 1, black);
+
+    SDL_Color white{255, 255, 255, 255};
+    text->render(renderer, msg, x, y, white);
 }
 
 void GraphicClient::draw_time(int time_ms) {
@@ -555,10 +583,23 @@ void GraphicClient::draw_time(int time_ms) {
     int milliseconds = time_ms % 1000;
     char buffer[64];
     std::snprintf(buffer, sizeof(buffer), "TIME: %02d:%02d.%03d", minutes, seconds, milliseconds);
-    SDL_Color color{255, 255, 255, 255};
-    text->render(renderer, buffer, 500, 100, color);
-}
 
+    int x = 500;
+    int y = 100;
+
+    SDL_Color black{0, 0, 0, 255};
+    text->render(renderer, buffer, x - 1, y - 1, black);
+    text->render(renderer, buffer, x, y - 1, black);
+    text->render(renderer, buffer, x + 1, y - 1, black);
+    text->render(renderer, buffer, x - 1, y, black);
+    text->render(renderer, buffer, x + 1, y, black);
+    text->render(renderer, buffer, x - 1, y + 1, black);
+    text->render(renderer, buffer, x, y + 1, black);
+    text->render(renderer, buffer, x + 1, y + 1, black);
+
+    SDL_Color white{255, 255, 255, 255};
+    text->render(renderer, buffer, x, y, white);
+}
 
 
 void GraphicClient::draw_speedometer(float speed) {
