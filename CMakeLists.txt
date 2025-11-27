@@ -155,6 +155,14 @@ if(TALLER_CLIENT)
             src/client/audio_manager.cpp
             src/client/sprite_loader.cpp
             src/client/sprite_loader.h
+            src/client/minimap_renderer.cpp
+            src/client/minimap_renderer.h
+            src/client/game_renderer.cpp
+            src/client/game_renderer.h
+            src/client/ui_renderer.cpp
+            src/client/ui_renderer.h
+            src/client/camera_manager.cpp
+            src/client/camera_manager.h
     )
 
     # Make them depend on taller_common lib
