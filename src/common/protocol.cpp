@@ -14,7 +14,10 @@ void Protocol::send_byte(const uint8_t byte) const {
 
 uint8_t Protocol::receive_byte() const {
     uint8_t byte;
-    socket.recvall(&byte, sizeof(byte));
+    int n = socket.recvall(&byte, sizeof(byte));
+    if (n == 0) {
+        throw CommunicationEndedException();
+    }
     return byte;
 }
 
@@ -37,13 +40,19 @@ void Protocol::send_big_endian_32(const uint32_t value) const{
 
 uint16_t Protocol::receive_big_endian_16() const{
     uint16_t big_endian_to_receive;
-    socket.recvall(&big_endian_to_receive, sizeof(big_endian_to_receive));
+    int n = socket.recvall(&big_endian_to_receive, sizeof(big_endian_to_receive));
+    if (n == 0) {
+        throw CommunicationEndedException();
+    }    
     return ntohs(big_endian_to_receive);
 }
 
 uint32_t Protocol::receive_big_endian_32() const{
     uint32_t big_endian_to_receive;
-    socket.recvall(&big_endian_to_receive, sizeof(big_endian_to_receive));
+    int n = socket.recvall(&big_endian_to_receive, sizeof(big_endian_to_receive));
+    if (n == 0) {
+        throw CommunicationEndedException();
+    }
     return ntohl(big_endian_to_receive);
 }
 
@@ -82,7 +91,10 @@ void Protocol::send_float(const float value) const {
 
 float Protocol::receive_float() const {
     uint32_t parsed_value;
-    socket.recvall(&parsed_value, sizeof(parsed_value));
+    int n = socket.recvall(&parsed_value, sizeof(parsed_value));
+    if (n == 0) {
+        throw CommunicationEndedException();
+    }
     parsed_value = ntohl(parsed_value);
     float value;
     std::memcpy(&value, &parsed_value, sizeof(float));
