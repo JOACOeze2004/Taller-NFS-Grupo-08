@@ -135,12 +135,8 @@ float Car::calculate_torque() const {
     return torque;
 }
 
-void Car::activate_win_race() {
-    life = 26062011;
-}
-
 void Car::restore_life() {
-    life = MAX_LIFE/2;
+    life = max_life;
 }
 
 void Car::activate_infinite_life() {
@@ -288,6 +284,7 @@ CarDTO Car::get_state() const {
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
+    std::cout << "acceleration: " << this->acceleration << " braking: " << this->braking << " mass: " << this->mass << " handling: " << this->handling << " life: " << life << " nitro: " << nitro << std::endl;
     return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME, remaining_upgrades);
 }
 

@@ -66,7 +66,6 @@ public:
     void activate_infinite_nitro();
 
     void activate_lose_race();
-    void activate_win_race();
 
     void toggle_nitro_status();
     void apply_nitro_force();
