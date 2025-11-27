@@ -104,8 +104,11 @@ bool Client::should_exit() const {
     return false;
 }
 
-bool Client::update_game_state(ClientReceiver& receiver, GraphicClient& graphic_client, 
-                               Snapshot& snapshot) {
+bool Client::update_game_state(ClientReceiver& receiver, GraphicClient& graphic_client, Snapshot& snapshot) {
+    if (receiver.is_server_disconnected()) {
+        std::cout << "[CLIENT] Lost connection to server.\n";
+        return true;
+    }
     if (receiver.has_final_results()) {
         std::cout << "[CLIENT] Final results received automatically!" << std::endl;
         final_results = receiver.get_final_results();
