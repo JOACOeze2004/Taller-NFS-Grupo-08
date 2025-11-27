@@ -43,6 +43,7 @@ public:
     void update_cars();
     bool all_cars_done();
     void spawn_cars();
+    void pass_to_next_checkpoint(int id); 
 
     void activate_win(int& id);
 };

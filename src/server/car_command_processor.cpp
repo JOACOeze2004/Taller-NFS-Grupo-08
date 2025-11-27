@@ -19,8 +19,8 @@ void CarCommandProcessor::init_car_actions(){
 }
 
 void CarCommandProcessor::init_race_actions(){
-    //si mas adelante metemos mas cheats de race, van aca.
     race_actions[SEND_WIN_RACE_CHEAT] = [](Race& race, int id) { race.activate_win(id); };
+    race_actions[SEND_NEXT_CHECKPOINT] = [](Race& race, int id) { race.pass_to_next_checkpoint(id); };
 }
 
 const std::function<void(Car&)>* CarCommandProcessor::get_car_action(int cmd) const {

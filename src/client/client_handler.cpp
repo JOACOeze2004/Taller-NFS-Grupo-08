@@ -59,6 +59,7 @@ void ClientHandler::initialize_cheat_map() {
     cheat_command_map[SDLK_c] = SEND_INFINITE_LIFE_CHEAT;
     cheat_command_map[SDLK_v] = SEND_LOSE_RACE_CHEAT;
     cheat_command_map[SDLK_b] = SEND_INFINITE_NITRO_CHEAT;
+    cheat_command_map[SDLK_a] = SEND_NEXT_CHECKPOINT;
     cheat_command_map[SDLK_q] = SEND_DISCONNECT;
 }
 

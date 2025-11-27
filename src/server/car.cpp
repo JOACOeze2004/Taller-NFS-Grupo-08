@@ -140,10 +140,10 @@ void Car::restore_life() {
 }
 
 void Car::activate_infinite_life() {
-    if (life >= MAX_LIFE + 1)
-        life = MAX_LIFE;
+    if (life >= max_life + 1)
+        life = max_life;
     else {
-        life = MAX_LIFE + 1;
+        life = max_life + 1;
     }
 }
 
@@ -152,11 +152,11 @@ void Car::activate_lose_race() {
 }
 
 void Car::activate_infinite_nitro() {
-    if (nitro >= MAX_NITRO+1) {
-        nitro = MAX_NITRO;
+    if (nitro >= max_nitro+1) {
+        nitro = max_nitro;
     }
     else {
-        nitro = MAX_NITRO + 1;
+        nitro = max_nitro + 1;
     }
 }
 
@@ -284,7 +284,6 @@ CarDTO Car::get_state() const {
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    std::cout << "acceleration: " << this->acceleration << " braking: " << this->braking << " mass: " << this->mass << " handling: " << this->handling << " life: " << life << " nitro: " << nitro << std::endl;
     return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME, remaining_upgrades);
 }
 
@@ -454,3 +453,16 @@ bool Car::apply_upgrade(Upgrades type, bool is_upgrade) {
 }
 
 int Car::get_id() const { return this->car_id; }
+
+void Car::set_position(float x, float y, float look_x, float look_y) {
+    float dx = look_x - x;
+    float dy = look_y - y;
+    float angle = atan2f(-dx, dy);  
+
+    b2Body_SetLinearVelocity(body_id, {0,0});
+    b2Body_SetAngularVelocity(body_id, 0);
+
+    b2Rot rot = b2MakeRot(angle + std::numbers::pi/2);
+
+    b2Body_SetTransform(body_id, {x,y}, rot);
+}

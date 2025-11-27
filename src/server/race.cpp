@@ -103,15 +103,6 @@ void Race::update_checkpoints() {
                 car_next_hint[id]++;
             }
             car_next_cp[id]++;
-
-            std::cout << "Auto " << id
-                      << " pasa por checkpoint " << cp.order
-                      << " (" << car_next_cp[id] << "/" << track.checkpoints.size() << ")" << std::endl;
-
-            if (car_next_cp[id] == static_cast<int>(track.checkpoints.size())) {
-                finished[id] = true;
-                std::cout << "Auto " << id << " completo la carrera" << std::endl;
-            }
         }
     }
 }
@@ -121,9 +112,7 @@ bool Race::car_dead(const int& id) const {
     return it->second.is_dead();
 }
 
-bool Race::car_finished(const int& id) {
-    return finished[id];
-}
+bool Race::car_finished(const int& id) { return finished[id]; }
 
 StateRunning Race::get_state(const int& id, const int& time_remaining) {
     if (car_finished(id)) {
@@ -168,16 +157,11 @@ HintCoords Race::get_hint(const int& id) const {
     return HintCoords{x, y, rotation};
 }
 
-Checkpoint Race::get_start() const {
-    return track.checkpoints[0];
-}
+Checkpoint Race::get_start() const { return track.checkpoints[0]; }
 
-Checkpoint Race::get_start_angle() const {
-    return track.checkpoints[1];
-}
+Checkpoint Race::get_start_angle() const { return track.checkpoints[1]; }
 
 void Race::reset_race() {
-    std::cout << "[RACE] Resetting race for next round" << std::endl;
     for (auto& [id, car] : *cars) {
         finished[id] = false;
         car_next_cp[id] = 0;
@@ -189,9 +173,34 @@ void Race::reset_race() {
     track = tracks[indx];
 }
 
-void Race::activate_win(int& id) {
-    finished[id] = true;
+void Race::pass_to_next_checkpoint(int id) {
+    if (car_finished(id)) {
+        return;
+    } 
+    int next_checkpoint = car_next_cp[id];
+
+    if (next_checkpoint >= (int)track.checkpoints.size()) {
+        finished[id] = true; 
+        return;
+    }
+    Checkpoint& checkpoint = track.checkpoints[next_checkpoint];
+    Checkpoint checkpoint_angle;
+
+    if (next_checkpoint + 1 < (int)track.checkpoints.size()) {
+        checkpoint_angle = track.checkpoints[next_checkpoint + 1];
+    } else {
+        checkpoint_angle = track.checkpoints[next_checkpoint];
+    }
+    auto it = cars->find(id);
+    if (it == cars->end()) {
+        return;
+    }
+    it->second.set_position(checkpoint.x, checkpoint.y, checkpoint_angle.x, checkpoint_angle.y);
+    car_next_cp[id] = next_checkpoint + 1;
+    car_next_hint[id] = std::min(car_next_hint[id] + 1, (int)track.hints.size() - 1);
 }
+
+void Race::activate_win(int& id) { finished[id] = true; }
 
 void Race::update_cars() {
     for (auto& [id, car] : *cars) {

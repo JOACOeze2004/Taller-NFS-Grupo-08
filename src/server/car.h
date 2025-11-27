@@ -95,6 +95,8 @@ public:
 
     bool apply_upgrade(Upgrades type, bool is_upgrade);
     int get_id() const;
+    void set_position(float x, float y, float look_x, float look_y);
+
 
 private:
     float calculate_torque() const;
