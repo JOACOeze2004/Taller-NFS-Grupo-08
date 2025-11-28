@@ -91,6 +91,8 @@ struct Snapshot {
     std::map<Upgrades, std::chrono::seconds> prices;
     std::vector<CarRacingInfo> cars_finished;
     std::map<int, long long> player_total_times;
+    int total_checkpoints; 
+    int current_checkpoint;
 };
 
 using FinalScoreList = std::vector<CarRacingInfo>;
