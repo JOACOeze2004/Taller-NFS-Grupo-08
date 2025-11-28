@@ -173,7 +173,9 @@ void MinimapRenderer::draw(const std::unordered_map<int, CarDTO>& cars, int came
     double hint_angle_deg = hint.angle + 180;
     SDL_FPoint hint_center = {hint_arrow_w * 0.5f, hint_arrow_h * 0.5f};
     
-    SDL_RenderCopyExF(renderer, hint_texture, &hint_src_rect, &hint_dst_rect, hint_angle_deg, &hint_center, SDL_FLIP_NONE);
+    if (camera_car.state == IN_GAME){
+        SDL_RenderCopyExF(renderer, hint_texture, &hint_src_rect, &hint_dst_rect, hint_angle_deg, &hint_center, SDL_FLIP_NONE);
+    }
     
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderDrawRectF(renderer, &border_rect);
