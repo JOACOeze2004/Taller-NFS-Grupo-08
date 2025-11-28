@@ -195,6 +195,14 @@ TEST(ClientProtocolTest, ReceiveGameStateMinimal) {
     }
     data.push_back(0x00);
 
+    uint16_t total = htons(25);
+    data.push_back(total >> 8);
+    data.push_back(total & 0xFF);
+
+    uint16_t current = htons(3);
+    data.push_back(current >> 8);
+    data.push_back(current & 0xFF);
+
     data.push_back(0x00);
     data.push_back(0x00);
     data.push_back(0x00);
