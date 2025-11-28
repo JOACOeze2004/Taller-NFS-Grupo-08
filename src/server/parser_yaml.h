@@ -2,6 +2,7 @@
 #define TALLER_TP_PARSER_YAML_H
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include <yaml-cpp/node/node.h>
 #include "CarStats.h"
@@ -38,13 +39,29 @@ struct Track {
 };
 
 class ParserYaml {
-    YAML::Node cars_file;
 public:
     explicit ParserYaml();
     std::vector<StaticBody> parse_map(std::string& map_name);
     std::vector<Corner> parse_corners(std::string& map_name);
     CarStats parse_car(const int car_id);
     std::vector<Track> parse_tracks(const std::string& tracks_dir, const std::string& map_name);
+
+private:
+    YAML::Node cars_file;
+    std::unordered_map<std::string, std::string> map_paths;    
+    
+    YAML::Node load_map_file(const std::string& map_name);
+    std::string get_map_id(const std::string& map_name);
+    
+    StaticBody parse_box(const YAML::Node& obj);
+    Corner parse_corner(const YAML::Node& obj);
+    
+    std::vector<StaticBody> parse_boxes_layer(const YAML::Node& map);
+    std::vector<Corner> parse_corners_layer(const YAML::Node& map);
+    Checkpoint parse_checkpoint(const YAML::Node& cp);
+    Hint parse_hint(const YAML::Node& hnt);
+    
+    void initialize_map_paths();
 };
 
 
