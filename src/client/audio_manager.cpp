@@ -8,8 +8,8 @@
 AudioManager::AudioManager() 
     : currentState(GameState::LOBBY)
     , initialized(false)
-    , musicVolume(64)
-    , effectsVolume(64) {
+    , musicVolume(30)
+    , effectsVolume(30) {
 }
 
 AudioManager::~AudioManager() {
