@@ -34,6 +34,10 @@ void NPC::update() {
 
 void NPC::choose_next_corner() {
     const auto& corner = (*corners)[current_corner];
+    if (corner.neighbors.empty()) {
+        next_corner = current_corner;
+        return;
+    }
 
     b2Vec2 pos = car.get_position();
     b2Vec2 forward = car.get_forward();
@@ -59,12 +63,20 @@ void NPC::choose_next_corner() {
     if (filtered.empty()) {
         filtered = idx;
     }
+    if (filtered.empty()) {
+        next_corner = current_corner;
+        return;
+    }
 
     std::sort(filtered.begin(), filtered.end(), [&](int a, int b) {
         return corner.dist[a] < corner.dist[b] && (corner.dist[a] - corner.dist[b]) > 50;
     });
 
     int limit = std::min(3, (int)filtered.size());
+    if (limit <= 0) {
+        next_corner = current_corner;
+        return;
+    }
     next_corner = corner.neighbors[ filtered[rand() % limit] ];
 }
 
