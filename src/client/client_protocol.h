@@ -16,6 +16,10 @@ private:
     void receive_remaining_data(Snapshot& snapshot) const;
     void receive_lobby_cars(Snapshot& snapshot) const;
     void receive_prices(Snapshot& snapshot) const;
+    std::vector<CarRacingInfo> receive_cars_finished() const;
+    void receive_player_total_times(Snapshot& snapshot) const;
+    CarRacingInfo receive_single_racing_info() const;
+
 
 public:
     explicit ClientProtocol(Socket& _socket);

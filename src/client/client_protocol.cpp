@@ -4,7 +4,6 @@
 
 ClientProtocol::ClientProtocol(Socket& _socket) : protocol(_socket) {  }
 
-
 std::unordered_map<int, CarDTO> ClientProtocol::receive_cars(const uint16_t cars_count) const{
     std::unordered_map<int, CarDTO> cars;
    
@@ -58,6 +57,33 @@ void ClientProtocol::receive_prices(Snapshot& snapshot) const {
     }
 }
 
+std::vector<CarRacingInfo> ClientProtocol::receive_cars_finished() const {
+    uint16_t cars_count = protocol.receive_big_endian_16();
+    std::vector<CarRacingInfo> cars;
+    cars.reserve(cars_count);
+    
+    for (uint16_t i = 0; i < cars_count; i++) {
+        CarRacingInfo car;
+        size_t name_size = protocol.receive_big_endian_16();
+        car.name = protocol.receive_string(name_size);
+        car.time = protocol.receive_big_endian_32();
+        car.position = protocol.receive_big_endian_32();
+        cars.push_back(car);
+    }
+    
+    return cars;
+}
+
+void ClientProtocol::receive_player_total_times(Snapshot& snapshot) const {
+    uint16_t total_times_count = protocol.receive_big_endian_16();
+    
+    for (uint16_t i = 0; i < total_times_count; i++) {
+        int player_id = protocol.receive_big_endian_16();
+        long long total_time = protocol.receive_big_endian_64();
+        snapshot.player_total_times[player_id] = total_time;
+    }
+}
+
 CarDTO ClientProtocol::receive_car_state() const {
     CarDTO car;
     car.x = protocol.receive_float();
@@ -86,13 +112,9 @@ LobbyCarDTO ClientProtocol::receive_lobby_car_state() const{
 }
 
 
-void ClientProtocol::send_byte(const uint8_t byte) const {
-    protocol.send_byte(byte);
-}
+void ClientProtocol::send_byte(const uint8_t byte) const { protocol.send_byte(byte); }
 
-uint8_t ClientProtocol::receive_byte() const{
-    return protocol.receive_byte();
-}
+uint8_t ClientProtocol::receive_byte() const { return protocol.receive_byte(); }
 
 const std::vector<std::string> ClientProtocol::receive_games_list(){
     std::vector<std::string> games;
@@ -116,20 +138,27 @@ void ClientProtocol::send_lobby_action(uint8_t action, const std::string& game_i
     }
 }
 
-void ClientProtocol::send_player_config(const std::string& name, uint8_t car_id,
-                                  const std::string& map_name) {
+void ClientProtocol::send_player_config(const std::string& name, uint8_t car_id, const std::string& map_name) {
     auto name_length = static_cast<uint16_t>(name.size());
     protocol.send_big_endian_16(name_length);
     protocol.send_string(name);
     send_byte(car_id);
-
     auto map_length = static_cast<uint16_t>(map_name.size());
     protocol.send_big_endian_16(map_length);
     protocol.send_string(map_name);
 }
 
-void ClientProtocol::receive_game_init_data(std::string& map_path,
-                                      float& spawn_x, float& spawn_y) {
+CarRacingInfo ClientProtocol::receive_single_racing_info() const {
+    CarRacingInfo result;
+    uint16_t name_len = protocol.receive_big_endian_16();
+    result.name = protocol.receive_string(name_len);
+    result.time = protocol.receive_float();
+    result.position = static_cast<int>(protocol.receive_byte());
+    
+    return result;
+}
+
+void ClientProtocol::receive_game_init_data(std::string& map_path, float& spawn_x, float& spawn_y) {
     uint16_t path_length = protocol.receive_big_endian_16();
     map_path = protocol.receive_string(path_length);
 
@@ -146,32 +175,14 @@ Snapshot ClientProtocol::receive_game_state() const {
     uint16_t cars_count = protocol.receive_big_endian_16();
     snapshot.cars = this->receive_cars(cars_count);
 
-    receive_game_data(snapshot,cars_count);
+    receive_game_data(snapshot, cars_count);
     receive_checkpoint_hint(snapshot);
     receive_remaining_data(snapshot);
     receive_lobby_cars(snapshot);
     receive_prices(snapshot);
-
-
-    cars_count = protocol.receive_big_endian_16();
-    std::vector<CarRacingInfo> cars;
-    size_t size;
-    CarRacingInfo car;
-    for (int i = 0; i < cars_count; i++) {
-        size = protocol.receive_big_endian_16();
-        car.name = protocol.receive_string(size);
-        car.time = protocol.receive_big_endian_32();
-        car.position = protocol.receive_big_endian_32();
-        cars.emplace_back(car);
-    }
-    snapshot.cars_finished = cars;
-
-    uint16_t total_times_count = protocol.receive_big_endian_16();
-    for (uint16_t i = 0; i < total_times_count; i++) {
-        int player_id = protocol.receive_big_endian_16();
-        long long total_time = protocol.receive_big_endian_64();
-        snapshot.player_total_times[player_id] = total_time;
-    }
+    
+    snapshot.cars_finished = receive_cars_finished();
+    receive_player_total_times(snapshot);
 
     return snapshot;
 }
@@ -182,18 +193,12 @@ std::string ClientProtocol::receive_error_message(){
 }
 
 FinalScoreList ClientProtocol::receive_final_results() const {
-    FinalScoreList results;
     uint16_t count = protocol.receive_big_endian_16();
+    FinalScoreList results;
+    results.reserve(count);
 
     for (uint16_t i = 0; i < count; ++i) {
-        CarRacingInfo result;
-
-        uint16_t name_len = protocol.receive_big_endian_16();
-        result.name = protocol.receive_string(name_len);
-        result.time = protocol.receive_float();
-        result.position = static_cast<int>(protocol.receive_byte());
-
-        results.push_back(result);
+        results.push_back(receive_single_racing_info());
     }
 
     return results;
