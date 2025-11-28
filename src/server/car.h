@@ -31,6 +31,7 @@ class Car {
     int nitro_consuption = NITRO_CONSUMPTION;
     int nitro_recharge = NITRO_RECHARGE_RATE;
     int remaining_upgrades;
+    bool in_lobby = true;
     
     float base_mass;
     float base_handling;

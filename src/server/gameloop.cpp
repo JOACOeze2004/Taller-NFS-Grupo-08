@@ -106,7 +106,7 @@ void Gameloop::process_command(ClientCommand& client_command) {
 }
 
 void Gameloop::generate_npcs() {
-    for (int i =0; i < MAX_NPCS; i++) {
+    for (int i = 0; i < MAX_NPCS; i++) {
         auto rand_corner = rand() % corners.size();
         npcs.emplace_back(world.get_id(), &corners, rand_corner);
     }
@@ -142,7 +142,7 @@ std::unordered_map<int, CarDTO> Gameloop::build_cars_dto(std::function<StateRunn
         cars_DTO.emplace(id, car_dto);
     }
 
-    for (int i=0; i < static_cast<int>(npcs.size()); i++) {
+    for (int i = 0; i < static_cast<int>(npcs.size()); i++) {
         CarDTO car_dto = npcs[i].get_state();
         cars_DTO.emplace(i+8, car_dto);
     }

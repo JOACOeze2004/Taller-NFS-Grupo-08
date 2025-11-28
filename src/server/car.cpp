@@ -135,9 +135,7 @@ float Car::calculate_torque() const {
     return torque;
 }
 
-void Car::restore_life() {
-    life = max_life;
-}
+void Car::restore_life() { life = max_life; }
 
 void Car::activate_infinite_life() {
     if (life >= max_life + 1)
@@ -147,9 +145,7 @@ void Car::activate_infinite_life() {
     }
 }
 
-void Car::activate_lose_race() {
-    life = 0;
-}
+void Car::activate_lose_race() { life = 0; }
 
 void Car::activate_infinite_nitro() {
     if (nitro_recharge > NITRO_RECHARGE_RATE) {
@@ -174,6 +170,10 @@ void Car::apply_friction() {
 }
 
 void Car::handle_hit(b2Vec2& normal, float& force, bool is_hitter) {
+    if (in_lobby){
+        return;
+    }
+    
     b2Vec2 impulse = {normal.x * force / MASS, normal.y * force / MASS};
     b2Body_ApplyForceToCenter(body_id, impulse, true);
 
@@ -286,13 +286,9 @@ CarDTO Car::get_state() const {
     return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME, remaining_upgrades);
 }
 
-b2Vec2 Car::get_position() {
-    return b2Body_GetPosition(body_id);
-}
+b2Vec2 Car::get_position() { return b2Body_GetPosition(body_id); }
 
-bool Car::is_dead() {
-    return life == 0;
-}
+bool Car::is_dead() { return life == 0; }
 
 void Car::delete_from_map() {
     if (b2Body_IsValid(body_id)) {
@@ -301,6 +297,7 @@ void Car::delete_from_map() {
 }
 
 void Car::set_spawn(float& x, float& y, float& angle_x, float& angle_y) {
+    in_lobby = false;
     float dx = x - angle_x;
     float dy = -(y - angle_y);
     float angle = atan2f(dx, dy);
