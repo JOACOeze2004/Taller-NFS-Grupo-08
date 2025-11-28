@@ -226,3 +226,13 @@ void Race::spawn_cars(){
         car.set_spawn(start.x, start.y, start_angle.x, start_angle.y);
     }
 }
+
+int Race::get_checkpoint_amount() const { return static_cast<int>(track.checkpoints.size()); }
+
+int Race::get_current_checkpoint(const int id) const { 
+    auto it = car_next_cp.find(id);
+    if (it == car_next_cp.end()){
+        return 0;
+    } 
+    return it->second;
+}

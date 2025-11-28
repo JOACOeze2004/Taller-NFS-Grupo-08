@@ -171,6 +171,8 @@ Snapshot Gameloop::initialize_DTO() {
     auto deads = results.get_deads();
     dto.cars_finished.insert(dto.cars_finished.end(), deads.begin(), deads.end());
     dto.player_total_times = results.get_total_times();
+    dto.total_checkpoints = 0;
+    dto.current_checkpoint = 0;
     return dto;
 }
 
@@ -198,6 +200,8 @@ void Gameloop::broadcast_in_game(const int time_ms) {
             dto.hint = race.get_hint(id);
             dto.position = race.get_position(id);
             dto.type_checkpoint = race.get_cp_type(id);
+            dto.total_checkpoints = race.get_checkpoint_amount();
+            dto.current_checkpoint = race.get_current_checkpoint(id);
         }    
     );
 }

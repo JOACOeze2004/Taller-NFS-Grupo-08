@@ -60,6 +60,8 @@ void ServerProtocol::send_checkpoint_hint(const Snapshot& snapshot){
     protocol.send_float(snapshot.hint.y);
     protocol.send_float(snapshot.hint.angle);
     protocol.send_byte(static_cast<uint8_t>(snapshot.type_checkpoint));
+    protocol.send_big_endian_16(snapshot.total_checkpoints);
+    protocol.send_big_endian_16(snapshot.current_checkpoint);
 }
 
 void ServerProtocol::send_remaining_data(const Snapshot& snapshot){

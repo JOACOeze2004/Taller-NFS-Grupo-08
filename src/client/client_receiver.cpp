@@ -18,7 +18,6 @@ void ClientReceiver::run(){
             queue.push(snapshot);
         }
         catch(const std::exception& e) {
-            std::cout << e.what() << "\n";
             server_disconnected = true;
             this->stop();
             break;

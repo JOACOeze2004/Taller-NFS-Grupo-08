@@ -44,6 +44,9 @@ public:
     bool all_cars_done();
     void spawn_cars();
     void pass_to_next_checkpoint(int id); 
+    int get_checkpoint_amount() const;
+    int get_current_checkpoint(const int id) const; 
+
 
     void activate_win(int& id);
 };
