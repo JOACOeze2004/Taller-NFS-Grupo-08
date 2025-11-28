@@ -1,7 +1,3 @@
-//
-// Created by vboxuser on 11/21/25.
-//
-
 #include "npc.h"
 
 #include <algorithm>
