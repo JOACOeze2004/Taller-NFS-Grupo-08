@@ -45,6 +45,16 @@ Car::~Car() {
     }
 }
 
+void Car::reset_upgrades() {
+    upgrades[ACCELERATION_UPGRADE] = acceleration_upgrades_applied;
+    upgrades[MASS_UPGRADE] = mass_upgrades_applied;
+    upgrades[NITRO_UPGRADE] = nitro_upgrades_applied;
+    upgrades[LIFE_UPGRADE] = life_upgrades_applied;
+    upgrades[BRAKE_UPGRADE] = brake_upgrades_applied;
+    upgrades[HANDLING_UPGRADE] = handling_upgrades_applied;
+    upgrades[NONE_UPGRADE] = 0;
+}
+
 void Car::initialize_upgrade_actions() {
     upgrade_actions[ACCELERATION_UPGRADE] = {
         [this]() { accelerate_upgrade(); },
@@ -277,13 +287,14 @@ void Car::recalculate_stats() {
     braking = braking_base * braking_mult;
 }
 
-CarDTO Car::get_state() const {
+CarDTO Car::get_state() {
     b2Vec2 pos = b2Body_GetPosition(body_id);
     b2Rot rot = b2Body_GetRotation(body_id);
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME, remaining_upgrades);
+    reset_upgrades();
+    return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME, remaining_upgrades, upgrades);
 }
 
 b2Vec2 Car::get_position() const { return b2Body_GetPosition(body_id); }

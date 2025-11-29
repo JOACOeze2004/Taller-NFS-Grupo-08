@@ -45,6 +45,9 @@ class Car {
     int brake_upgrades_applied = 0;
     int mass_upgrades_applied = 0;
 
+    std::map<Upgrades, int> upgrades;
+
+    void reset_upgrades();
     void initialize_upgrade_actions();
     using UpgradeAction = std::function<void()>;
     std::unordered_map<Upgrades, std::pair<UpgradeAction, UpgradeAction>> upgrade_actions;
@@ -73,7 +76,7 @@ public:
     void apply_nitro_force();
     void update_nitro_usage();
 
-    CarDTO get_state() const;
+    CarDTO get_state();
     void set_spawn(float& x, float& y, float& angle_x, float& angle_y);
     
     void reset_stats_and_upgrades();

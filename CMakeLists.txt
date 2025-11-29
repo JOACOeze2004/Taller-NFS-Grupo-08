@@ -32,7 +32,8 @@ add_library(taller_common STATIC
         src/common/protocol.h
         src/common/command.h
         src/common/car_DTO.h
-        src/common/DTO.h)
+        src/common/DTO.h
+        src/common/upgrades.h)
 
 # add the source files that make the lib
 # HEY!! TODO XXX: add more subfolders here
