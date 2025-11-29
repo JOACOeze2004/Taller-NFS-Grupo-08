@@ -85,12 +85,20 @@ void ServerProtocol::send_prices(const Snapshot& snapshot){
     }
 }
 
+void ServerProtocol::send_car_upgrades(const CarDTO& car){
+    protocol.send_big_endian_16(car.upgrades.size());
+    for (const auto& [type, level] : car.upgrades) {
+        protocol.send_byte(static_cast<uint8_t>(type));
+        protocol.send_big_endian_16(level);
+    }
+}
+
 void ServerProtocol::send_car_state(const CarDTO& car){
     protocol.send_float(car.x);
     protocol.send_float(car.y);
     protocol.send_float(car.velocity);
     protocol.send_float(car.angle);
-    protocol.send_big_endian_32(car.car_id);
+    protocol.send_big_endian_16(car.car_id);
     
     float life_percentage = (static_cast<float>(car.life) * 100.0f) / static_cast<float>(MAX_LIFE);
 
@@ -98,7 +106,8 @@ void ServerProtocol::send_car_state(const CarDTO& car){
     protocol.send_bool(car.nitro);
     protocol.send_float(car.remaining_nitro);
     protocol.send_byte(static_cast<uint8_t>(car.state));
-    protocol.send_big_endian_32(car.remaining_upgrades);
+    protocol.send_big_endian_16(car.remaining_upgrades);
+    this->send_car_upgrades(car);
 }
 
 void ServerProtocol::send_lobby_car_state(const LobbyCarDTO& car) {

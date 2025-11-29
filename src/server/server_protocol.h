@@ -22,6 +22,7 @@ private:
     void send_results(const FinalScoreList& results);
     void send_cars_finished(const Snapshot& snapshot);
     void send_player_total_times(const Snapshot& snapshot);
+    void send_car_upgrades(const CarDTO& car);
 
 public:
     explicit ServerProtocol(Socket& socket);
