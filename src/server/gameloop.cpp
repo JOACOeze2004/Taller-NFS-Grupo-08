@@ -201,7 +201,7 @@ void Gameloop::broadcast_in_game(const int time_ms) {
             dto.position = race.get_position(id);
             dto.type_checkpoint = race.get_cp_type(id);
             dto.total_checkpoints = race.get_checkpoint_amount();
-            dto.current_checkpoint = race.get_current_checkpoint(id);
+            dto.current_checkpoint = race.get_checkpoints(id);
         }    
     );
 }

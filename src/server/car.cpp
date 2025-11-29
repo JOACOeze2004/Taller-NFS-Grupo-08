@@ -286,7 +286,7 @@ CarDTO Car::get_state() const {
     return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME, remaining_upgrades);
 }
 
-b2Vec2 Car::get_position() { return b2Body_GetPosition(body_id); }
+b2Vec2 Car::get_position() const { return b2Body_GetPosition(body_id); }
 
 bool Car::is_dead() { return life == 0; }
 

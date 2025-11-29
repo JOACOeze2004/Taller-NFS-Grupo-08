@@ -59,7 +59,7 @@ public:
     void turn_left();
     void apply_friction();
     void handle_hit(b2Vec2& normal, float& force, bool is_hitter);
-    b2Vec2 get_position();
+    b2Vec2 get_position() const;
     bool is_dead();
     void delete_from_map();
 

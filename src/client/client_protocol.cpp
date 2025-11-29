@@ -33,7 +33,6 @@ void ClientProtocol::receive_checkpoint_hint(Snapshot& snapshot) const {
     snapshot.type_checkpoint = static_cast<TypeCheckpoint>(protocol.receive_byte());
     snapshot.total_checkpoints = protocol.receive_big_endian_16();
     snapshot.current_checkpoint = protocol.receive_big_endian_16();
-
 }
 
 void ClientProtocol::receive_remaining_data(Snapshot& snapshot) const {
