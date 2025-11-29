@@ -106,6 +106,9 @@ void Race::advance_checkpoint(const int id) {
         car_next_hint[id]++;
     }
     car_next_cp[id]++;
+    if (next_checkpoint >= static_cast<int>(track.checkpoints.size()) - 1) {
+        finished[id] = true;
+    }
 }
 
 void Race::check_and_advance_checkpoint(int id, Car& car) {
