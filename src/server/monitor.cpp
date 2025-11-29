@@ -28,8 +28,7 @@ void Monitor::add_client(const int client_id, std::unique_ptr<ClientHandler> cli
     clients[client_id] = std::move(client);
 }
 
-void Monitor::reap() {
-    std::unique_lock<std::mutex> lock(mutex);
+void Monitor::reap_clients() {
     std::vector<int> to_remove;
     for ( auto& [id, client] : clients) {
         if (client->is_dead()) {
@@ -43,6 +42,30 @@ void Monitor::reap() {
     for (auto id : to_remove) {
         clients.erase(id);
     }
+}
+
+void Monitor::reap_games() {
+    std::vector<std::string> games_to_remove;
+    
+    for (auto& [game_id, gameloop] : current_games) {
+        if (!gameloop->has_active_players() || !gameloop->is_alive()) {
+            games_to_remove.push_back(game_id);
+        }
+    }
+
+    for (const auto& game_id : games_to_remove) {
+        auto game = current_games[game_id];
+        game->stop();
+        game->join();
+        current_games.erase(game_id);
+        clear_remaining_clients(game_id);
+    }
+}
+
+void Monitor::reap() {
+    std::unique_lock<std::mutex> lock(mutex);
+    reap_clients();
+    reap_games();
 }
 
 void Monitor::clear_clients() {

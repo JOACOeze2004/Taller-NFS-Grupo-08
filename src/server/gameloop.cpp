@@ -24,6 +24,10 @@ void Gameloop::run() {
     while (this->should_keep_running()) {
         try {
             current_phase->run();
+            if (!has_active_players() || get_races_completed() >= MAX_RACES){
+                break;
+            }
+            
         }catch (...) {
             break;
         }
@@ -283,4 +287,4 @@ int Gameloop::get_races_completed() const { return races_completed;}
 
 void Gameloop::reset_race() { race.reset_race(); }
 
-bool Gameloop::has_active_players() const { return !cars.empty();}
+bool Gameloop::has_active_players() const { return !cars.empty(); }

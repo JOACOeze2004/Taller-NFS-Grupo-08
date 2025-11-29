@@ -27,6 +27,8 @@ private:
     std::string generate_game_id();
     void clear_remaining_clients(const std::string& _game_id);
     std::string get_client_game_id(int client_id);
+    void reap_clients();
+    void reap_games();
 
 public:
     Monitor();
