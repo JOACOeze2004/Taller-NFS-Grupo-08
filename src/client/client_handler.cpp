@@ -12,10 +12,18 @@ void ClientHandler::handle_event() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
+            try {
+                parser.parse_command(SEND_DISCONNECT);
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            } catch (...) {}
             throw ClientQuitException();
         }
         process_event(event);
         if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_q){
+            try {
+                parser.parse_command(SEND_DISCONNECT);
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            } catch (...) {}
             throw ClientQuitException();
         }
     }
