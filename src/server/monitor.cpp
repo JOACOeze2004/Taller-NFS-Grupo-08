@@ -56,7 +56,16 @@ void Monitor::clear_clients() {
 
 void Monitor::broadcast(const Snapshot& snapshot, const std::string& gid, const int client_id) {
     std::unique_lock<std::mutex> lock(mutex);
-    auto& client = clients[client_id];
+    auto it = clients.find(client_id);
+    if (it == clients.end()) {
+        return;
+    }
+    
+    auto& client = it->second;
+    if (!client) {
+        return;
+    }
+    
     if (client->get_game_id() == gid && !client->is_dead()) {
         client->send_state(snapshot);
     }
