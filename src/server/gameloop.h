@@ -90,6 +90,8 @@ private:
 
     bool handle_car_action(const int command, Car& car);
     bool handle_race_action(const int command, int id);
+    bool handle_skip_to_last_race_cheat(const int command);
+
 
 
     template<typename CustomizedSnapshot>

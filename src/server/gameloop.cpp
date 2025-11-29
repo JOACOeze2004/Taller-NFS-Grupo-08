@@ -83,11 +83,28 @@ bool Gameloop::handle_race_action(const int command, int id) {
     return false;
 }
 
+bool Gameloop::handle_skip_to_last_race_cheat(const int command) { 
+    if (command != SEND_PASS_TO_FINAL_RACE){
+        return false;
+    }   
+    races_completed = MAX_RACES - 2;
+    
+    for (auto& [key, car] : cars) {
+        int id = key;
+        race.activate_win(id);
+    }
+    return true;
+}
+
 void Gameloop::process_command(ClientCommand& client_command) {
     int command = client_command.cmd_struct.cmd;
     int player_id = client_command.id;
 
     if (handle_disconnect(command, player_id)) {
+        return;
+    }
+    
+    if (handle_skip_to_last_race_cheat(command)) {
         return;
     }
     auto it = cars.find(player_id);

@@ -16,8 +16,11 @@ void InGame::end() {
     gameloop->increment_race_counter();
 
     if (gameloop->get_races_completed() >= MAX_RACES) {
+        std::cout << "Entre al final de todo el juego" << std::endl;
         FinalScoreList final_results = gameloop->calculate_final_results();
+        std::cout << "Tengo los resultados" << std::endl;
         gameloop->broadcast_final_results(final_results);
+        std::cout << "Los broadcasteo" << std::endl;
         gameloop->stop();
         return;
     }
