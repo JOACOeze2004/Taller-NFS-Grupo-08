@@ -94,15 +94,19 @@ bool Gameloop::handle_skip_to_last_race_cheat(const int command) {
     return true;
 }
 
+bool Gameloop::handle_force_start(const int command) { 
+    if (command != SEND_FORCE_LOBBY_START){
+        return false;
+    }   
+    ready_to_start = true;
+    return true;
+}
+
 void Gameloop::process_command(ClientCommand& client_command) {
     int command = client_command.cmd_struct.cmd;
     int player_id = client_command.id;
 
-    if (handle_disconnect(command, player_id)) {
-        return;
-    }
-    
-    if (handle_skip_to_last_race_cheat(command)) {
+    if (handle_disconnect(command, player_id) || handle_skip_to_last_race_cheat(command)) {
         return;
     }
     auto it = cars.find(player_id);
@@ -116,12 +120,9 @@ void Gameloop::process_command(ClientCommand& client_command) {
     if (race.car_finished(player_id) || race.car_dead(player_id)) {
         return;
     }
-    if (handle_car_action(command, car)) {
+    if (handle_car_action(command, car) || handle_race_action(command, player_id)) {
         return;
     }
-    if (handle_race_action(command, player_id)){
-        return;
-    } 
 }
 
 void Gameloop::generate_npcs() {
@@ -258,7 +259,13 @@ bool Gameloop::is_game_already_started() const { return this->ready_to_start; }
 bool Gameloop::is_running() const { return should_keep_running(); }
 
 void Gameloop::handle_lobby_command(const ClientCommand& cmd) {
+    if (handle_force_start(cmd.cmd_struct.cmd)){
+        return;
+    }    
     if (cmd.cmd_struct.cmd == SEND_READY_TO_PLAY && cmd.id == owner_id) {
+        if (cars.size() < MIN_PLAYERS_TO_START){
+            return;
+        }
         ready_to_start = true;
     }
 }
