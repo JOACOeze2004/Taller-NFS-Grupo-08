@@ -92,6 +92,7 @@ private:
     bool handle_race_action(const int command, int id);
     bool handle_skip_to_last_race_cheat(const int command);
     bool handle_force_start(const int command);
+    Car* find_car(const int id);
 
 
 

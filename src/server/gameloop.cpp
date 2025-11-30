@@ -170,6 +170,13 @@ std::unordered_map<int, CarDTO> Gameloop::build_cars_dto(std::function<StateRunn
     return cars_DTO;
 }
 
+Car* Gameloop::find_car(int id) {
+    if (auto it = cars.find(id); it != cars.end()){
+        return &it->second;
+    }
+    return nullptr;
+}
+
 Snapshot Gameloop::initialize_DTO() {
     Snapshot dto;
     dto.game_id = std::stoi(this->game_id);
@@ -222,12 +229,9 @@ void Gameloop::broadcast_in_game(const int time_ms) {
             dto.type_checkpoint = race.get_cp_type(id);
             dto.total_checkpoints = race.get_checkpoint_amount();
             dto.current_checkpoint = race.get_checkpoints(id);
-            auto it = cars.find(id);
-            if (it == cars.end()){
-                return;
+            if (Car* car = find_car(id)) {
+                dto.upgrades = car->get_upgrades();
             }
-            Car& car = it->second;
-            dto.upgrades = car.get_upgrades();
         }    
     );
 }
@@ -242,8 +246,11 @@ void Gameloop::broadcast_countdown(const int time_ms) {
 void Gameloop::broadcast_workshop(const int time_ms ) {
     common_broadcast( IN_WORK_SHOP ,time_ms, 
         [](int){ return StateRunning::FINISHED;},
-        [this](Snapshot& dto,int) {
+        [this](Snapshot& dto,int id) {
             dto.prices = upgrader.get_prices();
+            if (Car* car = find_car(id)) {
+                dto.upgrades = car->get_upgrades();
+            }
         }
     );
 }

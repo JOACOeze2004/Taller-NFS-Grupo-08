@@ -250,7 +250,6 @@ bool Race::all_cars_done() {
         if (car_finished(id) || car_dead(id)) {
             cars_finished_or_dead++;
         }
-        std::cout<< "el cp es: " << car_next_cp[id] << " el hint es: " << car_next_hint[id] << std::endl;
     }
     return cars_finished_or_dead == (int)cars->size();
 }
