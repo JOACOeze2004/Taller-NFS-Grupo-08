@@ -74,51 +74,52 @@ void MinimapRenderer::draw(const std::unordered_map<int, CarDTO>& cars, int came
         }
     }
 
-    float checkpoint_minimap_x, checkpoint_minimap_y;
-    bool is_inside = (checkpoint.x >= src_rect.x && checkpoint.x <= src_rect.x + src_rect.w &&
-                        checkpoint.y >= src_rect.y && checkpoint.y <= src_rect.y + src_rect.h);
-    
-    if (is_inside) {
-        checkpoint_minimap_x = minimap_x + (checkpoint.x - src_rect.x) * scale;
-        checkpoint_minimap_y = minimap_y + (checkpoint.y - src_rect.y) * scale;
-    } else {
-        float center_x = camera_car.x;
-        float center_y = camera_car.y;
-        float dx = checkpoint.x - center_x;
-        float dy = checkpoint.y - center_y;
-        float distance = std::sqrt(dx * dx + dy * dy);
+    if (checkpoint.x != 0 || checkpoint.y != 0) {
+        float checkpoint_minimap_x, checkpoint_minimap_y;
+        bool is_inside = (checkpoint.x >= src_rect.x && checkpoint.x <= src_rect.x + src_rect.w &&
+                            checkpoint.y >= src_rect.y && checkpoint.y <= src_rect.y + src_rect.h);
         
-        if (distance > 0) {
-            dx /= distance;
-            dy /= distance;
-            checkpoint_minimap_x = minimap_x + minimap_width * 0.5f + dx * (minimap_width * 0.45f);
-            checkpoint_minimap_y = minimap_y + minimap_height * 0.5f + dy * (minimap_height * 0.45f);
+        if (is_inside) {
+            checkpoint_minimap_x = minimap_x + (checkpoint.x - src_rect.x) * scale;
+            checkpoint_minimap_y = minimap_y + (checkpoint.y - src_rect.y) * scale;
         } else {
-            checkpoint_minimap_x = minimap_x + minimap_width * 0.5f;
-            checkpoint_minimap_y = minimap_y + minimap_height * 0.5f;
+            float center_x = camera_car.x;
+            float center_y = camera_car.y;
+            float dx = checkpoint.x - center_x;
+            float dy = checkpoint.y - center_y;
+            float distance = std::sqrt(dx * dx + dy * dy);
+            
+            if (distance > 0) {
+                dx /= distance;
+                dy /= distance;
+                checkpoint_minimap_x = minimap_x + minimap_width * 0.5f + dx * (minimap_width * 0.45f);
+                checkpoint_minimap_y = minimap_y + minimap_height * 0.5f + dy * (minimap_height * 0.45f);
+            } else {
+                checkpoint_minimap_x = minimap_x + minimap_width * 0.5f;
+                checkpoint_minimap_y = minimap_y + minimap_height * 0.5f;
+            }
         }
+        SDL_Color checkpoint_color;
+        switch (checkpoint_type) {
+            case 1: checkpoint_color = {0, 255, 0, 255}; break;
+            case 2: checkpoint_color = {255, 255, 0, 255}; break;
+            default: checkpoint_color = {255, 100, 0, 255}; break;
+        }
+        
+        const float checkpoint_size = is_inside ? 10.0f : 8.0f;
+        SDL_FRect checkpoint_rect = {
+            checkpoint_minimap_x - checkpoint_size * 0.5f,
+            checkpoint_minimap_y - checkpoint_size * 0.5f,
+            checkpoint_size,
+            checkpoint_size
+        };
+        
+        SDL_SetRenderDrawColor(renderer, checkpoint_color.r, checkpoint_color.g, checkpoint_color.b, 255);
+        SDL_RenderFillRectF(renderer, &checkpoint_rect);
+        
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderDrawRectF(renderer, &checkpoint_rect);
     }
-    
-    SDL_Color checkpoint_color;
-    switch (checkpoint_type) {
-        case 1: checkpoint_color = {0, 255, 0, 255}; break;
-        case 2: checkpoint_color = {255, 255, 0, 255}; break;
-        default: checkpoint_color = {255, 100, 0, 255}; break;
-    }
-    
-    const float checkpoint_size = is_inside ? 10.0f : 8.0f;
-    SDL_FRect checkpoint_rect = {
-        checkpoint_minimap_x - checkpoint_size * 0.5f,
-        checkpoint_minimap_y - checkpoint_size * 0.5f,
-        checkpoint_size,
-        checkpoint_size
-    };
-    
-    SDL_SetRenderDrawColor(renderer, checkpoint_color.r, checkpoint_color.g, checkpoint_color.b, 255);
-    SDL_RenderFillRectF(renderer, &checkpoint_rect);
-    
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderDrawRectF(renderer, &checkpoint_rect);
     
     SDL_FRect border_rect = {
         static_cast<float>(minimap_x), 
@@ -128,7 +129,7 @@ void MinimapRenderer::draw(const std::unordered_map<int, CarDTO>& cars, int came
     };
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     
-    if (!hint_texture) {
+    if (!hint_texture || (hint.x == 0 && hint.y == 0)) {
         SDL_RenderDrawRectF(renderer, &border_rect);
         return;
     }
