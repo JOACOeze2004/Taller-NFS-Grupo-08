@@ -8,6 +8,7 @@
 #include "text_renderer.h"
 #include "client_handler.h"
 #include "../common/DTO.h"
+#include "sprite_loader.h"
 
 class UIRenderer {
 private:
@@ -29,6 +30,10 @@ public:
     void draw_state(int state);
     void draw_ready_btn(int player_count, bool& ready_sent);
     void draw_results(const std::vector<CarRacingInfo>& cars_finished);
+    void draw_checkpoints_info(int current_checkpoint, int total_checkpoints);
+    void draw_upgrades_info(const std::map<Upgrades, int>& upgrades,
+                           SDL_Texture* icons_texture,
+                           const std::vector<UpgradeData>& upgrade_data);
     
     bool is_text_ok() const { return text && text->ok(); }
 };

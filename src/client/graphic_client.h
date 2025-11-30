@@ -12,6 +12,8 @@
 #include "upgrade_phase.h"
 #include "resource_manager.h"
 #include "audio_manager.h"
+#include "sprite_loader.h"
+#include "config.h"
 
 class GraphicClient {
 private:
@@ -32,6 +34,9 @@ private:
     ClientHandler* handler;
     bool ready_sent;
     AudioManager* audio_manager;
+
+    SDL_Texture* upgrade_icons_texture;
+    std::vector<UpgradeData> upgrade_sprites;
 
     CollisionType previous_collision;
     bool previous_using_nitro;

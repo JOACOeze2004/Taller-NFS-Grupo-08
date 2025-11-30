@@ -85,6 +85,9 @@ void GraphicClient::initialize_components(const Snapshot& initial_snapshot) {
     minimap_renderer->set_textures(game_renderer->get_bg_texture(), game_renderer->get_hint_texture());
     minimap_renderer->set_player_car_id(initial_snapshot.id);
 
+    upgrade_icons_texture = resources->load(WORKSHOP_ICONS_PATH);
+    upgrade_sprites = SpriteLoader::loadUpgradeSprites("../src/client/workshop_sprites.yaml");
+
     upgrade_phase = std::make_unique<UpgradePhase>(renderer, window, screen_width, screen_height,
                                                     handler, resources.get());
 }
@@ -223,6 +226,12 @@ void GraphicClient::draw_race_state(const Snapshot& snapshot) {
     } else {
         ui_renderer->draw_position(snapshot.position, human_count);
         ui_renderer->draw_time(snapshot.time_ms);
+        
+        ui_renderer->draw_checkpoints_info(snapshot.current_checkpoint, snapshot.total_checkpoints);
+        
+        if (player_it != snapshot.cars.end()) {
+            ui_renderer->draw_upgrades_info(player_it->second.upgrades, upgrade_icons_texture, upgrade_sprites);
+        }
     }
 }
 

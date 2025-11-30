@@ -194,3 +194,98 @@ void UIRenderer::draw_results(const std::vector<CarRacingInfo>& cars_finished) {
         row_y += row_height;
     }
 }
+
+void UIRenderer::draw_checkpoints_info(int current_checkpoint, int total_checkpoints) {
+    if (!text) return;
+    
+    const int panel_x = 10;
+    const int panel_y = 10;
+    const int panel_w = 350;
+    const int panel_h = 45;
+    
+    int checkpoints_remaining = total_checkpoints - current_checkpoint;
+    
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 20, 20, 40, 200);
+    SDL_Rect panel_rect = {panel_x, panel_y, panel_w, panel_h};
+    SDL_RenderFillRect(renderer, &panel_rect);
+    
+    SDL_SetRenderDrawColor(renderer, 255, 215, 0, 255);
+    SDL_RenderDrawRect(renderer, &panel_rect);
+    
+    SDL_Color title_color = {255, 215, 0, 255};
+    std::string checkpoints_text = "Remaining checkpoints: " + std::to_string(checkpoints_remaining);
+    text->render(renderer, checkpoints_text, panel_x + 10, panel_y + 12, title_color);
+}
+
+void UIRenderer::draw_upgrades_info(const std::map<Upgrades, int>& upgrades,
+                                   SDL_Texture* icons_texture,
+                                   const std::vector<UpgradeData>& upgrade_data) {
+    if (!text || !icons_texture || upgrades.empty()) return;
+    
+    const int panel_x = 10;
+    const int panel_y = 65;
+    const int panel_w = 280;
+    const int icon_size = 35;
+    const int icon_spacing = 5;
+    
+    int total_icons = 0;
+    for (const auto& [upgrade_type, level] : upgrades) {
+        if (level > 0) total_icons += level;
+    }
+    
+    if (total_icons == 0) return;
+    
+    int icons_per_row = (panel_w - 20) / (icon_size + icon_spacing);
+    int icon_rows = (total_icons + icons_per_row - 1) / icons_per_row;
+    int panel_h = 35 + icon_rows * (icon_size + icon_spacing);
+    
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 20, 20, 40, 200);
+    SDL_Rect panel_rect = {panel_x, panel_y, panel_w, panel_h};
+    SDL_RenderFillRect(renderer, &panel_rect);
+    
+    SDL_SetRenderDrawColor(renderer, 255, 215, 0, 255);
+    SDL_RenderDrawRect(renderer, &panel_rect);
+    
+    SDL_Color upgrades_color = {200, 200, 200, 255};
+    text->render(renderer, "UPGRADES:", panel_x + 10, panel_y + 5, upgrades_color);
+    
+    int current_x = panel_x + 10;
+    int current_y = panel_y + 35;
+    int count = 0;
+    
+    for (const auto& [upgrade_type, level] : upgrades) {
+        if (level <= 0) continue;
+        
+        SDL_Rect icon_src = {0, 0, 120, 100};
+        for (const auto& upgrade : upgrade_data) {
+            Upgrades type = NONE_UPGRADE;
+            if (upgrade.name == "mass") type = MASS_UPGRADE;
+            else if (upgrade.name == "acceleration") type = ACCELERATION_UPGRADE;
+            else if (upgrade.name == "handling") type = HANDLING_UPGRADE;
+            else if (upgrade.name == "nitro") type = NITRO_UPGRADE;
+            else if (upgrade.name == "life") type = LIFE_UPGRADE;
+            else if (upgrade.name == "brakes") type = BRAKE_UPGRADE;
+            
+            if (type == upgrade_type) {
+                icon_src = upgrade.sprite;
+                break;
+            }
+        }
+        
+        for (int i = 0; i < level; ++i) {
+            if (count >= icons_per_row) {
+                current_x = panel_x + 10;
+                current_y += icon_size + icon_spacing;
+                count = 0;
+            }
+            
+            SDL_Rect dst_rect = {current_x, current_y, icon_size, icon_size};
+            SDL_RenderCopy(renderer, icons_texture, &icon_src, &dst_rect);
+            
+            current_x += icon_size + icon_spacing;
+            count++;
+        }
+    }
+}
