@@ -230,7 +230,7 @@ void GraphicClient::draw_race_state(const Snapshot& snapshot) {
         ui_renderer->draw_checkpoints_info(snapshot.current_checkpoint, snapshot.total_checkpoints);
         
         if (player_it != snapshot.cars.end()) {
-            ui_renderer->draw_upgrades_info(player_it->second.upgrades, upgrade_icons_texture, upgrade_sprites);
+            ui_renderer->draw_upgrades_info(snapshot.upgrades, upgrade_icons_texture, upgrade_sprites);
         }
     }
 }

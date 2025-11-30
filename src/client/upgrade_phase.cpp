@@ -332,9 +332,9 @@ void UpgradePhase::render(const Snapshot& snapshot) {
     render_background();
     render_title();
     render_remaining_upgrades(snapshot.cars.at(snapshot.id).remaining_upgrades);
-    render_upgrade_buttons(snapshot.prices, snapshot.cars.at(snapshot.id).upgrades);
+    render_upgrade_buttons(snapshot.prices, snapshot.upgrades);
     render_instructions();
-    render_actual_upgrades(snapshot.cars.at(snapshot.id).upgrades);
+    render_actual_upgrades(snapshot.upgrades);
 }
 
 UpgradePhase::~UpgradePhase() {
