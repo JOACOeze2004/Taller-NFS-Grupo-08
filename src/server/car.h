@@ -77,6 +77,7 @@ public:
     void update_nitro_usage();
 
     CarDTO get_state();
+    std::map<Upgrades, int> get_upgrades();
     void set_spawn(float& x, float& y, float& angle_x, float& angle_y);
     
     void reset_stats_and_upgrades();

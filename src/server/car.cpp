@@ -293,8 +293,12 @@ CarDTO Car::get_state() {
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
+    return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME, remaining_upgrades);
+}
+
+std::map<Upgrades, int> Car::get_upgrades() {
     reset_upgrades();
-    return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME, remaining_upgrades, upgrades);
+    return upgrades;
 }
 
 b2Vec2 Car::get_position() const { return b2Body_GetPosition(body_id); }

@@ -223,6 +223,12 @@ void Gameloop::broadcast_in_game(const int time_ms) {
             dto.type_checkpoint = race.get_cp_type(id);
             dto.total_checkpoints = race.get_checkpoint_amount();
             dto.current_checkpoint = race.get_checkpoints(id);
+            auto it = cars.find(id);
+            if (it == cars.end()){
+                return;
+            }
+            Car& car = it->second;
+            dto.upgrades = car.get_upgrades();
         }    
     );
 }

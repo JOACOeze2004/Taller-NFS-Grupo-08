@@ -1,7 +1,5 @@
 #ifndef TALLER_TP_CAR_DTO_H
 #define TALLER_TP_CAR_DTO_H
-#include "upgrades.h"
-#include <map>
 
 enum StateRunning {
     IN_GAME,
@@ -23,7 +21,6 @@ struct CarDTO {
     float remaining_nitro;
     enum StateRunning state;
     int remaining_upgrades;
-    std::map<Upgrades, int> upgrades;
 };
 
 #endif  // TALLER_TP_CAR_DTO_H

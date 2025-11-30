@@ -74,8 +74,7 @@ CarDTO CarNPC::get_state() {
     float y = pos.y;
     b2Rot rot = b2Body_GetRotation(body_id);
     float angle = atan2(rot.s, rot.c);
-    std::map<Upgrades, int> upgrades;
-    return {x, y,0, angle, 0, false, 0, 0, 0, NPC_STATE, 0, upgrades};
+    return {x, y,0, angle, 0, false, 0, 0, 0, NPC_STATE, 0};
 }
 
 b2Vec2 CarNPC::get_forward() {
