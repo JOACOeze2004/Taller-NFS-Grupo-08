@@ -19,7 +19,7 @@ private:
     std::vector<CarRacingInfo> receive_cars_finished() const;
     void receive_player_total_times(Snapshot& snapshot) const;
     CarRacingInfo receive_single_racing_info() const;
-    void receive_car_upgrades(CarDTO& car) const ;
+    void receive_car_upgrades(Snapshot& snapshot) const ;
 
 
 public:

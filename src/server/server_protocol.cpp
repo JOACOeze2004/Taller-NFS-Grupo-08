@@ -85,9 +85,9 @@ void ServerProtocol::send_prices(const Snapshot& snapshot){
     }
 }
 
-void ServerProtocol::send_car_upgrades(const CarDTO& car){
-    protocol.send_big_endian_16(car.upgrades.size());
-    for (const auto& [type, level] : car.upgrades) {
+void ServerProtocol::send_car_upgrades(const Snapshot& snapshot){
+    protocol.send_big_endian_16(snapshot.upgrades.size());
+    for (const auto& [type, level] : snapshot.upgrades) {
         protocol.send_byte(static_cast<uint8_t>(type));
         protocol.send_big_endian_16(level);
     }
@@ -107,7 +107,6 @@ void ServerProtocol::send_car_state(const CarDTO& car){
     protocol.send_float(car.remaining_nitro);
     protocol.send_byte(static_cast<uint8_t>(car.state));
     protocol.send_big_endian_16(car.remaining_upgrades);
-    this->send_car_upgrades(car);
 }
 
 void ServerProtocol::send_lobby_car_state(const LobbyCarDTO& car) {
@@ -171,6 +170,7 @@ void ServerProtocol::send_game_state(const Snapshot& snapshot) {
     send_prices(snapshot);
     send_cars_finished(snapshot);
     send_player_total_times(snapshot);
+    send_car_upgrades(snapshot);
 }
 
 void ServerProtocol::send_error_message(const std::string& msg) {

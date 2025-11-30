@@ -86,12 +86,12 @@ void ClientProtocol::receive_player_total_times(Snapshot& snapshot) const {
     }
 }
 
-void ClientProtocol::receive_car_upgrades(CarDTO& car) const {
+void ClientProtocol::receive_car_upgrades(Snapshot& snapshot) const {
     uint16_t upgrades_count = protocol.receive_big_endian_16();
     for (int i = 0; i < upgrades_count; i++) {
         Upgrades type = static_cast<Upgrades>(protocol.receive_byte());
         int level = protocol.receive_big_endian_16();
-        car.upgrades[type] = level;
+        snapshot.upgrades[type] = level;
     }
 }
 
@@ -108,7 +108,6 @@ CarDTO ClientProtocol::receive_car_state() const {
     car.remaining_nitro = protocol.receive_float();
     car.state = static_cast<StateRunning>(protocol.receive_byte());
     car.remaining_upgrades = protocol.receive_big_endian_16();
-    receive_car_upgrades(car);
     return car;
 }
 
@@ -195,6 +194,7 @@ Snapshot ClientProtocol::receive_game_state() const {
     
     snapshot.cars_finished = receive_cars_finished();
     receive_player_total_times(snapshot);
+    receive_car_upgrades(snapshot);
 
     return snapshot;
 }
