@@ -82,7 +82,7 @@ void GraphicClient::initialize_components(const Snapshot& initial_snapshot) {
     minimap_renderer = std::make_unique<MinimapRenderer>(renderer, screen_width, screen_height,
                                                           game_renderer->get_map_width(),
                                                           game_renderer->get_map_height());
-    minimap_renderer->set_textures(game_renderer->get_bg_texture(), nullptr);
+    minimap_renderer->set_textures(game_renderer->get_bg_texture(), game_renderer->get_hint_texture());
     minimap_renderer->set_player_car_id(initial_snapshot.id);
 
     upgrade_phase = std::make_unique<UpgradePhase>(renderer, window, screen_width, screen_height,

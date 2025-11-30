@@ -46,6 +46,7 @@ public:
     float get_map_width() const { return map_width; }
     float get_map_height() const { return map_height; }
     SDL_Texture* get_bg_texture() const { return bg_texture; }
+    SDL_Texture* get_hint_texture() const { return hint_texture; }
 };
 
 #endif // TALLER_GAME_RENDERER_H
