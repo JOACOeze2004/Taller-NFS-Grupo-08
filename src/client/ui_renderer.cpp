@@ -22,19 +22,47 @@ void UIRenderer::draw_text_with_outline(const std::string& msg, int x, int y) {
 
 void UIRenderer::draw_position(int position, int total_cars) {
     if (!text) return;
+    
+    const int panel_x = 490;
+    const int panel_y = 10;
+    const int panel_w = 220;
+    const int panel_h = 45;
+    
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 20, 20, 40, 200);
+    SDL_Rect panel_rect = {panel_x, panel_y, panel_w, panel_h};
+    SDL_RenderFillRect(renderer, &panel_rect);
+    
+    SDL_SetRenderDrawColor(renderer, 255, 215, 0, 255);
+    SDL_RenderDrawRect(renderer, &panel_rect);
+    
     std::string msg = "POSITION: " + std::to_string(position) + " / " + std::to_string(total_cars);
-    draw_text_with_outline(msg, 500, 30);
+    draw_text_with_outline(msg, 500, 20);
 }
 
 void UIRenderer::draw_time(int time_ms) {
     if (!text) return;
+    
+    const int panel_x = 490;
+    const int panel_y = 65;
+    const int panel_w = 220;
+    const int panel_h = 45;
+    
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 20, 20, 40, 200);
+    SDL_Rect panel_rect = {panel_x, panel_y, panel_w, panel_h};
+    SDL_RenderFillRect(renderer, &panel_rect);
+    
+    SDL_SetRenderDrawColor(renderer, 255, 215, 0, 255);
+    SDL_RenderDrawRect(renderer, &panel_rect);
+    
     int total_seconds = time_ms / 1000;
     int minutes = total_seconds / 60;
     int seconds = total_seconds % 60;
     int milliseconds = time_ms % 1000;
     char buffer[64];
     std::snprintf(buffer, sizeof(buffer), "TIME: %02d:%02d.%03d", minutes, seconds, milliseconds);
-    draw_text_with_outline(buffer, 500, 100);
+    draw_text_with_outline(buffer, 500, 75);
 }
 
 void UIRenderer::draw_game_id(int id) {
@@ -225,7 +253,7 @@ void UIRenderer::draw_upgrades_info(const std::map<Upgrades, int>& upgrades,
     
     const int panel_x = 10;
     const int panel_y = 65;
-    const int panel_w = 280;
+    const int panel_w = std::max(static_cast<int>(upgrades.size()) * 45, 160);
     const int icon_size = 35;
     const int icon_spacing = 5;
     

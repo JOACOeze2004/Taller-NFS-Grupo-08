@@ -175,11 +175,11 @@ void UpgradePhase::render_upgrade_buttons(const std::map<Upgrades, std::chrono::
         SDL_Color bg_color = COLOR_UPGRADE_BUTTON_BG;
         if (upgrade_level > 0) {
             if (upgrade_level == 1) {
-                bg_color = {255, 255, 100, 255};
+                bg_color = {120, 160, 220, 220};
             } else if (upgrade_level == 2) {
-                bg_color = {255, 150, 100, 255};
+                bg_color = {180, 180, 200, 220};
             } else {
-                bg_color = {255, 70, 50, 255};
+                bg_color = {220, 200, 120, 220};
             }
         }
         
