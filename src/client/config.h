@@ -108,14 +108,14 @@ constexpr int RESULTS_COL_NAME_X = 120;
 constexpr int RESULTS_COL_TIME_X_OFFSET = 180;
 
 // Upgrade Phase
-constexpr int UPGRADE_BUTTON_WIDTH = 420;
-constexpr int UPGRADE_BUTTON_HEIGHT = 200;
-constexpr int UPGRADE_BUTTON_SPACING = 20;
-constexpr int UPGRADE_COLUMN_SPACING = 60;
+constexpr int UPGRADE_BUTTON_WIDTH = 400;
+constexpr int UPGRADE_BUTTON_HEIGHT = 180;
+constexpr int UPGRADE_BUTTON_SPACING = 25;
+constexpr int UPGRADE_COLUMN_SPACING = 70;
 constexpr int UPGRADE_START_Y = 100;
-constexpr int UPGRADE_ICON_SIZE = 100;
-constexpr int UPGRADE_ARROW_SIZE = 50;
-constexpr int UPGRADE_ARROW_GAP = 55;
+constexpr int UPGRADE_ICON_SIZE = 95;
+constexpr int UPGRADE_ARROW_SIZE = 45;
+constexpr int UPGRADE_ARROW_GAP = 50;
 constexpr int UPGRADE_ICON_PADDING = 12;
 constexpr int UPGRADE_TITLE_Y_OFFSET = 10;
 constexpr int UPGRADE_DESC_Y_OFFSET = 60;

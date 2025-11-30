@@ -259,15 +259,65 @@ void UpgradePhase::render_instructions() {
     text->render(renderer, instruction, x, y, COLOR_UPGRADE_INFO);
 }
 
-void UpgradePhase::render(int remaining_upgrades, const std::map<Upgrades, std::chrono::seconds>& prices) {
+void UpgradePhase::render_actual_upgrades(std::map<Upgrades, int> upgrades){
+    if (!icons_texture || !text) return;
+    
+    const int icon_size = 75;
+    const int icon_spacing = 15;
+    const int y_position = screen_height - 130;
+    
+    SDL_Rect clear_area = {0, y_position - 40, screen_width, icon_size + 50};
+    SDL_SetRenderDrawColor(renderer, COLOR_UPGRADE_BG.r, COLOR_UPGRADE_BG.g, 
+                          COLOR_UPGRADE_BG.b, COLOR_UPGRADE_BG.a);
+    SDL_RenderFillRect(renderer, &clear_area);
+    
+    SDL_Color title_color = {255, 215, 0, 255};
+    std::string title = "CURRENT UPGRADES:";
+    int title_width = static_cast<int>(title.size()) * 12;
+    int title_x = (screen_width - title_width) / 2 - 30;
+    int title_y = y_position - 35;
+    text->render(renderer, title, title_x, title_y, title_color);
+    
+    if (upgrades.empty()) return;
+    
+    int total_width = 0;
+    int total_icons = 0;
+    for (const auto& [upgrade_type, level] : upgrades) {
+        if (level > 0) total_icons += level;
+    }
+    total_width = total_icons * (icon_size + icon_spacing) - icon_spacing;
+    
+    int start_x = (screen_width - total_width) / 2;
+    int current_x = start_x;
+    
+    for (const auto& [upgrade_type, level] : upgrades) {
+        if (level <= 0) continue;
+        
+        SDL_Rect icon_src = {0, 0, 100, 100};
+        for (const auto& button : upgrade_buttons) {
+            if (button.upgrade_type == upgrade_type) {
+                icon_src = button.icon_src_rect;
+                break;
+            }
+        }
+        
+        for (int i = 0; i < level; ++i) {
+            SDL_Rect dst_rect = {current_x, y_position, icon_size, icon_size};
+            SDL_RenderCopy(renderer, icons_texture, &icon_src, &dst_rect);
+            
+            current_x += icon_size + icon_spacing;
+        }
+    }
+}
+
+void UpgradePhase::render(const Snapshot& snapshot) {
     
     render_background();
     render_title();
-    render_remaining_upgrades(remaining_upgrades);
-    render_upgrade_buttons(prices);
+    render_remaining_upgrades(snapshot.cars.at(snapshot.id).remaining_upgrades);
+    render_upgrade_buttons(snapshot.prices);
     render_instructions();
-
-    
+    render_actual_upgrades(snapshot.cars.at(snapshot.id).upgrades);
 }
 
 UpgradePhase::~UpgradePhase() {

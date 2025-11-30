@@ -184,9 +184,7 @@ void GraphicClient::draw(const Snapshot& snapshot) {
 }
 
 void GraphicClient::draw_workshop_state(const Snapshot& snapshot) {
-    auto player_it = snapshot.cars.find(player_car_id);
-    int remaining_upgrades = (player_it != snapshot.cars.end()) ? player_it->second.remaining_upgrades : 0;
-    upgrade_phase->render(remaining_upgrades, snapshot.prices);
+    upgrade_phase->render(snapshot);
 }
 
 void GraphicClient::draw_lobby_state(const Snapshot& snapshot) {

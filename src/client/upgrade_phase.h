@@ -57,6 +57,7 @@ private:
     void render_upgrade_buttons(const std::map<Upgrades, std::chrono::seconds>& prices);
     void render_instructions();
     void render_remaining_upgrades(int remaining_upgrades);
+    void render_actual_upgrades(std::map<Upgrades, int> upgrades);
 
 public:
     UpgradePhase(SDL_Renderer* renderer, SDL_Window* window, int screen_width, int screen_height, 
@@ -65,7 +66,7 @@ public:
     
     Upgrades show_and_wait_selection();
     
-    void render(int remaining_upgrades, const std::map<Upgrades, std::chrono::seconds>& prices);
+    void render(const Snapshot& snapshot);
 };
 
 #endif  // TALLER_TP_UPGRADE_PHASE_H
