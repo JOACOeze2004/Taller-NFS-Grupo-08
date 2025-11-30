@@ -70,7 +70,7 @@ void ClientHandler::initialize_cheat_map() {
     cheat_command_map[SDLK_a] = SEND_NEXT_CHECKPOINT;
     cheat_command_map[SDLK_f] = SEND_PASS_TO_FINAL_RACE;
     cheat_command_map[SDLK_q] = SEND_DISCONNECT;
-
+    cheat_command_map[SDLK_r] = SEND_FORCE_LOBBY_START;
 }
 
 bool ClientHandler::is_point_in_rect(int x, int y, const SDL_Rect& rect) const {

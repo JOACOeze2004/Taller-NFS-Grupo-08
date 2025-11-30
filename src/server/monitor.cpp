@@ -110,9 +110,9 @@ std::shared_ptr<Gameloop> Monitor::join_game(const std::string& username, const 
         throw InvalidGameIDException();
     }
     auto game = game_i->second;
-    // if (game->is_game_already_started()){
-    //     throw GameAlreadyStartedException();
-    // }    
+    if (game->is_game_already_started()){
+        throw GameAlreadyStartedException();
+    }    
     if (!game->can_join_to_game()){
         throw GameFullException();
     }
@@ -128,27 +128,11 @@ std::vector<std::string> Monitor::get_active_games() {
     std::unique_lock<std::mutex> lock(mutex);
     std::vector<std::string> active_games;
     for(const auto& [id,game] : current_games){
-        //if (game->is_running){
+        if (!game->is_game_already_started()){
             active_games.push_back(id);
-        //}
+        }
     }
     return active_games;
-}
-
-void Monitor::remove_player(const std::string& username){
-    std::unique_lock<std::mutex> lock(mutex);
-    players.erase(username);
-}
-
-void Monitor::remove_game(const std::string& _game_id){
-    auto game_to_remove = current_games.find(_game_id);
-    if (game_to_remove != current_games.end()) {
-        auto game_loop = game_to_remove->second;
-        game_loop->stop();
-        game_loop->join();
-        current_games.erase(_game_id);
-    }  
-    clear_remaining_clients(_game_id);  
 }
 
 void Monitor::clear_remaining_clients(const std::string& _game_id){
@@ -174,7 +158,6 @@ void Monitor::broadcast_final_results(const FinalScoreList& results, const std::
     for (auto& [id, client] : clients) {
         if (client->get_game_id() == gid && !client->is_dead()) {
             client->send_final_results(results);
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 }
