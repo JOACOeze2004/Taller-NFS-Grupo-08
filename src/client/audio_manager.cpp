@@ -98,9 +98,9 @@ void AudioManager::changeState(GameState newState) {
     if (currentState == newState) return;
 
     currentState = newState;
-    Mix_FadeOutMusic(500);
+    Mix_FadeOutMusic(200);
     
-    SDL_Delay(600);
+    SDL_Delay(250);
     playMusicForState(newState);
 }
 
