@@ -43,7 +43,7 @@ bool Gameloop::handle_disconnect(const int command,const int id) {
     return true;
 }
 
-bool Gameloop::handle_upgrade(const int command, Car& car) {
+bool Gameloop::handle_upgrade(const int command, Car& car, const int player_id) {
     if (!upgrader.is_upgrade_command(command)) {
         return false;
     }
@@ -52,8 +52,6 @@ bool Gameloop::handle_upgrade(const int command, Car& car) {
     bool is_upgrade = upgrader.is_upgrade_operation(command);
     
     int price_ms = std::chrono::duration_cast<std::chrono::seconds>( upgrader.get_price(type) ).count();
-    
-    int player_id = car.get_id();
 
     bool upgrade_applied = car.apply_upgrade(type, is_upgrade);
     
@@ -112,7 +110,7 @@ void Gameloop::process_command(ClientCommand& client_command) {
         return;
     }
     Car& car = it->second;
-    if (handle_upgrade(command, car)){
+    if (handle_upgrade(command, car, player_id)){
         return;
     } 
     if (race.car_finished(player_id) || race.car_dead(player_id)) {

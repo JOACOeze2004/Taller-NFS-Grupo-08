@@ -86,7 +86,7 @@ private:
     void generate_npcs();
     
     bool handle_disconnect(const int command_id, const int id);
-    bool handle_upgrade(const int command, Car& car);
+    bool handle_upgrade(const int command, Car& car, const int player_id);
 
     bool handle_car_action(const int command, Car& car);
     bool handle_race_action(const int command, int id);
