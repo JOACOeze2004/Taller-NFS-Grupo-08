@@ -1,6 +1,6 @@
 #include "server.h"
 
-#include <cstdint>
+#include "config.h"
 #include <iostream>
 
 #include "../common/constants.h"
@@ -11,6 +11,7 @@
 Server::Server(const std::string& port): port(port){}
 
 void Server::run() {
+    Config::instance().load("../src/server/config.yaml");
     Monitor monitor;
     ClientAcceptor acceptor(port, monitor);
     std::cout << "[SERVER] Listening on port " << port << std::endl;

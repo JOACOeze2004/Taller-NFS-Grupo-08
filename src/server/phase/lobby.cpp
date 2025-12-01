@@ -16,7 +16,7 @@ void Lobby::update(int time_ms) {
     gameloop->broadcast_lobby(time_ms);
 }
 
-void Lobby::end() { gameloop->change_phase(std::make_unique<Countdown>(gameloop, RACE_START_TIME)); }
+void Lobby::end() { gameloop->change_phase(std::make_unique<Countdown>(gameloop, Config::instance().game.race_start_time_ms)); }
 
 
 State Lobby::get_current_phase_state() const { return IN_LOBBY; }

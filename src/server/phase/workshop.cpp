@@ -22,7 +22,7 @@ void Workshop::end() {
         gameloop->stop();
         return;
     }
-    gameloop->change_phase(std::make_unique<Countdown>(gameloop, RACE_START_TIME));
+    gameloop->change_phase(std::make_unique<Countdown>(gameloop, Config::instance().game.race_start_time_ms));
 }
 
 State Workshop::get_current_phase_state() const { return IN_WORK_SHOP; }

@@ -33,7 +33,8 @@ add_library(taller_common STATIC
         src/common/command.h
         src/common/car_DTO.h
         src/common/DTO.h
-        src/common/upgrades.h)
+        src/common/upgrades.h
+        src/server/config.yaml)
 
 # add the source files that make the lib
 # HEY!! TODO XXX: add more subfolders here
@@ -233,7 +234,9 @@ if(TALLER_SERVER)
             src/server/car_npc.cpp
             src/server/upgrade_handler.h
             src/server/upgrade_handler.cpp
-            )
+            src/server/config.cpp
+            src/server/config.h
+    )
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)

@@ -1,5 +1,8 @@
 #include "server_protocol.h"
+
 #include <cstring>
+
+#include "config.h"
 
 ServerProtocol::ServerProtocol(Socket& _socket) : protocol(_socket) {  }
 
@@ -101,7 +104,7 @@ void ServerProtocol::send_car_state(const CarDTO& car){
     protocol.send_float(car.angle);
     protocol.send_big_endian_16(car.car_id);
     
-    float life_percentage = (static_cast<float>(car.life) * 100.0f) / static_cast<float>(MAX_LIFE);
+    float life_percentage = (static_cast<float>(car.life) * 100.0f) / static_cast<float>(Config::instance().car.max_life);
 
     protocol.send_float(life_percentage);
     protocol.send_bool(car.nitro);

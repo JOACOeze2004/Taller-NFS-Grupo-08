@@ -24,7 +24,7 @@ void Gameloop::run() {
     while (this->should_keep_running()) {
         try {
             current_phase->run();
-            if (!has_active_players() || get_races_completed() >= MAX_RACES){
+            if (!has_active_players() || get_races_completed() >= Config::instance().game.max_races){
                 break;
             }
             
@@ -87,7 +87,7 @@ bool Gameloop::handle_skip_to_last_race_cheat(const int command) {
     if (command != SEND_PASS_TO_FINAL_RACE){
         return false;
     }   
-    races_completed = MAX_RACES - 2;
+    races_completed = Config::instance().game.max_races - 2;
     
     for (auto& [key, car] : cars) {
         int id = key;
@@ -128,7 +128,7 @@ void Gameloop::process_command(ClientCommand& client_command) {
 }
 
 void Gameloop::generate_npcs() {
-    for (int i = 0; i < MAX_NPCS; i++) {
+    for (int i = 0; i < Config::instance().game.max_npcs; i++) {
         auto rand_corner = rand() % corners.size();
         npcs.emplace_back(world.get_id(), &corners, rand_corner);
     }
@@ -266,7 +266,7 @@ void Gameloop::broadcast_workshop(const int time_ms ) {
     );
 }
 
-bool Gameloop::can_join_to_game(){ return cars.size() < MAX_PLAYERS_PER_GAME && !game_started; }
+bool Gameloop::can_join_to_game(){ return cars.size() < Config::instance().game.max_players && !game_started; }
 
 const std::string& Gameloop::get_game_id() const{ return this->game_id; }
 
@@ -281,7 +281,7 @@ void Gameloop::handle_lobby_command(const ClientCommand& cmd) {
         return;
     }    
     if (cmd.cmd_struct.cmd == SEND_READY_TO_PLAY && cmd.id == owner_id) {
-        if (cars.size() < MIN_PLAYERS_TO_START){
+        if (cars.size() < Config::instance().game.min_players){
             return;
         }
         ready_to_start = true;

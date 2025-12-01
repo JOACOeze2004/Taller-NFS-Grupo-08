@@ -3,6 +3,7 @@
 #include "src/common/DTO.h"
 #include "src/common/constants.h"
 
+#include "config.h"
 #include "parser_yaml.h"
 
 CarNPC::CarNPC(GraphNode& start_corner, b2WorldId& world) {
@@ -33,7 +34,7 @@ void CarNPC::move(GraphNode& target) {
     float speed = b2Length(vel);
 
     float accel = 6.0f;
-    float limit = MAX_SPEED;
+    float limit = Config::instance().car.max_speed;
 
     if (speed < limit) {
         b2Vec2 velocity = b2Body_GetWorldVector(body_id, {1,0});

@@ -4,12 +4,12 @@
 UpgradeHandler::UpgradeHandler() { initialize_prices(); }
 
 void UpgradeHandler::initialize_prices() {
-    prices[ACCELERATION_UPGRADE] = std::chrono::seconds(ACCELERATION_PRICE);
-    prices[HANDLING_UPGRADE] = std::chrono::seconds(HANDLING_PRICE);
-    prices[NITRO_UPGRADE] = std::chrono::seconds(NITRO_PRICE);
-    prices[LIFE_UPGRADE] = std::chrono::seconds(LIFE_PRICE);
-    prices[BRAKE_UPGRADE] = std::chrono::seconds(BRAKE_PRICE);
-    prices[MASS_UPGRADE] = std::chrono::seconds(MASS_PRICE);
+    prices[ACCELERATION_UPGRADE] = std::chrono::seconds(Config::instance().workshop.acceleration_price);
+    prices[HANDLING_UPGRADE] = std::chrono::seconds(Config::instance().workshop.handling_price);
+    prices[NITRO_UPGRADE] = std::chrono::seconds(Config::instance().workshop.nitro_price);
+    prices[LIFE_UPGRADE] = std::chrono::seconds(Config::instance().workshop.life_price);
+    prices[BRAKE_UPGRADE] = std::chrono::seconds(Config::instance().workshop.brake_price);
+    prices[MASS_UPGRADE] = std::chrono::seconds(Config::instance().workshop.mass_price);
 }
 
 std::pair<Upgrades, bool> UpgradeHandler::parse_command(int command_id) const {

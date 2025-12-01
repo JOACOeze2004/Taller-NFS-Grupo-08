@@ -1,12 +1,14 @@
 #ifndef TALLER_TP_CAR_H
 #define TALLER_TP_CAR_H
 
-#include "car_state.h"
-#include "functional"
-#include "../common/car_DTO.h"
-#include "../common/DTO.h"
-#include "../common/constants.h"
 #include <box2d/box2d.h>
+
+#include "../common/DTO.h"
+#include "../common/car_DTO.h"
+
+#include "car_state.h"
+#include "config.h"
+#include "functional"
 
 constexpr float MASS = 20.f;
 constexpr float HANDLING = 80.0f + MASS;
@@ -14,9 +16,9 @@ constexpr float ACCELERATION = 80.0f - MASS;
 constexpr float BRAKING = 20.0f - MASS/2;
 
 class Car {
-    float max_nitro = MAX_NITRO;
-    float max_speed = MAX_SPEED;
-    float max_life = MAX_LIFE;
+    float max_nitro = Config::instance().car.max_nitro;
+    float max_speed = Config::instance().car.max_speed;
+    float max_life = Config::instance().car.max_life;
 
     CarState state;
     float mass;
@@ -25,11 +27,11 @@ class Car {
     float braking = BRAKING;
     int car_id;
     int life = max_life;
-    int nitro = MAX_NITRO;
+    int nitro = Config::instance().car.max_nitro;
     b2BodyId body_id;
     bool nitro_activated = false;
-    int nitro_consuption = NITRO_CONSUMPTION;
-    int nitro_recharge = NITRO_RECHARGE_RATE;
+    int nitro_consuption = Config::instance().car.nitro_consumption;
+    int nitro_recharge = Config::instance().car.nitro_recharge_rate;
     int remaining_upgrades;
     bool in_lobby = true;
     
