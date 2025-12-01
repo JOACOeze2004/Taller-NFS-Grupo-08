@@ -58,6 +58,8 @@ public:
     int get_races_completed() const;
     void reset_race();
     bool has_active_players() const;
+    void reset_upgrade_penalties();
+    int get_upgrade_penalty(int player_id) const;
 
 private:
     Queue<ClientCommand> cmd_queue;

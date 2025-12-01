@@ -48,4 +48,16 @@ int Phase::get_time() const {
     return static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count()/1000);
 }
 
+int Phase::get_time_remaining_ms(const float base_time, int player_id) const {
+    if (this->get_current_phase_state() == IN_LOBBY){
+        return 1;
+    }    
+    
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count();
+    int penalty_ms = gameloop->get_upgrade_penalty(player_id) * 1000;
+    int available_time = static_cast<int>(base_time) - penalty_ms;    
+    return std::max(0, available_time - static_cast<int>(elapsed));
+}
+
 Phase::~Phase() {}
