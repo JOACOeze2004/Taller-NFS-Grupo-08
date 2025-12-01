@@ -23,6 +23,8 @@ CarNPC::CarNPC(GraphNode& start_corner, b2WorldId& world) {
     b2ShapeId shape = b2CreatePolygonShape(body_id, &shape_def, &box);
     b2Shape_EnableContactEvents(shape, true);
     b2Shape_EnableHitEvents(shape, true);
+
+    car_id = rand() % 6;
 }
 
 b2Vec2 CarNPC::get_position() {
@@ -95,7 +97,7 @@ CarDTO CarNPC::get_state() {
     float y = pos.y;
     b2Rot rot = b2Body_GetRotation(body_id);
     float angle = atan2(rot.s, rot.c);
-    return {x, y,0, angle, 0, false, 0, 0, 0, NPC_STATE, 0};
+    return {x, y,0, angle, car_id, false, 0, 0, 0, NPC_STATE, 0};
 }
 
 b2Vec2 CarNPC::get_forward() {

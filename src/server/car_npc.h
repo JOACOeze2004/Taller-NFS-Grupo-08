@@ -17,6 +17,7 @@ class CarNPC {
     b2Vec2 last_pos = {0,0};
     b2Vec2 act_pos = {0,0};
     void rotate(GraphNode& target);
+    int car_id;
 
 public:
     explicit CarNPC(GraphNode& start_corner, b2WorldId& world);
