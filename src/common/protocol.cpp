@@ -57,16 +57,14 @@ uint32_t Protocol::receive_big_endian_32() const{
 }
 
 void Protocol::send_big_endian_64(const uint64_t value) const {
-    uint32_t high = (value >> 32) & 0xFFFFFFFF;
-    send_big_endian_32(high);
-    uint32_t low = value & 0xFFFFFFFF;
-    send_big_endian_32(low);
+    uint64_t big_endian = htobe64(value);
+    socket.sendall(&big_endian, sizeof(big_endian));
 }
 
 uint64_t Protocol::receive_big_endian_64() const {
-    uint32_t high = receive_big_endian_32();
-    uint32_t low = receive_big_endian_32();
-    return (static_cast<uint64_t>(high) << 32) | low;
+    uint64_t big_endian;
+    socket.recvall(&big_endian, sizeof(big_endian));
+    return be64toh(big_endian);
 }
 
 void Protocol::send_string(const std::string& str) const {
@@ -101,9 +99,7 @@ float Protocol::receive_float() const {
     return value;
 }
 
-void Protocol::send_bool(const bool value) const{
-    this->send_byte(value ? 1 : 0);
-}
+void Protocol::send_bool(const bool value) const { this->send_byte(value ? 1 : 0); }
 
 bool Protocol::receive_bool() const{
     uint8_t byte = this->receive_byte();

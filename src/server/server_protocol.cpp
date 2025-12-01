@@ -6,9 +6,7 @@
 
 ServerProtocol::ServerProtocol(Socket& _socket) : protocol(_socket) {  }
 
-uint8_t ServerProtocol::receive_standar_command() const {
-    return protocol.receive_byte();
-}
+uint8_t ServerProtocol::receive_standar_command() const {  return protocol.receive_byte(); }
 
 void ServerProtocol::send_cars(const Snapshot& snapshot){
     protocol.send_big_endian_16(snapshot.cars.size());
@@ -187,6 +185,4 @@ void ServerProtocol::send_ok() { protocol.send_byte(SEND_OK_MESSAGE); }
 
 void ServerProtocol::send_final_results(const FinalScoreList& results) { this->send_results(results); }
 
-void ServerProtocol::close(){
-    protocol.close_socket();    
-}
+void ServerProtocol::close(){ protocol.close_socket(); }

@@ -216,6 +216,4 @@ FinalScoreList ClientProtocol::receive_final_results() const {
     return results;
 }
 
-void ClientProtocol::close(){
-    protocol.close_socket();
-}
+void ClientProtocol::close(){ protocol.close_socket(); }
