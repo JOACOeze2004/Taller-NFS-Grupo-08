@@ -32,12 +32,13 @@ void GraphicClient::initialize_window() {
     window = SDL_CreateWindow("Client Game",
                               SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                               screen_width, screen_height,
-                              SDL_WINDOW_SHOWN | SDL_WINDOW_MAXIMIZED);
+                              SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
     if (!window) {
         SDL_Quit();
         throw std::runtime_error(std::string("[CLIENT] Error creating window: ") + SDL_GetError());
     }
+    SDL_SetWindowMinimumSize(window, screen_width, screen_height);
 }
 
 void GraphicClient::initialize_renderer() {
@@ -47,6 +48,10 @@ void GraphicClient::initialize_renderer() {
         SDL_Quit();
         throw std::runtime_error(std::string("[CLIENT] Error creating renderer: ") + SDL_GetError());
     }
+    
+    SDL_RenderSetLogicalSize(renderer, screen_width, screen_height);
+    SDL_RenderSetIntegerScale(renderer, SDL_FALSE);
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 }
 
 void GraphicClient::initialize_image_and_ttf() {
