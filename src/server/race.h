@@ -20,6 +20,7 @@ class Race {
     std::map<int, bool> finished;
     std::map<int, int> positions;
     std::vector<int> positions_order;
+    std::map<int, bool> timeouted;
 
     
     float get_distance(const int id) const;
@@ -53,6 +54,8 @@ public:
     void pass_to_next_checkpoint(int id); 
     int get_checkpoint_amount() const;
     int get_checkpoints(const int id) const;
+    bool car_timeouted(const int& id) const;
+
 
 
     void activate_win(int& id);

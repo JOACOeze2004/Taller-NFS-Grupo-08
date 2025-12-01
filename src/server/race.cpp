@@ -7,6 +7,7 @@ Race::Race(const std::string& map_name, std::map<int, Car> *_cars, const std::st
     track = tracks[indx];
     for (auto& [id, car] : *cars) {
         finished[id] = false;
+        timeouted[id] = false;
         car_next_cp[id] = 0;
         car_next_hint[id] = 0;
     }
@@ -133,6 +134,14 @@ void Race::update_checkpoints() {
     }
 }
 
+bool Race::car_timeouted(const int& id) const {
+    auto it = timeouted.find(id);
+    if (it == timeouted.end()) {
+        return false;
+    }
+    return it->second;
+}
+
 bool Race::car_dead(const int& id) const {
     auto it = cars->find(id);
     return it->second.is_dead();
@@ -148,6 +157,11 @@ StateRunning Race::get_state(const int& id, const int& time_remaining) {
         return DEAD;
     }
     if (time_remaining <= 0) {
+        timeouted[id] = true;
+        auto it = cars->find(id);
+        if (it != cars->end()) {
+            it->second.activate_lose_race();
+        }
         return TIMEOUTED;
     }
 
@@ -190,6 +204,7 @@ Checkpoint Race::get_start_angle() const { return track.checkpoints[1]; }
 void Race::reset_race() {
     for (auto& [id, car] : *cars) {
         finished[id] = false;
+        timeouted[id] = false;
         car_next_cp[id] = 0;
         car_next_hint[id] = 0;
         car.reset_stats_and_upgrades();

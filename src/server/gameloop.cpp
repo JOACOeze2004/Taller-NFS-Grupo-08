@@ -119,7 +119,7 @@ void Gameloop::process_command(ClientCommand& client_command) {
     if (handle_upgrade(command, car, player_id)){
         return;
     } 
-    if (race.car_finished(player_id) || race.car_dead(player_id)) {
+    if (race.car_finished(player_id) || race.car_dead(player_id) || race.car_timeouted(player_id)) {
         return;
     }
     if (handle_car_action(command, car) || handle_race_action(command, player_id)) {
@@ -224,7 +224,8 @@ void Gameloop::broadcast_lobby(const int time_ms) {
 
 void Gameloop::broadcast_in_game(const int time_ms) {
     common_broadcast( IN_RACE ,time_ms, 
-        [&](int id){ return race.get_state(id, time_ms); },
+        [&](int id){ int player_time_ms = current_phase->get_time_remaining_ms(MAX_TIME_PER_RACE, id);
+            return race.get_state(id, player_time_ms); },
         [&](Snapshot& dto,int id) {
             int player_time_ms = current_phase->get_time_remaining_ms(MAX_TIME_PER_RACE, id);
             dto.time_ms = player_time_ms;
@@ -312,7 +313,13 @@ void Gameloop::update_race_state() {
     for (auto& [id, car] : cars) {
         if (race.car_finished(id)) {
             results.add_finished(id, user_names[id], current_phase->get_time(), race.get_position(id));
+            continue;
         }
+         if (race.car_timeouted(id)) {
+            results.add_dead(id, user_names[id], current_phase->get_time(), MAX_TIME_PER_RACE / 1000);
+            continue;
+        }
+
         if (race.car_dead(id)) {
             results.add_dead(id, user_names[id], current_phase->get_time(), MAX_TIME_PER_RACE / 1000);
         }
