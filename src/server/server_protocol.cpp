@@ -104,9 +104,7 @@ void ServerProtocol::send_car_state(const CarDTO& car){
     protocol.send_float(car.angle);
     protocol.send_big_endian_16(car.car_id);
     
-    float life_percentage = (static_cast<float>(car.life) * 100.0f) / static_cast<float>(Config::instance().car.max_life);
-
-    protocol.send_float(life_percentage);
+    protocol.send_float(car.life);
     protocol.send_bool(car.nitro);
     protocol.send_float(car.remaining_nitro);
     protocol.send_byte(static_cast<uint8_t>(car.state));

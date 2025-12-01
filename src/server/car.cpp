@@ -293,7 +293,8 @@ CarDTO Car::get_state() {
     float angle = atan2(rot.s, rot.c);
     b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
     float speed = b2Length(vel);
-    return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life, this->nitro_activated, this->nitro, IN_GAME, remaining_upgrades);
+    float life_percentage = (static_cast<float>(life) * 100.0f) / static_cast<float>(Config::instance().car.max_life);
+    return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life_percentage, this->nitro_activated, this->nitro, IN_GAME, remaining_upgrades);
 }
 
 std::map<Upgrades, int> Car::get_upgrades() {
