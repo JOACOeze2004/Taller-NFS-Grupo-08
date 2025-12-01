@@ -241,12 +241,14 @@ void UpgradePhase::render_upgrade_buttons(const std::map<Upgrades, std::chrono::
             int title_y = button.rect.y + UPGRADE_TITLE_Y_OFFSET;
             int est_title_width = static_cast<int>(button.title.size()) * 14;
             int title_x = button.rect.x + (button.rect.w - est_title_width) / 2;
-            text->render(renderer, button.title, title_x, title_y, COLOR_BLACK);
+            
+            text->render_with_outline(renderer, button.title, title_x, title_y, COLOR_WHITE, COLOR_BLACK);
             
             int desc_y = button.rect.y + button.rect.h - UPGRADE_DESC_Y_OFFSET;
             int est_desc_width = static_cast<int>(button.description.size()) * 11;
             int desc_x = button.rect.x + (button.rect.w - est_desc_width) / 2;
-            text->render(renderer, button.description, desc_x, desc_y, COLOR_BLACK);
+            
+            text->render_with_outline(renderer, button.description, desc_x, desc_y, COLOR_WHITE, COLOR_BLACK);
             
             
 
@@ -260,8 +262,8 @@ void UpgradePhase::render_upgrade_buttons(const std::map<Upgrades, std::chrono::
                 
                 int est_price_width = static_cast<int>(price_text.size()) * 11;
                 int price_x = button.rect.x + (button.rect.w - est_price_width) / 2;
-                SDL_Color price_color = {255, 215, 0, 255}; 
-                text->render(renderer, price_text, price_x, price_y, price_color);
+                
+                text->render_with_outline(renderer, price_text, price_x, price_y, COLOR_GOLD, COLOR_BLACK);
             }
         }
     }

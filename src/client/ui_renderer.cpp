@@ -1,23 +1,11 @@
 #include "ui_renderer.h"
+#include "config.h"
 #include <cstdio>
 
 UIRenderer::UIRenderer(SDL_Renderer* rend, const std::string& font_path, int font_size,
                        ClientHandler* hdlr, int screen_w, int screen_h)
     : renderer(rend), handler(hdlr), screen_width(screen_w), screen_height(screen_h) {
     text = std::make_unique<TextRenderer>(font_path, font_size);
-}
-
-void UIRenderer::draw_text_with_outline(const std::string& msg, int x, int y) {
-    if (!text) return;
-    
-    SDL_Color black{0, 0, 0, 255};
-    text->render(renderer, msg, x - 2, y, black);
-    text->render(renderer, msg, x + 2, y, black);
-    text->render(renderer, msg, x, y - 2, black);
-    text->render(renderer, msg, x, y + 2, black);
-    
-    SDL_Color white{255, 255, 255, 255};
-    text->render(renderer, msg, x, y, white);
 }
 
 void UIRenderer::draw_position(int position, int total_cars) {
@@ -37,7 +25,7 @@ void UIRenderer::draw_position(int position, int total_cars) {
     SDL_RenderDrawRect(renderer, &panel_rect);
     
     std::string msg = "POSITION: " + std::to_string(position) + " / " + std::to_string(total_cars);
-    draw_text_with_outline(msg, 500, 20);
+    text->render_with_outline(renderer, msg, 500, 20, COLOR_WHITE, COLOR_BLACK);
 }
 
 void UIRenderer::draw_time(int time_ms) {
@@ -62,13 +50,27 @@ void UIRenderer::draw_time(int time_ms) {
     int milliseconds = time_ms % 1000;
     char buffer[64];
     std::snprintf(buffer, sizeof(buffer), "TIME: %02d:%02d.%03d", minutes, seconds, milliseconds);
-    draw_text_with_outline(buffer, 500, 75);
+    text->render_with_outline(renderer, buffer, 500, 75, COLOR_WHITE, COLOR_BLACK);
 }
 
 void UIRenderer::draw_game_id(int id) {
     if (!text) return;
+    
+    const int panel_w = 150;
+    const int panel_h = 45;
+    const int panel_x = screen_width - panel_w - 10;
+    const int panel_y = 200;
+    
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 20, 20, 40, 200);
+    SDL_Rect panel_rect = {panel_x, panel_y, panel_w, panel_h};
+    SDL_RenderFillRect(renderer, &panel_rect);
+    
+    SDL_SetRenderDrawColor(renderer, 255, 215, 0, 255);
+    SDL_RenderDrawRect(renderer, &panel_rect);
+    
     std::string msg = "GAME ID: " + std::to_string(id);
-    draw_text_with_outline(msg, screen_width - 150, 200);
+    text->render_with_outline(renderer, msg, panel_x + 10, panel_y + 12, COLOR_WHITE, COLOR_BLACK);
 }
 
 void UIRenderer::draw_state(int state) {
@@ -226,12 +228,10 @@ void UIRenderer::draw_results(const std::vector<CarRacingInfo>& cars_finished) {
 void UIRenderer::draw_checkpoints_info(int current_checkpoint, int total_checkpoints) {
     if (!text) return;
     
-    const int panel_x = 10;
+    const int panel_x = 8;
     const int panel_y = 10;
-    const int panel_w = 350;
+    const int panel_w = 260;
     const int panel_h = 45;
-    
-    int checkpoints_remaining = total_checkpoints - current_checkpoint;
     
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, 20, 20, 40, 200);
@@ -241,9 +241,8 @@ void UIRenderer::draw_checkpoints_info(int current_checkpoint, int total_checkpo
     SDL_SetRenderDrawColor(renderer, 255, 215, 0, 255);
     SDL_RenderDrawRect(renderer, &panel_rect);
     
-    SDL_Color title_color = {255, 215, 0, 255};
-    std::string checkpoints_text = "Remaining checkpoints: " + std::to_string(checkpoints_remaining);
-    text->render(renderer, checkpoints_text, panel_x + 10, panel_y + 12, title_color);
+    std::string checkpoints_text = "Checkpoints: " + std::to_string(current_checkpoint) + " / " + std::to_string(total_checkpoints);
+    text->render_with_outline(renderer, checkpoints_text, panel_x + 10, panel_y + 12, COLOR_WHITE, COLOR_BLACK);
 }
 
 void UIRenderer::draw_upgrades_info(const std::map<Upgrades, int>& upgrades,
@@ -253,7 +252,6 @@ void UIRenderer::draw_upgrades_info(const std::map<Upgrades, int>& upgrades,
     
     const int panel_x = 10;
     const int panel_y = 65;
-    const int panel_w = std::max(static_cast<int>(upgrades.size()) * 45, 160);
     const int icon_size = 35;
     const int icon_spacing = 5;
     
@@ -264,7 +262,10 @@ void UIRenderer::draw_upgrades_info(const std::map<Upgrades, int>& upgrades,
     
     if (total_icons == 0) return;
     
-    int icons_per_row = (panel_w - 20) / (icon_size + icon_spacing);
+    const int max_icons_per_row = 4;
+    int icons_per_row = std::min(total_icons, max_icons_per_row);
+    const int panel_w = 20 + icons_per_row * (icon_size + icon_spacing);
+    
     int icon_rows = (total_icons + icons_per_row - 1) / icons_per_row;
     int panel_h = 35 + icon_rows * (icon_size + icon_spacing);
     
@@ -276,8 +277,7 @@ void UIRenderer::draw_upgrades_info(const std::map<Upgrades, int>& upgrades,
     SDL_SetRenderDrawColor(renderer, 255, 215, 0, 255);
     SDL_RenderDrawRect(renderer, &panel_rect);
     
-    SDL_Color upgrades_color = {200, 200, 200, 255};
-    text->render(renderer, "UPGRADES:", panel_x + 10, panel_y + 5, upgrades_color);
+    text->render_with_outline(renderer, "Upgrades:", panel_x + 10, panel_y + 5, COLOR_WHITE, COLOR_BLACK);
     
     int current_x = panel_x + 10;
     int current_y = panel_y + 35;

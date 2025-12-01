@@ -18,8 +18,6 @@ private:
     int screen_width;
     int screen_height;
 
-    void draw_text_with_outline(const std::string& msg, int x, int y);
-
 public:
     UIRenderer(SDL_Renderer* rend, const std::string& font_path, int font_size, 
                ClientHandler* hdlr, int screen_w, int screen_h);
