@@ -39,6 +39,7 @@ void ClientProtocol::receive_remaining_data(Snapshot& snapshot) const {
     snapshot.time_ms = protocol.receive_big_endian_32();
     snapshot.state = static_cast<State>(protocol.receive_byte());
     snapshot.is_owner = protocol.receive_bool();
+    snapshot.upgrade_penalty_seconds = protocol.receive_big_endian_16();
 }
 
 void ClientProtocol::receive_lobby_cars(Snapshot& snapshot) const {
@@ -207,7 +208,6 @@ std::string ClientProtocol::receive_error_message(){
 FinalScoreList ClientProtocol::receive_final_results() const {
     uint16_t count = protocol.receive_big_endian_16();
     FinalScoreList results;
-    results.reserve(count);
 
     for (uint16_t i = 0; i < count; ++i) {
         results.push_back(receive_single_racing_info());

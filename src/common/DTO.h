@@ -85,6 +85,7 @@ struct Snapshot {
     int total_checkpoints; 
     int current_checkpoint;
     std::map<Upgrades, int> upgrades;
+    int upgrade_penalty_seconds;
 };
 
 using FinalScoreList = std::vector<CarRacingInfo>;

@@ -22,6 +22,7 @@ void InGame::end() {
         return;
     }
     gameloop->reset_race();
+    gameloop->reset_upgrade_penalties(); 
     gameloop->change_phase(std::make_unique<Workshop>(gameloop, MAX_TIME_PER_WORKSHOP));
 }
 

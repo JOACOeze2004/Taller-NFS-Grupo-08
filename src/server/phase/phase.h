@@ -16,6 +16,7 @@ public:
     explicit Phase(Gameloop* _gameloop, float _duration);
     
     void run();
+    int get_time_remaining_ms(const float base_time, int player_id) const;
     int get_time_remaining_ms(const float base_time) const;
     int get_time() const;
 

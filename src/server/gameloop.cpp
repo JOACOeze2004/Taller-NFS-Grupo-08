@@ -58,8 +58,10 @@ bool Gameloop::handle_upgrade(const int command, Car& car, const int player_id) 
     if (upgrade_applied){
         if (is_upgrade) {
             results.add_upgrade_time(player_id, price_ms);
+            results.add_upgrade_penalty(player_id, price_ms);
         } else {
             results.subtract_upgrade_time(player_id, price_ms);
+            results.subtract_upgrade_penalty(player_id, price_ms);
         }
     }
     return true;
@@ -200,6 +202,7 @@ Snapshot Gameloop::initialize_DTO() {
     dto.player_total_times = results.get_total_times();
     dto.total_checkpoints = 0;
     dto.current_checkpoint = 0;
+    dto.upgrade_penalty_seconds = 0;
     return dto;
 }
 
@@ -223,6 +226,8 @@ void Gameloop::broadcast_in_game(const int time_ms) {
     common_broadcast( IN_RACE ,time_ms, 
         [&](int id){ return race.get_state(id, time_ms); },
         [&](Snapshot& dto,int id) {
+            int player_time_ms = current_phase->get_time_remaining_ms(MAX_TIME_PER_RACE, id);
+            dto.time_ms = player_time_ms;
             dto.checkpoint = race.get_checkpoint(id);
             dto.hint = race.get_hint(id);
             dto.position = race.get_position(id);
@@ -232,6 +237,7 @@ void Gameloop::broadcast_in_game(const int time_ms) {
             if (Car* car = find_car(id)) {
                 dto.upgrades = car->get_upgrades();
             }
+            dto.upgrade_penalty_seconds = results.get_upgrade_penalty(id);
         }    
     );
 }
@@ -251,6 +257,10 @@ void Gameloop::broadcast_workshop(const int time_ms ) {
             if (Car* car = find_car(id)) {
                 dto.upgrades = car->get_upgrades();
             }
+            int penalty_seconds = results.get_upgrade_penalty(id);
+            int final_time_ms = MAX_TIME_PER_RACE - (penalty_seconds * 1000); //Si hace falta, meter alguna validacion de q no pueda ser negativo
+            dto.time_ms = final_time_ms;
+            dto.upgrade_penalty_seconds = results.get_upgrade_penalty(id);
         }
     );
 }
@@ -281,6 +291,10 @@ void Gameloop::change_phase(std::unique_ptr<Phase> new_phase) {
     this->current_phase = std::move(new_phase);
     results.reset_for_next_race(); 
 }
+
+int Gameloop::get_upgrade_penalty(int player_id) const { return results.get_upgrade_penalty(player_id); }
+
+void Gameloop::reset_upgrade_penalties(){ results.reset_upgrade_penalties(); }
 
 bool Gameloop::did_all_finish() {return race.all_cars_done(); }
 
