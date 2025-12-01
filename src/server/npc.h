@@ -16,12 +16,19 @@ class NPC {
     CarNPC car;
     int state = 0;
     float reverse_timer = 1.0f;
+    float dt = 1.0f / 60.0f;
 
     void choose_next_corner();
+    void filter_corners(std::vector<int>& filtered, const GraphNode& act_corner);
+    bool is_stuck();
+
 
 public:
     explicit NPC(b2WorldId world, std::vector<GraphNode>* _corners, int start_corner);
     void update();
+    void move();
+    void reverse();
+    void reverse_timer_update();
     CarDTO get_state();
 };
 

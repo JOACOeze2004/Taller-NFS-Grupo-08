@@ -42,6 +42,16 @@
 #define REVERSE_FACTOR 2
 #define SPEED_ZERO 0
 
+// NPC
+#define NORMAL 0
+#define REVERSE 1
+#define UNDEFINED_CORNER (-1)
+#define MIN_DISTANCE 100.0f
+#define MAX_REVERSE_TIMER 1.0f
+#define MIN_SPEED 0.25f
+#define MIN_DIFF 0.01f
+#define MIN_REVERSE_TIMER 0
+
 // PARSER YAML
 #define LIBERTY_CITY_STR "Liberty City"
 #define SAN_ANDREAS_STR "San Andreas"
