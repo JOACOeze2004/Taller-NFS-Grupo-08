@@ -14,7 +14,8 @@
 
 class CarNPC {
     b2BodyId body_id;
-
+    b2Vec2 last_pos = {0,0};
+    b2Vec2 act_pos = {0,0};
     void rotate(GraphNode& target);
 
 public:
@@ -22,6 +23,8 @@ public:
     void move(GraphNode& target);
     void reverse();
     float get_speed();
+    float get_first_speed();
+    b2Vec2 get_last_pos();
     b2Vec2 get_position();
     b2Vec2 get_forward();
     void apply_friction();

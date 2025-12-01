@@ -13,10 +13,19 @@ void NPC::update() {
 
     float speed = car.get_speed();
     float dt = 1.0f / 60.0f;
+    if (reverse_timer < 1.0f && state == 0) {
+        reverse_timer += dt;
+        if (reverse_timer >= 1.0f) {
+            reverse_timer = 1.0f;
+        }
+    }
 
-    if (state == 0 && speed < 0.2f) {
+    b2Vec2 act_pos = car.get_position();
+    b2Vec2 last_pos = car.get_last_pos();
+    b2Vec2 pos_dif = {abs(act_pos.x - last_pos.x), abs(act_pos.y - last_pos.y)};
+
+    if (state == 0 && (speed < 0.25 || (pos_dif.x < 0.01 && pos_dif.y < 0.01)) && reverse_timer == 1.0f) {
         state = 1;
-        reverse_timer = 1.0f;
     }
 
     if (state == 1) {
@@ -26,6 +35,7 @@ void NPC::update() {
 
         if (reverse_timer <= 0.0f) {
             state = 0;
+            reverse_timer = 0;
         }
         return;
     }
