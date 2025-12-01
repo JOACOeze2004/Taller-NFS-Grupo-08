@@ -292,21 +292,24 @@ void UpgradePhase::render_actual_upgrades(std::map<Upgrades, int> upgrades){
     
     SDL_Color title_color = {255, 215, 0, 255};
     std::string title = "CURRENT UPGRADES:";
-    int title_width = static_cast<int>(title.size()) * 12;
-    int title_x = (screen_width - title_width) / 2 - 30;
     int title_y = y_position - 35;
+    
+    int total_width = 2 * UPGRADE_BUTTON_WIDTH + UPGRADE_COLUMN_SPACING;
+    int left_column_x = (screen_width - total_width) / 2;
+    int right_column_x = left_column_x + UPGRADE_BUTTON_WIDTH + UPGRADE_COLUMN_SPACING;
+    
+    int title_width = static_cast<int>(title.size()) * 12;
+    int title_x = right_column_x + (UPGRADE_BUTTON_WIDTH - title_width) / 2;
     text->render(renderer, title, title_x, title_y, title_color);
     
     if (upgrades.empty()) return;
     
-    int total_width = 0;
     int total_icons = 0;
     for (const auto& [upgrade_type, level] : upgrades) {
         if (level > 0) total_icons += level;
     }
-    total_width = total_icons * (icon_size + icon_spacing) - icon_spacing;
-    
-    int start_x = (screen_width - total_width) / 2;
+    int icons_width = total_icons * (icon_size + icon_spacing) - icon_spacing;
+    int start_x = right_column_x + (UPGRADE_BUTTON_WIDTH - icons_width) / 2;
     int current_x = start_x;
     
     for (const auto& [upgrade_type, level] : upgrades) {
@@ -329,6 +332,31 @@ void UpgradePhase::render_actual_upgrades(std::map<Upgrades, int> upgrades){
     }
 }
 
+void UpgradePhase::render_penalty_time(int penalty_seconds) {
+    if (!text) return;
+    
+    const int y_position = screen_height - 130;
+    const int title_y = y_position - 35;
+    const int value_y = y_position + 20;
+    
+    std::string title = "PENALTY TIME:";
+    std::string penalty_text = std::to_string(penalty_seconds) + "s";
+    
+    int total_width_calc = 2 * UPGRADE_BUTTON_WIDTH + UPGRADE_COLUMN_SPACING;
+    int left_column_x = (screen_width - total_width_calc) / 2;
+    
+    int title_width = static_cast<int>(title.size()) * 12;
+    int penalty_width = static_cast<int>(penalty_text.size()) * 12;
+    
+    int title_x = left_column_x + (UPGRADE_BUTTON_WIDTH - title_width) / 2;
+    int penalty_x = left_column_x + (UPGRADE_BUTTON_WIDTH - penalty_width) / 2;
+    
+    SDL_Color title_color = {255, 215, 0, 255};
+    text->render(renderer, title, title_x, title_y, title_color);
+    
+    text->render_with_outline(renderer, penalty_text, penalty_x, value_y, COLOR_WHITE, COLOR_BLACK);
+}
+
 void UpgradePhase::render(const Snapshot& snapshot) {
     
     render_background();
@@ -337,6 +365,7 @@ void UpgradePhase::render(const Snapshot& snapshot) {
     render_upgrade_buttons(snapshot.prices, snapshot.upgrades);
     render_instructions();
     render_actual_upgrades(snapshot.upgrades);
+    render_penalty_time(snapshot.upgrade_penalty_seconds);
 }
 
 UpgradePhase::~UpgradePhase() {

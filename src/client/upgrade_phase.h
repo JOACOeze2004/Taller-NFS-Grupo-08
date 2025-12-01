@@ -58,6 +58,7 @@ private:
     void render_instructions();
     void render_remaining_upgrades(int remaining_upgrades);
     void render_actual_upgrades(std::map<Upgrades, int> upgrades);
+    void render_penalty_time(int penalty_seconds);
 
 public:
     UpgradePhase(SDL_Renderer* renderer, SDL_Window* window, int screen_width, int screen_height, 
