@@ -8,6 +8,7 @@ target_sources(taller_server
         client_handler.cpp
         receiver.cpp
         sender.cpp
+        config.cpp
     PUBLIC
         server.h
         server_protocol.h
@@ -15,5 +16,6 @@ target_sources(taller_server
         client_handler.h
         receiver.h
         sender.h
+        config.h
     # .h files
     )
