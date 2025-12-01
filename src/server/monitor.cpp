@@ -11,9 +11,7 @@ std::string Monitor::generate_game_id(){
     return std::to_string(game_id++);
 }
 
-std::string Monitor::get_last_created_game_id() const {
-    return std::to_string(game_id - 1);
-}
+std::string Monitor::get_last_created_game_id() const { return std::to_string(game_id - 1); }
 
 std::string Monitor:: get_client_game_id(int client_id){
     auto it = clients.find(client_id);
@@ -32,7 +30,6 @@ void Monitor::reap_clients() {
     std::vector<int> to_remove;
     for ( auto& [id, client] : clients) {
         if (client->is_dead()) {
-            std::string g_id = client->get_game_id();
             client->kill();
             client->join();
             to_remove.push_back(id);
@@ -45,18 +42,16 @@ void Monitor::reap_clients() {
 }
 
 void Monitor::reap_games() {
-    std::vector<std::string> games_to_remove;
-    
+    std::vector<std::string> games_to_remove; 
     for (auto& [game_id, gameloop] : current_games) {
         if (!gameloop->has_active_players() || !gameloop->is_alive()) {
+            gameloop->stop();
+            gameloop->join();
             games_to_remove.push_back(game_id);
         }
     }
 
     for (const auto& game_id : games_to_remove) {
-        auto game = current_games[game_id];
-        game->stop();
-        game->join();
         current_games.erase(game_id);
         clear_remaining_clients(game_id);
     }
@@ -153,6 +148,7 @@ void Monitor::kill_games() {
     current_games.clear();
     players.clear();
 }
+
 void Monitor::broadcast_final_results(const FinalScoreList& results, const std::string& gid) {
     std::unique_lock<std::mutex> lock(mutex);
     for (auto& [id, client] : clients) {

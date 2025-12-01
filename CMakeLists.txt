@@ -337,6 +337,7 @@ if(TALLER_TESTS)
         ../src/common/protocol.cpp
         ../src/common/mocked_socket.cpp
         tests/test_protocol.cpp
+        ../src/server/config.cpp
     )
 
     # HEY!! TODO XXX: I'm assuming that the code under testing is in taller_common
@@ -366,5 +367,6 @@ if(TALLER_TESTS)
     target_link_libraries(taller_tests
         taller_common
         GTest::gtest_main
+        yaml-cpp
     )
 endif()
