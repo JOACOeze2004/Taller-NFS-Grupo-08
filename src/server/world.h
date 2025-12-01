@@ -25,6 +25,7 @@ class World {
 
     static std::unordered_map<std::string, std::vector<StaticBody>> cached_maps;
     static std::unordered_map<std::string, std::vector<Corner>> cached_corners;
+    static std::unordered_map<std::string, std::vector<GraphNode>> cached_graphs;
 
     void create_collisions(std::vector<StaticBody>& boxes);
     void create_corners(std::vector<Corner>& corners);
@@ -39,6 +40,8 @@ public:
     b2WorldId get_id();
     void generate_map(std::string& map_name);
     std::vector<GraphNode> generate_corners(std::string& map_name);
+
+    static void preload_all_maps();
     ~World();
 };
 

@@ -4,6 +4,7 @@
 
 std::unordered_map<std::string, std::vector<StaticBody>> World::cached_maps;
 std::unordered_map<std::string, std::vector<Corner>> World::cached_corners;
+std::unordered_map<std::string, std::vector<GraphNode>> World::cached_graphs;
 
 World::World() {
     b2WorldDef world_def = b2DefaultWorldDef();
@@ -130,6 +131,31 @@ std::vector<GraphNode> World::create_nodes(std::vector<Corner>& corners) {
         }
     }
     return nodes;
+}
+
+void World::preload_all_maps() {
+    std::vector<std::string> maps = {SAN_ANDREAS_STR, VICE_CITY_STR, LIBERTY_CITY_STR};
+    
+    World temp_world;
+    ParserYaml parser;
+    
+    for (const auto& map_name : maps) {
+        std::string map_copy = map_name;
+        
+        if (cached_maps.find(map_name) == cached_maps.end()) {
+            cached_maps[map_name] = parser.parse_map(map_copy);
+        }
+        
+        if (cached_corners.find(map_name) == cached_corners.end()) {
+            cached_corners[map_name] = parser.parse_corners(map_copy);
+        }
+        
+        if (cached_graphs.find(map_name) == cached_graphs.end()) {
+            temp_world.create_collisions(cached_maps[map_name]);
+            
+            cached_graphs[map_name] = temp_world.create_nodes(cached_corners[map_name]);
+        }
+    }
 }
 
 float World::calculate_distance_squared(const Corner& from, const Corner& to) const {
