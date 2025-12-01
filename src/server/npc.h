@@ -14,6 +14,8 @@ class NPC {
     int next_corner;
     b2WorldId world;
     CarNPC car;
+    int state = 0;
+    float reverse_timer = 1.0f;
 
     void choose_next_corner();
 

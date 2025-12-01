@@ -10,7 +10,7 @@ CarNPC::CarNPC(GraphNode& start_corner, b2WorldId& world) {
     b2BodyDef body = b2DefaultBodyDef();
     body.type = b2_dynamicBody;
     body.linearDamping = 2.0f;
-    body.angularDamping = 7.0f;
+    body.angularDamping = 7.5f;
     body.position = {start_corner.x,start_corner.y};
     body_id = b2CreateBody(world, &body);
     b2Body_EnableContactEvents(body_id, true);
@@ -43,6 +43,19 @@ void CarNPC::move(GraphNode& target) {
     }
     rotate(target);
     apply_friction();
+}
+
+void CarNPC::reverse() {
+    float accel = -12.0f;
+    b2Vec2 velocity = b2Body_GetWorldVector(body_id, {1,0});
+    b2Vec2 force = {velocity.x * accel, velocity.y * accel};
+    b2Body_ApplyForceToCenter(body_id, force, true);
+}
+
+float CarNPC::get_speed() {
+    b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
+    float speed = b2Length(vel);
+    return speed;
 }
 
 void CarNPC::rotate(GraphNode& target) {

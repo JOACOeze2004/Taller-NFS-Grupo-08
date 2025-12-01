@@ -8,23 +8,40 @@ NPC::NPC(b2WorldId world, std::vector<GraphNode>* _corners, int start_corner) : 
 }
 
 void NPC::update() {
-    if (corners->empty()) {
+    if (corners->empty())
+        return;
+
+    float speed = car.get_speed();
+    float dt = 1.0f / 60.0f;
+
+    if (state == 0 && speed < 0.2f) {
+        state = 1;
+        reverse_timer = 1.0f;
+    }
+
+    if (state == 1) {
+        reverse_timer -= dt;
+
+        car.reverse();
+
+        if (reverse_timer <= 0.0f) {
+            state = 0;
+        }
         return;
     }
 
-    b2Vec2 car_pos = car.get_position();
+    b2Vec2 pos = car.get_position();
 
-    if (next_corner == -1) {
+    if (next_corner == -1)
         choose_next_corner();
-    }
 
     GraphNode target = (*corners)[next_corner];
 
-    float dx = target.x - car_pos.x;
-    float dy = target.y - car_pos.y;
-    float dist = dx * dx + dy * dy;
+    float dx = target.x - pos.x;
+    float dy = target.y - pos.y;
+    float dist2 = dx * dx + dy * dy;
 
-    if (dist < 100.0f) {
+    if (dist2 < 100.0f) {
         current_corner = next_corner;
         choose_next_corner();
     }
