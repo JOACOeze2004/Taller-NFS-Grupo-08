@@ -13,7 +13,7 @@
 #define CLIENT_QUEUE_LEN 100
 #define MIN_PLAYERS_TO_START 2 //CAMBIAR A 2 AL ENTREGAR TP!
 #define MAX_PLAYERS_PER_GAME 8
-#define MAX_TIME_PER_RACE 60000 // en ms creo
+#define MAX_TIME_PER_RACE 600000 // en ms creo
 #define MIN_NAME_LEN 3
 #define MAX_NAME_LEN 16
 #define MAX_RACES 8
