@@ -68,6 +68,7 @@ void ServerProtocol::send_remaining_data(const Snapshot& snapshot){
     protocol.send_big_endian_32(snapshot.time_ms);
     protocol.send_byte(static_cast<uint8_t>(snapshot.state));
     protocol.send_bool(snapshot.is_owner);
+    protocol.send_big_endian_16(snapshot.upgrade_penalty_seconds);
 }
 
 void ServerProtocol::send_lobby_cars(const Snapshot& snapshot){
