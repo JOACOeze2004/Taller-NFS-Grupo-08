@@ -16,7 +16,7 @@ LoginWindow::LoginWindow(QWidget *parent)
       selectedGameId("")
 {
     setWindowTitle("Need for Speed - Login");
-    showMaximized();
+    showFullScreen();
     backgroundImage = QPixmap("../assets/images/fondo_login.png");
 
     setupUI();

@@ -12,7 +12,7 @@ FinalResultsWindow::FinalResultsWindow(QWidget* parent)
       resultMessageLabel(nullptr)
 {
     setWindowTitle("Race Results");
-    showMaximized();
+    showFullScreen();
 
     backgroundImage = QPixmap("../assets/images/fondo_login.png");
 
@@ -57,11 +57,12 @@ void FinalResultsWindow::setupExitButton() {
     StyleManager::applyGlowEffect(exitBtn);
     layout->addWidget(exitBtn);
 
-    connect(exitBtn, &QPushButton::clicked, []() {
+    connect(exitBtn, &QPushButton::clicked, this, [this]() {
+        this->close();
         QApplication::quit();
+        std::exit(0);
     });
 }
-
 void FinalResultsWindow::displayResults(const FinalScoreList& scores, const std::string& playerName) {
     resultsTable->displayResults(scores);
     bool won = false;
