@@ -29,16 +29,22 @@ void GraphicClient::initialize_sdl() {
 }
 
 void GraphicClient::initialize_window() {
+    SDL_DisplayMode display_mode;
+    if (SDL_GetCurrentDisplayMode(0, &display_mode) == 0) {
+        screen_width = display_mode.w;
+        screen_height = display_mode.h;
+    }
+
     window = SDL_CreateWindow("Client Game",
                               SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                               screen_width, screen_height,
-                              SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+                              SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN_DESKTOP);
 
     if (!window) {
         SDL_Quit();
         throw std::runtime_error(std::string("[CLIENT] Error creating window: ") + SDL_GetError());
     }
-    SDL_SetWindowMinimumSize(window, screen_width, screen_height);
+    SDL_SetWindowMinimumSize(window, 750, 450);
 }
 
 void GraphicClient::initialize_renderer() {
