@@ -9,7 +9,7 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
       screen_width(DEFAULT_SCREEN_WIDTH), screen_height(DEFAULT_SCREEN_HEIGHT),
       handler(_handler), ready_sent(false), audio_manager(audio),
       previous_collision(NONE_COLLISION), previous_using_nitro(false),
-      previous_checkpoint_count(0), human_count(0), is_paused(false) {
+      previous_checkpoint_count(0), human_count(0), end_race_sound_played(false), is_paused(false) {
 
     initialize_sdl();
     initialize_window();
@@ -174,12 +174,18 @@ void GraphicClient::handle_audio_events(const Snapshot& snapshot) {
     }
     previous_using_nitro = using_nitro;
 
-    if (player_car.state == DEAD) {
+    if (player_car.state == DEAD && !end_race_sound_played) {
         audio_manager->playSoundEffect(SoundEffect::DEATH);
+        end_race_sound_played = true;
     }
 
-    if (player_car.state == FINISHED && snapshot.state == IN_RACE) {
+    if (player_car.state == FINISHED && snapshot.state == IN_RACE && !end_race_sound_played) {
         audio_manager->playSoundEffect(SoundEffect::WIN);
+        end_race_sound_played = true;
+    }
+    
+    if (player_car.state == IN_GAME && end_race_sound_played) {
+        end_race_sound_played = false;
     }
 }
 
@@ -229,7 +235,12 @@ void GraphicClient::draw_lobby_state(const Snapshot& snapshot) {
     game_renderer->draw_cars(cars, camera_x, camera_y);
     minimap_renderer->draw(cars, camera_manager->get_camera_id(),
                           snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
-    game_renderer->draw_speedometer(cars[player_car_id].velocity);
+    
+    auto player_it = cars.find(player_car_id);
+    if (player_it != cars.end()) {
+        game_renderer->draw_speedometer(player_it->second.velocity);
+    }
+    
     ui_renderer->draw_game_id(snapshot.game_id);
 
     if (snapshot.is_owner) {
@@ -248,14 +259,21 @@ void GraphicClient::draw_race_state(const Snapshot& snapshot) {
     minimap_renderer->draw(cars, camera_manager->get_camera_id(),
                           snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
 
-    game_renderer->draw_speedometer(cars[player_car_id].velocity);
+    auto local_player_it = cars.find(player_car_id);
+    if (local_player_it != cars.end()) {
+        game_renderer->draw_speedometer(local_player_it->second.velocity);
+    }
+    
     ui_renderer->draw_game_id(snapshot.game_id);
     game_renderer->draw_cars(cars, camera_x, camera_y);
 
     auto player_it = snapshot.cars.find(player_car_id);
     if (player_it != snapshot.cars.end() && player_it->second.state != IN_GAME) {
         ui_renderer->draw_state(player_it->second.state);
-        ui_renderer->draw_results(snapshot.cars_finished);
+        
+        if (!snapshot.cars_finished.empty()) {
+            ui_renderer->draw_results(snapshot.cars_finished);
+        }
     } else {
         ui_renderer->draw_position(snapshot.position, human_count);
         ui_renderer->draw_time(snapshot.time_ms);
@@ -284,7 +302,12 @@ void GraphicClient::draw_countdown_state(const Snapshot& snapshot) {
     game_renderer->draw_cars(cars, camera_x, camera_y);
     minimap_renderer->draw(cars, camera_manager->get_camera_id(),
                           snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
-    game_renderer->draw_speedometer(cars[player_car_id].velocity);
+    
+    auto player_it = cars.find(player_car_id);
+    if (player_it != cars.end()) {
+        game_renderer->draw_speedometer(player_it->second.velocity);
+    }
+    
     ui_renderer->draw_game_id(snapshot.game_id);
     ui_renderer->draw_countdown(snapshot.time_ms);
 }

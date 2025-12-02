@@ -44,6 +44,7 @@ private:
     bool previous_using_nitro;
     int previous_checkpoint_count;
     int human_count;
+    bool end_race_sound_played;
 
     bool is_paused;
 
