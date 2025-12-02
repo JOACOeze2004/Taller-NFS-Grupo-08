@@ -28,9 +28,9 @@ car:
   spawn_position: [300.0, 300.0]
 
 workshop:
-  acceleration_price: 30
-  handling_price: 10
-  nitro_price: 40
-  life_price: 25
-  mass_price: 25
-  brake_price: 25
+  acceleration_price: 180
+  handling_price: 120
+  nitro_price: 150
+  life_price: 90
+  mass_price: 90
+  brake_price: 90

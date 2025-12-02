@@ -57,28 +57,28 @@ void Car::reset_upgrades() {
 
 void Car::initialize_upgrade_actions() {
     upgrade_actions[ACCELERATION_UPGRADE] = {
-        [this]() { accelerate_upgrade(); },
-        [this]() { accelerate_downgrade(); }
+        [this]()->bool { return accelerate_upgrade(); },
+        [this]()->bool { return accelerate_downgrade(); }
     };
     upgrade_actions[HANDLING_UPGRADE] = {
-        [this]() { handling_upgrade(); },
-        [this]() { handling_downgrade(); }
+        [this]()->bool { return handling_upgrade(); },
+        [this]()->bool { return handling_downgrade(); }
     };
     upgrade_actions[NITRO_UPGRADE] = {
-        [this]() { nitro_upgrade(); },
-        [this]() { nitro_downgrade(); }
+        [this]()->bool { return nitro_upgrade(); },
+        [this]()->bool { return nitro_downgrade(); }
     };
     upgrade_actions[LIFE_UPGRADE] = {
-        [this]() { life_upgrade(); },
-        [this]() { life_downgrade(); }
+        [this]()->bool { return life_upgrade(); },
+        [this]()->bool { return life_downgrade(); }
     };
     upgrade_actions[BRAKE_UPGRADE] = {
-        [this]() { brake_upgrade(); },
-        [this]() { brake_downgrade(); }
+        [this]()->bool { return brake_upgrade(); },
+        [this]()->bool { return brake_downgrade(); }
     };
     upgrade_actions[MASS_UPGRADE] = {
-        [this]() { mass_upgrade(); },
-        [this]() { mass_downgrade(); }
+        [this]()->bool { return mass_upgrade(); },
+        [this]()->bool { return mass_downgrade(); }
     };
 }
 
@@ -295,7 +295,7 @@ CarDTO Car::get_state() {
     float speed = b2Length(vel);
     float life_percentage = (static_cast<float>(life) * 100.0f) / static_cast<float>(max_life);
     float nitro_percentage = (static_cast<float>(nitro) * 100.0f) / static_cast<float>(max_nitro);
-    return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life_percentage, this->nitro_activated, nitro_percentage, IN_GAME, remaining_upgrades);
+    return CarDTO(pos.x, pos.y, speed, angle, car_id, false, life_percentage, this->nitro_activated, nitro_percentage, IN_GAME, 99);
 }
 
 std::map<Upgrades, int> Car::get_upgrades() {
@@ -348,45 +348,59 @@ void Car::reset_stats_and_upgrades() {
     mass_upgrades_applied = 0;
 }
 
-void Car::accelerate_upgrade() {
+bool Car::accelerate_upgrade() {
     if (upgrade(acceleration, Config::instance().car.acceleration_upgrade_factor)) {
         acceleration_upgrades_applied++;
+        return true;
     }
+
+    return false;
 }
 
-void Car::handling_upgrade() {
+bool Car::handling_upgrade() {
     if (upgrade(handling, Config::instance().car.handling_upgrade_factor)) {
         handling_upgrades_applied++;
+        return true;
     }
+    return false;
 }
 
-void Car::nitro_upgrade() {
+bool Car::nitro_upgrade() {
     if (upgrade(max_nitro, Config::instance().car.nitro_upgrade_factor)) {
         nitro_upgrades_applied++;
         nitro = max_nitro;
+        return true;
     }
+    return false;
 }
 
-void Car::life_upgrade() {
+bool Car::life_upgrade() {
     float max_life_casted = static_cast<float>(max_life);
     if (upgrade(max_life_casted, Config::instance().car.life_upgrade_factor)) {
         max_life = static_cast<int>(max_life_casted);
         life = max_life;
         life_upgrades_applied++;
+        return true;
     }
+    return false;
 }
 
-void Car::brake_upgrade() {
+bool Car::brake_upgrade() {
     if (upgrade(braking, Config::instance().car.brake_upgrade_factor)) {
         brake_upgrades_applied++;
+        return true;
     }
+
+    return false;
 }
 
-void Car::mass_upgrade() {
+bool Car::mass_upgrade() {
     if (upgrade(mass, Config::instance().car.mass_upgrade_factor)) {
         mass_upgrades_applied++;
         recalculate_stats();
+        return true;
     }
+    return false;
 }
 
 bool Car::upgrade(float& stat, float upgrade_factor) {
@@ -398,42 +412,52 @@ bool Car::upgrade(float& stat, float upgrade_factor) {
     return true;
 }
 
-void Car::accelerate_downgrade() {
-    downgrade(acceleration, Config::instance().car.acceleration_upgrade_factor, acceleration_upgrades_applied);
+bool Car::accelerate_downgrade() {
+    return downgrade(acceleration, Config::instance().car.acceleration_upgrade_factor, acceleration_upgrades_applied);
 }
 
-void Car::handling_downgrade() {
-    downgrade(handling, Config::instance().car.handling_upgrade_factor, handling_upgrades_applied);
+bool Car::handling_downgrade() {
+    return downgrade(handling, Config::instance().car.handling_upgrade_factor, handling_upgrades_applied);
 }
 
-void Car::nitro_downgrade() {
+bool Car::nitro_downgrade() {
     float max_nitro_casted = static_cast<float>(max_nitro);
     if (downgrade(max_nitro_casted, Config::instance().car.nitro_upgrade_factor, nitro_upgrades_applied)) {
         max_nitro = static_cast<int>(max_nitro_casted);
         if (nitro > max_nitro) {
             nitro = max_nitro;
         }
+        return true;
     }
+
+    return false;
 }
 
-void Car::life_downgrade() {
+bool Car::life_downgrade() {
     float max_life_casted = static_cast<float>(max_life);
     if (downgrade(max_life_casted, Config::instance().car.life_upgrade_factor, life_upgrades_applied)) {
         max_life = static_cast<int>(max_life_casted);
         if (life > max_life) {
             life = max_life;
         }
+
+        return true;
     }
+
+    return false;
 }
 
-void Car::brake_downgrade() {
-    downgrade(braking, Config::instance().car.brake_upgrade_factor, brake_upgrades_applied);
+bool Car::brake_downgrade() {
+    return downgrade(braking, Config::instance().car.brake_upgrade_factor, brake_upgrades_applied);
 }
 
-void Car::mass_downgrade() {
+bool Car::mass_downgrade() {
     if (downgrade(mass, Config::instance().car.mass_upgrade_factor, mass_upgrades_applied)){
         recalculate_stats();
+        return true;
     }
+
+    return false;
 }
 
 bool Car::downgrade(float& stat, float upgrade_factor, int& upgrades_applied) {
@@ -451,9 +475,7 @@ bool Car::downgrade(float& stat, float upgrade_factor, int& upgrades_applied) {
 bool Car::apply_upgrade(Upgrades type, bool is_upgrade) {
     auto it = upgrade_actions.find(type);
     if (it != upgrade_actions.end()) {
-        (is_upgrade ? it->second.first : it->second.second)();
-
-        return true;
+        return (is_upgrade ? it->second.first : it->second.second)();
     }
     return false;
 }

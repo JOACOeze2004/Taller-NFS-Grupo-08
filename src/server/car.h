@@ -34,12 +34,12 @@ class Car {
     int nitro_recharge = Config::instance().car.nitro_recharge_rate;
     int remaining_upgrades;
     bool in_lobby = true;
-    
+
     float base_mass;
     float base_handling;
     float base_acceleration;
     float base_braking;
-    
+
     int acceleration_upgrades_applied = 0;
     int handling_upgrades_applied = 0;
     int nitro_upgrades_applied = 0;
@@ -51,7 +51,7 @@ class Car {
 
     void reset_upgrades();
     void initialize_upgrade_actions();
-    using UpgradeAction = std::function<void()>;
+    using UpgradeAction = std::function<bool()>;
     std::unordered_map<Upgrades, std::pair<UpgradeAction, UpgradeAction>> upgrade_actions;
     void recalculate_stats();
 
@@ -81,23 +81,23 @@ public:
     CarDTO get_state();
     std::map<Upgrades, int> get_upgrades();
     void set_spawn(float& x, float& y, float& angle_x, float& angle_y);
-    
+
     void reset_stats_and_upgrades();
 
-    void accelerate_upgrade();
-    void handling_upgrade();
-    void nitro_upgrade();
-    void life_upgrade();
-    void brake_upgrade();
-    void mass_upgrade();
-    
-    void accelerate_downgrade();
-    void handling_downgrade();
-    void nitro_downgrade();
-    void life_downgrade();
-    void brake_downgrade();
-    void mass_downgrade();
-    
+    bool accelerate_upgrade();
+    bool handling_upgrade();
+    bool nitro_upgrade();
+    bool life_upgrade();
+    bool brake_upgrade();
+    bool mass_upgrade();
+
+    bool accelerate_downgrade();
+    bool handling_downgrade();
+    bool nitro_downgrade();
+    bool life_downgrade();
+    bool brake_downgrade();
+    bool mass_downgrade();
+
     bool upgrade(float& stat, float upgrade_factor);
     bool downgrade(float& stat, float upgrade_factor, int& upgrades_applied);
 
