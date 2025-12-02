@@ -165,6 +165,8 @@ if(TALLER_CLIENT)
             src/client/ui_renderer.h
             src/client/camera_manager.cpp
             src/client/camera_manager.h
+            src/client/pause_menu.cpp
+            src/client/pause_menu.h
     )
 
     # Make them depend on taller_common lib

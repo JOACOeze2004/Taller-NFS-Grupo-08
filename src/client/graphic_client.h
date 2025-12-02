@@ -13,6 +13,7 @@
 #include "resource_manager.h"
 #include "audio_manager.h"
 #include "sprite_loader.h"
+#include "pause_menu.h"
 #include "config.h"
 
 class GraphicClient {
@@ -26,6 +27,7 @@ private:
     std::unique_ptr<GameRenderer> game_renderer;
     std::unique_ptr<MinimapRenderer> minimap_renderer;
     std::unique_ptr<UpgradePhase> upgrade_phase;
+    std::unique_ptr<PauseMenu> pause_menu;
 
     std::unordered_map<int, CarDTO> cars;
     int player_car_id;
@@ -35,13 +37,15 @@ private:
     bool ready_sent;
     AudioManager* audio_manager;
 
-    SDL_Texture* upgrade_icons_texture;
+    SDL_Texture* upgrade_icons_texture{};
     std::vector<UpgradeData> upgrade_sprites;
 
     CollisionType previous_collision;
     bool previous_using_nitro;
     int previous_checkpoint_count;
     int human_count;
+
+    bool is_paused;
 
 public:
     explicit GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _handler, AudioManager* audio);
@@ -50,6 +54,12 @@ public:
     void draw(const Snapshot& snapshot);
     void update_from_snapshot(const Snapshot& snapshot);
 
+    void toggle_pause();
+    bool is_game_paused() const { return is_paused; }
+    PauseMenu* get_pause_menu() { return pause_menu.get(); }
+    SDL_Rect get_settings_button_rect() const {
+        return ui_renderer ? ui_renderer->get_settings_button_rect() : SDL_Rect{0,0,0,0};
+    }
 private:
     void initialize_sdl();
     void initialize_window();
@@ -65,6 +75,7 @@ private:
     void update_car(int id, const CarDTO& car_state);
     void clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dto);
     void handle_audio_events(const Snapshot& snapshot);
+
 };
 
 #endif // TALLER_TP_GRAPHIC_CLIENT_H

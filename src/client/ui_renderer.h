@@ -17,6 +17,9 @@ private:
     ClientHandler* handler;
     int screen_width;
     int screen_height;
+    static constexpr int HEADER_HEIGHT = 50;
+    static constexpr int SETTINGS_BUTTON_SIZE = 30;
+    static constexpr int SETTINGS_BUTTON_MARGIN = 10;
 
 public:
     UIRenderer(SDL_Renderer* rend, const std::string& font_path, int font_size, 
@@ -33,7 +36,8 @@ public:
                            SDL_Texture* icons_texture,
                            const std::vector<UpgradeData>& upgrade_data);
     void draw_countdown(int time_ms);
-    
+    void draw_settings_button(bool is_hovered);
+    SDL_Rect get_settings_button_rect() const;
     bool is_text_ok() const { return text && text->ok(); }
 };
 

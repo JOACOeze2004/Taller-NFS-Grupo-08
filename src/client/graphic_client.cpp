@@ -9,7 +9,7 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
       screen_width(DEFAULT_SCREEN_WIDTH), screen_height(DEFAULT_SCREEN_HEIGHT),
       handler(_handler), ready_sent(false), audio_manager(audio),
       previous_collision(NONE_COLLISION), previous_using_nitro(false),
-      previous_checkpoint_count(0), human_count(0) {
+      previous_checkpoint_count(0), human_count(0), is_paused(false) {
 
     initialize_sdl();
     initialize_window();
@@ -54,7 +54,7 @@ void GraphicClient::initialize_renderer() {
         SDL_Quit();
         throw std::runtime_error(std::string("[CLIENT] Error creating renderer: ") + SDL_GetError());
     }
-    
+
     SDL_RenderSetLogicalSize(renderer, screen_width, screen_height);
     SDL_RenderSetIntegerScale(renderer, SDL_FALSE);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
@@ -101,6 +101,9 @@ void GraphicClient::initialize_components(const Snapshot& initial_snapshot) {
 
     upgrade_phase = std::make_unique<UpgradePhase>(renderer, window, screen_width, screen_height,
                                                     handler, resources.get());
+
+    pause_menu = std::make_unique<PauseMenu>(renderer, DEFAULT_FONT_PATH, DEFAULT_FONT_SIZE,
+                                             audio_manager, screen_width, screen_height);
 }
 
 void GraphicClient::update_from_snapshot(const Snapshot& snapshot) {
@@ -110,7 +113,7 @@ void GraphicClient::update_from_snapshot(const Snapshot& snapshot) {
         if (car.state != NPC_STATE) ++human_count;
     }
 
-    camera_manager->update( cars);
+    camera_manager->update(cars);
     clear_cars(snapshot.cars);
 
     auto player_it = snapshot.cars.find(player_car_id);
@@ -180,6 +183,17 @@ void GraphicClient::handle_audio_events(const Snapshot& snapshot) {
     }
 }
 
+void GraphicClient::toggle_pause() {
+    is_paused = !is_paused;
+    if (audio_manager) {
+        if (is_paused) {
+            audio_manager->pauseMusic();
+        } else {
+            audio_manager->resumeMusic();
+        }
+    }
+}
+
 void GraphicClient::draw(const Snapshot& snapshot) {
     switch (snapshot.state) {
         case IN_WORK_SHOP:
@@ -190,6 +204,9 @@ void GraphicClient::draw(const Snapshot& snapshot) {
             break;
         case IN_RACE:
             draw_race_state(snapshot);
+            if (is_paused) {
+                pause_menu->render();
+            }
             break;
         case IN_COUNTDOWN:
             draw_countdown_state(snapshot);
@@ -227,8 +244,10 @@ void GraphicClient::draw_race_state(const Snapshot& snapshot) {
     game_renderer->draw_background(camera_x, camera_y);
     game_renderer->draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint, camera_x, camera_y);
     game_renderer->draw_hint(snapshot.hint, camera_x, camera_y);
+
     minimap_renderer->draw(cars, camera_manager->get_camera_id(),
                           snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
+
     game_renderer->draw_speedometer(cars[player_car_id].velocity);
     ui_renderer->draw_game_id(snapshot.game_id);
     game_renderer->draw_cars(cars, camera_x, camera_y);
@@ -240,12 +259,18 @@ void GraphicClient::draw_race_state(const Snapshot& snapshot) {
     } else {
         ui_renderer->draw_position(snapshot.position, human_count);
         ui_renderer->draw_time(snapshot.time_ms);
-        
         ui_renderer->draw_checkpoints_info(snapshot.current_checkpoint, snapshot.total_checkpoints);
-        
+
         if (player_it != snapshot.cars.end()) {
             ui_renderer->draw_upgrades_info(snapshot.upgrades, upgrade_icons_texture, upgrade_sprites);
         }
+
+        int mouse_x, mouse_y;
+        SDL_GetMouseState(&mouse_x, &mouse_y);
+        SDL_Rect settings_rect = ui_renderer->get_settings_button_rect();
+        bool is_hovered = (mouse_x >= settings_rect.x && mouse_x <= settings_rect.x + settings_rect.w &&
+                          mouse_y >= settings_rect.y && mouse_y <= settings_rect.y + settings_rect.h);
+        ui_renderer->draw_settings_button(is_hovered);
     }
 }
 
@@ -265,6 +290,7 @@ void GraphicClient::draw_countdown_state(const Snapshot& snapshot) {
 }
 
 GraphicClient::~GraphicClient() {
+    pause_menu.reset();
     upgrade_phase.reset();
     minimap_renderer.reset();
     game_renderer.reset();

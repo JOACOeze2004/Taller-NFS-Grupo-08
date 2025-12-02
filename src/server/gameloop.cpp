@@ -47,14 +47,17 @@ bool Gameloop::handle_upgrade(const int command, Car& car, const int player_id) 
     if (!upgrader.is_upgrade_command(command)) {
         return false;
     }
-    
+
     Upgrades type = upgrader.get_upgrade_type(command);
     bool is_upgrade = upgrader.is_upgrade_operation(command);
     
     int price_ms = std::chrono::duration_cast<std::chrono::seconds>( upgrader.get_price(type) ).count();
 
+    if (results.get_upgrade_penalty(player_id) + price_ms >= (MAX_TIME_PER_RACE/1000 - 120)) {
+        return true;
+    }
+
     bool upgrade_applied = car.apply_upgrade(type, is_upgrade);
-    
     if (upgrade_applied){
         if (is_upgrade) {
             results.add_upgrade_time(player_id, price_ms);
