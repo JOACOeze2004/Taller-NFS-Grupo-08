@@ -40,6 +40,7 @@ bool Gameloop::handle_disconnect(const int command,const int id) {
     } 
     user_names.erase(id);
     cars.erase(id);
+    results.delete_user(id);
     return true;
 }
 

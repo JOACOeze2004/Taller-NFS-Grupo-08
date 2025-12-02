@@ -39,6 +39,8 @@ public:
 
     void add_upgrade_time(int player_id, int ms);
     void subtract_upgrade_time(int player_id, int ms);
+
+    void delete_user(const int& player_id);
 };
 
 

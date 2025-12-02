@@ -86,3 +86,7 @@ void ResultsHandler::subtract_upgrade_time(int player_id, int ms) {
 }
 
 void ResultsHandler::add_upgrade_time(int player_id, int ms) { player_total_times[player_id] += ms; }
+
+void ResultsHandler::delete_user(const int& player_id) {
+    player_total_times.erase(player_id);
+}
