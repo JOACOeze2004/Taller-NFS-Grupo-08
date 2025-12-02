@@ -26,17 +26,30 @@ LoginWindow::LoginWindow(QWidget *parent)
 LoginWindow::~LoginWindow() = default;
 
 void LoginWindow::setupUI() {
-    layout = new QVBoxLayout(this);
-    layout->setContentsMargins(300, 50, 300, 50);
+    contentWidget = new QWidget(this);
+    contentWidget->setAttribute(Qt::WA_TranslucentBackground);
+    layout = new QVBoxLayout(contentWidget);
+    layout->setContentsMargins(20, 20, 20, 20);
     layout->setSpacing(20);
-    layout->setAlignment(Qt::AlignTop);
-
+    layout->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
     setupNameSection();
     setupCarSection();
     setupMapSection();
     setupGameActions();
 
-    setLayout(layout);
+    scrollArea = new QScrollArea(this);
+    scrollArea->setWidget(contentWidget);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+
+    scrollArea->setStyleSheet("QScrollArea { background: transparent; } QWidget { background: transparent; }");
+    scrollArea->viewport()->setAutoFillBackground(false);
+
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->addWidget(scrollArea);
+
+    setLayout(mainLayout);
 }
 
 void LoginWindow::setupNameSection() {
