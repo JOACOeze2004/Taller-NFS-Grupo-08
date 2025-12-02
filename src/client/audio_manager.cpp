@@ -90,6 +90,11 @@ void AudioManager::playMusicForState(GameState state) {
 
     auto it = music.find(state);
     if (it != music.end() && it->second) {
+        if (state == GameState::PLAYING) {
+            Mix_VolumeMusic(15);
+        } else {
+            Mix_VolumeMusic(musicVolume);
+        }
         Mix_PlayMusic(it->second, -1);
     }
 }
@@ -141,7 +146,19 @@ void AudioManager::playSoundEffect(SoundEffect effect) {
 
     auto it = soundEffects.find(effect);
     if (it != soundEffects.end() && it->second) {
+        bool was_playing = Mix_PlayingMusic();
+        
+        if (was_playing) {
+            Mix_PauseMusic();
+        }
+        
         Mix_PlayChannel(-1, it->second, 0);
+        
+        SDL_Delay(200);
+        
+        if (was_playing) {
+            Mix_ResumeMusic();
+        }
     }
 }
 
