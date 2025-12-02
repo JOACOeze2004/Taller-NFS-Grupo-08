@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <iostream>
 #include <QMessageBox>
+#include <QApplication>
 
 LoginWindow::LoginWindow(QWidget *parent)
     : QWidget(parent),
@@ -36,7 +37,7 @@ void LoginWindow::setupUI() {
     setupCarSection();
     setupMapSection();
     setupGameActions();
-
+    setupExitButton();
     scrollArea = new QScrollArea(this);
     scrollArea->setWidget(contentWidget);
     scrollArea->setWidgetResizable(true);
@@ -121,6 +122,20 @@ void LoginWindow::setupConnections() {
         this->lobbyAction = SEND_JOIN_GAME;
         this->selectedGameId = gameId;
         emit startButtonClicked();
+    });
+}
+
+void LoginWindow::setupExitButton() {
+    layout->addSpacing(30);
+
+    exitButton = new QPushButton("EXIT");
+    StyleManager::styleButton(exitButton);
+    StyleManager::applyGlowEffect(exitButton);
+    layout->addWidget(exitButton, 0, Qt::AlignHCenter);
+
+    connect(exitButton, &QPushButton::clicked, this, []() {
+        QApplication::quit();
+        std::exit(0);
     });
 }
 

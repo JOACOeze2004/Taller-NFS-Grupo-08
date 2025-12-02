@@ -28,7 +28,7 @@ public:
     void setupMapSection();
     void setupGameActions();
     void setupConnections();
-
+    void setupExitButton();
     uint8_t getLobbyAction() const;
     std::string getSelectedGameId() const;
     PlayerConfig getPlayerConfig() const;
@@ -50,7 +50,7 @@ private:
 
     uint8_t lobbyAction;
     std::string selectedGameId;
-
+    QPushButton* exitButton;
 
     QScrollArea* scrollArea;
     QWidget* contentWidget;
