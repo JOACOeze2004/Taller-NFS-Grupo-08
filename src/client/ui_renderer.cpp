@@ -203,7 +203,11 @@ void UIRenderer::draw_results(const std::vector<CarRacingInfo>& cars_finished) {
         }
 
         char position_str[16];
-        std::snprintf(position_str, sizeof(position_str), "%d.", car_info.position);
+        if (car_info.position == -1) {
+            std::snprintf(position_str, sizeof(position_str), "Dead");
+        }else {
+            std::snprintf(position_str, sizeof(position_str), "%d.", car_info.position);
+        }
         text->render(renderer, position_str, panel_x + 30, row_y, row_color);
 
         std::string display_name = car_info.name;
