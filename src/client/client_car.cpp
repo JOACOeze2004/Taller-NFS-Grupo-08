@@ -208,9 +208,7 @@ void Car::renderLife() {
     SDL_RenderFillRect(renderer, &lifeBarFg);
 }
 
-void Car::renderNitroBar() {
-    const float nitro_percentage = nitro_remaining / NITRO_DIVISOR;
-    
+void Car::renderNitroBar() {    
     const SDL_Rect nitroBg = createBarBackground(
         NITRO_BAR_OFFSET_X, 
         NITRO_BAR_OFFSET_Y, 
@@ -221,7 +219,7 @@ void Car::renderNitroBar() {
     SDL_SetRenderDrawColor(renderer, 40, 40, 60, 255);
     SDL_RenderFillRect(renderer, &nitroBg);
     
-    const SDL_Rect nitroFg = createBarForeground(nitroBg, nitro_percentage, NITRO_MAX_VALUE);
+    const SDL_Rect nitroFg = createBarForeground(nitroBg, nitro_remaining, NITRO_MAX_VALUE);
     
     SDL_SetRenderDrawColor(renderer, 0, 150, 255, 255);
     SDL_RenderFillRect(renderer, &nitroFg);
