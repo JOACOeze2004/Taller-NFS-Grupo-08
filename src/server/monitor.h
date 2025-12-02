@@ -27,6 +27,8 @@ private:
     std::string generate_game_id();
     void clear_remaining_clients(const std::string& _game_id);
     std::string get_client_game_id(int client_id);
+    void reap_clients();
+    void reap_games();
 
 public:
     Monitor();
@@ -39,8 +41,6 @@ public:
     std::shared_ptr<Gameloop> create_game(std::string map_name, const int client_id, const int car_id,const std::string& username);
     std::shared_ptr<Gameloop> join_game(const std::string& user_name, const std::string& game_id, const int client_id, const int car_id);
     std::vector<std::string> get_active_games();
-    void remove_player(const std::string& username);
-    void remove_game(const std::string& user_id);
     std::string get_last_created_game_id() const;
 
     void kill_games();

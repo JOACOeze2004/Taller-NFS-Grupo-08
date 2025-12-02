@@ -1,10 +1,14 @@
 #include "world.h"
 
-#include <iostream>
-#include <vector>
+#include <chrono>
+
+#include "src/common/constants.h"
 
 #include "car.h"
 
+std::unordered_map<std::string, std::vector<StaticBody>> World::cached_maps;
+std::unordered_map<std::string, std::vector<Corner>> World::cached_corners;
+std::unordered_map<std::string, std::vector<GraphNode>> World::cached_graphs;
 
 World::World() {
     b2WorldDef world_def = b2DefaultWorldDef();
@@ -19,7 +23,7 @@ void World::update() {
 
     b2ContactEvents events = b2World_GetContactEvents(world);
 
-    for (int i =0; i < events.hitCount; i++) {
+    for (int i = 0; i < events.hitCount; i++) {
         b2ContactHitEvent event = events.hitEvents[i];
 
         b2BodyId body_a = b2Shape_GetBody(event.shapeIdA);
@@ -39,58 +43,129 @@ void World::update() {
             if (vel > 0) {
                 car_a->handle_hit(normal, force, true);
                 car_b->handle_hit(normal, force, false);
-            }
-            else {
+            } else {
                 car_a->handle_hit(normal, force, false);
                 car_b->handle_hit(normal, force, true);
             }
-
-        }
-        else if (car_a) {
+        } else if (car_a) {
             car_a->handle_hit(event.normal, event.approachSpeed, false);
-        }
-        else if (car_b) {
+        } else if (car_b) {
             car_b->handle_hit(event.normal, event.approachSpeed, false);
         }
     }
 }
 
-b2WorldId World::get_id() {
-    return world;
-}
+b2WorldId World::get_id() { return world; }
 
 void World::generate_map(std::string& map_name) {
-    std::vector<StaticBody> boxes = parser.parse_map(map_name);
-
+    auto it = cached_maps.find(map_name);
+    std::vector<StaticBody> boxes;
+    
+    if (it != cached_maps.end()) {
+        boxes = it->second;
+    } else {
+        boxes = parser.parse_map(map_name);
+        cached_maps[map_name] = boxes;
+    }
     create_collisions(boxes);
 }
 
 std::vector<GraphNode> World::generate_corners(std::string& map_name) {
-    std::vector<Corner> corners = parser.parse_corners(map_name);
-    return create_nodes(corners);
+    auto it = cached_corners.find(map_name);
+    std::vector<Corner> corners;
+    
+    if (it != cached_corners.end()) {
+        corners = it->second;
+    } else {
+        corners = parser.parse_corners(map_name);
+        cached_corners[map_name] = corners;
+    }
+    
+    auto result = create_nodes(corners);    
+    return result;
 }
 
 std::vector<GraphNode> World::create_nodes(std::vector<Corner>& corners) {
     std::vector<GraphNode> nodes;
     nodes.resize(corners.size());
+    float MAX_VISIBILITY_DISTANCE_SQ = 300.0f * 300.0f;
+    size_t MAX_NEIGHBORS_PER_NODE = 12;
+    
+    int total_checks = 0;
+    int skipped_by_distance = 0;
+    int skipped_by_limit = 0;
 
-    for (size_t i=0; i < corners.size(); i++) {
+    for (size_t i = 0; i < corners.size(); i++) {
         nodes[i].x = corners[i].x;
         nodes[i].y = corners[i].y;
 
-        for (size_t j =0; j < corners.size(); j++) {
-            if ( i == j) continue;
+        nodes[i].neighbors.reserve(MAX_NEIGHBORS_PER_NODE);
+        nodes[i].dist.reserve(MAX_NEIGHBORS_PER_NODE);
+        
+        std::vector<std::pair<size_t, float>> candidates;
+        candidates.reserve(corners.size());
+
+        for (size_t j = 0; j < corners.size(); j++) {
+            if (i == j){
+                continue;
+            }             
+            total_checks++;            
+            float dist_sq = calculate_distance_squared(corners[i], corners[j]);
+            
+            if (dist_sq > MAX_VISIBILITY_DISTANCE_SQ) {
+                skipped_by_distance++;
+                continue;
+            }
+            
+            candidates.push_back({j, dist_sq});
+        }
+        std::sort(candidates.begin(), candidates.end(),[](const auto& a, const auto& b) { return a.second < b.second; });
+        size_t checked = 0;
+        for (const auto& [j, dist_sq] : candidates) {
+            if (checked >= MAX_NEIGHBORS_PER_NODE) {
+                skipped_by_limit++;
+                continue;
+            }
+            
             if (is_visible(corners[i], corners[j])) {
-                float dx = corners[j].x - corners[i].x;
-                float dy = corners[j].y - corners[i].y;
-                float dist = dx*dx + dy*dy;
                 nodes[i].neighbors.push_back(static_cast<int>(j));
-                nodes[i].dist.push_back(dist);
+                nodes[i].dist.push_back(dist_sq);
+                checked++;
             }
         }
     }
-
     return nodes;
+}
+
+void World::preload_all_maps() {
+    std::vector<std::string> maps = {SAN_ANDREAS_STR, VICE_CITY_STR, LIBERTY_CITY_STR};
+    
+    World temp_world;
+    ParserYaml parser;
+    
+    for (const auto& map_name : maps) {
+        std::string map_copy = map_name;
+        
+        if (cached_maps.find(map_name) == cached_maps.end()) {
+            cached_maps[map_name] = parser.parse_map(map_copy);
+        }
+        
+        if (cached_corners.find(map_name) == cached_corners.end()) {
+            cached_corners[map_name] = parser.parse_corners(map_copy);
+        }
+        
+        if (cached_graphs.find(map_name) == cached_graphs.end()) {
+            temp_world.create_collisions(cached_maps[map_name]);
+            
+            cached_graphs[map_name] = temp_world.create_nodes(cached_corners[map_name]);
+        }
+    }
+}
+
+float World::calculate_distance_squared(const Corner& from, const Corner& to) const {
+    float dx = to.x - from.x;
+    float dy = to.y - from.y;
+    return dx * dx + dy * dy;
 }
 
 bool World::is_visible(const Corner& _origin, const Corner& _traslation) const {
@@ -104,18 +179,17 @@ bool World::is_visible(const Corner& _origin, const Corner& _traslation) const {
 }
 
 void World::create_collisions(std::vector<StaticBody>& boxes) {
+    bodies.reserve(boxes.size());    
     for (const auto& box : boxes) {
-
         b2BodyDef bodyDef = b2DefaultBodyDef();
         bodyDef.type = b2_staticBody;
-
-        bodyDef.position = { (box.x + box.width/2), (box.y + box.height/2) };
+        bodyDef.position = {(box.x + box.width / 2), (box.y + box.height / 2)};
 
         b2BodyId body = b2CreateBody(world, &bodyDef);
         b2Body_EnableContactEvents(body, true);
         b2Body_EnableHitEvents(body, true);
 
-        b2Polygon b2box = b2MakeBox(box.width/2, box.height/2);
+        b2Polygon b2box = b2MakeBox(box.width / 2, box.height / 2);
         b2ShapeDef shape_def = b2DefaultShapeDef();
         b2ShapeId shape = b2CreatePolygonShape(body, &shape_def, &b2box);
         b2Shape_EnableContactEvents(shape, true);

@@ -15,13 +15,14 @@ void InGame::execute(ClientCommand& command) {gameloop->process_command(command)
 void InGame::end() {
     gameloop->increment_race_counter();
 
-    if (gameloop->get_races_completed() >= MAX_RACES) {
+    if (gameloop->get_races_completed() >= Config::instance().game.max_races) {
         FinalScoreList final_results = gameloop->calculate_final_results();
         gameloop->broadcast_final_results(final_results);
         gameloop->stop();
         return;
     }
     gameloop->reset_race();
+    gameloop->reset_upgrade_penalties(); 
     gameloop->change_phase(std::make_unique<Workshop>(gameloop, MAX_TIME_PER_WORKSHOP));
 }
 

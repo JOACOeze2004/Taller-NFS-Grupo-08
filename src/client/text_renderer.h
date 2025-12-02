@@ -26,6 +26,7 @@ public:
     bool load(const std::string& font_path, int ptsize);
     bool ok() const;
     void render(SDL_Renderer* renderer, const std::string& text, int x, int y, SDL_Color color);
+    void render_with_outline(SDL_Renderer* renderer, const std::string& text, int x, int y, SDL_Color color, SDL_Color outline_color);
 };
 
 #endif // TALLER_TP_TEXT_RENDERER_H

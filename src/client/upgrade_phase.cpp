@@ -120,6 +120,7 @@ void UpgradePhase::init_upgrade_buttons() {
 }
 
 void UpgradePhase::render_background() {
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, COLOR_UPGRADE_BG.r, COLOR_UPGRADE_BG.g, 
                           COLOR_UPGRADE_BG.b, COLOR_UPGRADE_BG.a);
     SDL_Rect fullscreen = {0, 0, screen_width, screen_height};
@@ -135,25 +136,7 @@ void UpgradePhase::render_title() {
     text->render(renderer, title, title_x, title_y, COLOR_UPGRADE_TITLE);
 }
 
-void UpgradePhase::render_remaining_upgrades(int remaining_upgrades) {
-    if (!text) return;
-    
-    std::string info;
-    if (remaining_upgrades == 1) {
-        info = "You have 1 upgrade point to spend";
-    } else if (remaining_upgrades == 0) {
-        info = "No upgrade points remaining";
-    } else {
-        info = "You have " + std::to_string(remaining_upgrades) + " upgrade points to spend";
-    }
-    
-    int est_width = static_cast<int>(info.size()) * 11;
-    int info_x = (screen_width - est_width) / 2;
-    int info_y = 55;
-    text->render(renderer, info, info_x, info_y, COLOR_UPGRADE_INFO);
-}
-
-void UpgradePhase::render_upgrade_buttons(const std::map<Upgrades, std::chrono::seconds>& prices) {
+void UpgradePhase::render_upgrade_buttons(const std::map<Upgrades, std::chrono::seconds>& prices, const std::map<Upgrades, int>& current_upgrades) {
     
     if (handler) {
         handler->clear_buttons();
@@ -165,8 +148,25 @@ void UpgradePhase::render_upgrade_buttons(const std::map<Upgrades, std::chrono::
     SDL_Rect arrow_src = arrow_data.sprite;
     for (size_t i = 0; i < upgrade_buttons.size(); ++i) {
         auto& button = upgrade_buttons[i];
-        SDL_SetRenderDrawColor(renderer, COLOR_UPGRADE_BUTTON_BG.r, COLOR_UPGRADE_BUTTON_BG.g, 
-                              COLOR_UPGRADE_BUTTON_BG.b, COLOR_UPGRADE_BUTTON_BG.a);
+        
+        int upgrade_level = 0;
+        auto it = current_upgrades.find(button.upgrade_type);
+        if (it != current_upgrades.end()) {
+            upgrade_level = it->second;
+        }
+        
+        SDL_Color bg_color = COLOR_UPGRADE_BUTTON_BG;
+        if (upgrade_level > 0) {
+            if (upgrade_level == 1) {
+                bg_color = {120, 160, 220, 220};
+            } else if (upgrade_level == 2) {
+                bg_color = {180, 180, 200, 220};
+            } else {
+                bg_color = {220, 200, 120, 220};
+            }
+        }
+        
+        SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
         SDL_RenderFillRect(renderer, &button.rect);
         SDL_SetRenderDrawColor(renderer, COLOR_UPGRADE_BUTTON_BORDER.r, COLOR_UPGRADE_BUTTON_BORDER.g, 
                               COLOR_UPGRADE_BUTTON_BORDER.b, COLOR_UPGRADE_BUTTON_BORDER.a);
@@ -224,12 +224,14 @@ void UpgradePhase::render_upgrade_buttons(const std::map<Upgrades, std::chrono::
             int title_y = button.rect.y + UPGRADE_TITLE_Y_OFFSET;
             int est_title_width = static_cast<int>(button.title.size()) * 14;
             int title_x = button.rect.x + (button.rect.w - est_title_width) / 2;
-            text->render(renderer, button.title, title_x, title_y, COLOR_WHITE);
+            
+            text->render_with_outline(renderer, button.title, title_x, title_y, COLOR_WHITE, COLOR_BLACK);
             
             int desc_y = button.rect.y + button.rect.h - UPGRADE_DESC_Y_OFFSET;
             int est_desc_width = static_cast<int>(button.description.size()) * 11;
             int desc_x = button.rect.x + (button.rect.w - est_desc_width) / 2;
-            text->render(renderer, button.description, desc_x, desc_y, COLOR_UPGRADE_DESC);
+            
+            text->render_with_outline(renderer, button.description, desc_x, desc_y, COLOR_WHITE, COLOR_BLACK);
             
             
 
@@ -243,8 +245,8 @@ void UpgradePhase::render_upgrade_buttons(const std::map<Upgrades, std::chrono::
                 
                 int est_price_width = static_cast<int>(price_text.size()) * 11;
                 int price_x = button.rect.x + (button.rect.w - est_price_width) / 2;
-                SDL_Color price_color = {255, 215, 0, 255}; 
-                text->render(renderer, price_text, price_x, price_y, price_color);
+                
+                text->render_with_outline(renderer, price_text, price_x, price_y, COLOR_GOLD, COLOR_BLACK);
             }
         }
     }
@@ -259,15 +261,94 @@ void UpgradePhase::render_instructions() {
     text->render(renderer, instruction, x, y, COLOR_UPGRADE_INFO);
 }
 
-void UpgradePhase::render(int remaining_upgrades, const std::map<Upgrades, std::chrono::seconds>& prices) {
+void UpgradePhase::render_actual_upgrades(std::map<Upgrades, int> upgrades){
+    if (!icons_texture || !text) return;
+    
+    const int icon_size = 75;
+    const int icon_spacing = 15;
+    const int y_position = screen_height - 130;
+    
+    SDL_Rect clear_area = {0, y_position - 40, screen_width, icon_size + 50};
+    SDL_SetRenderDrawColor(renderer, COLOR_UPGRADE_BG.r, COLOR_UPGRADE_BG.g, 
+                          COLOR_UPGRADE_BG.b, COLOR_UPGRADE_BG.a);
+    SDL_RenderFillRect(renderer, &clear_area);
+    
+    SDL_Color title_color = {255, 215, 0, 255};
+    std::string title = "CURRENT UPGRADES:";
+    int title_y = y_position - 35;
+    
+    int total_width = 2 * UPGRADE_BUTTON_WIDTH + UPGRADE_COLUMN_SPACING;
+    int left_column_x = (screen_width - total_width) / 2;
+    int right_column_x = left_column_x + UPGRADE_BUTTON_WIDTH + UPGRADE_COLUMN_SPACING;
+    
+    int title_width = static_cast<int>(title.size()) * 12;
+    int title_x = right_column_x + (UPGRADE_BUTTON_WIDTH - title_width) / 2;
+    text->render(renderer, title, title_x, title_y, title_color);
+    
+    if (upgrades.empty()) return;
+    
+    int total_icons = 0;
+    for (const auto& [upgrade_type, level] : upgrades) {
+        if (level > 0) total_icons += level;
+    }
+    int icons_width = total_icons * (icon_size + icon_spacing) - icon_spacing;
+    int start_x = right_column_x + (UPGRADE_BUTTON_WIDTH - icons_width) / 2;
+    int current_x = start_x;
+    
+    for (const auto& [upgrade_type, level] : upgrades) {
+        if (level <= 0) continue;
+        
+        SDL_Rect icon_src = {0, 0, 100, 100};
+        for (const auto& button : upgrade_buttons) {
+            if (button.upgrade_type == upgrade_type) {
+                icon_src = button.icon_src_rect;
+                break;
+            }
+        }
+        
+        for (int i = 0; i < level; ++i) {
+            SDL_Rect dst_rect = {current_x, y_position, icon_size, icon_size};
+            SDL_RenderCopy(renderer, icons_texture, &icon_src, &dst_rect);
+            
+            current_x += icon_size + icon_spacing;
+        }
+    }
+}
+
+void UpgradePhase::render_penalty_time(int penalty_seconds) {
+    if (!text) return;
+    
+    const int y_position = screen_height - 130;
+    const int title_y = y_position - 35;
+    const int value_y = y_position + 20;
+    
+    std::string title = "PENALTY TIME:";
+    std::string penalty_text = std::to_string(penalty_seconds) + "s";
+    
+    int total_width_calc = 2 * UPGRADE_BUTTON_WIDTH + UPGRADE_COLUMN_SPACING;
+    int left_column_x = (screen_width - total_width_calc) / 2;
+    
+    int title_width = static_cast<int>(title.size()) * 12;
+    int penalty_width = static_cast<int>(penalty_text.size()) * 12;
+    
+    int title_x = left_column_x + (UPGRADE_BUTTON_WIDTH - title_width) / 2;
+    int penalty_x = left_column_x + (UPGRADE_BUTTON_WIDTH - penalty_width) / 2;
+    
+    SDL_Color title_color = {255, 215, 0, 255};
+    text->render(renderer, title, title_x, title_y, title_color);
+    
+    text->render_with_outline(renderer, penalty_text, penalty_x, value_y, COLOR_WHITE, COLOR_BLACK);
+}
+
+void UpgradePhase::render(const Snapshot& snapshot) {
     
     render_background();
     render_title();
-    render_remaining_upgrades(remaining_upgrades);
-    render_upgrade_buttons(prices);
-    render_instructions();
-
     
+    render_upgrade_buttons(snapshot.prices, snapshot.upgrades);
+    render_instructions();
+    render_actual_upgrades(snapshot.upgrades);
+    render_penalty_time(snapshot.upgrade_penalty_seconds);
 }
 
 UpgradePhase::~UpgradePhase() {

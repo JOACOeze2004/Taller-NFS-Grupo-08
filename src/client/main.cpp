@@ -35,6 +35,7 @@ int main(int argc, char *argv[]) try {
     QApplication app(argc, argv);
     auto loginWindow = new LoginWindow();
     bool startPressed = false;
+    bool gameFinishedNaturally = false;
     PlayerConfig playerConfig;
     Client* client = nullptr;
 
@@ -44,11 +45,12 @@ int main(int argc, char *argv[]) try {
             client = new Client(host, port, &audioManager);
             client->send_config(playerConfig, loginWindow->getLobbyAction(), loginWindow->getSelectedGameId());
             loginWindow->close();
-            
+
             audioManager.changeState(GameState::PLAYING);
-            
+
             client->run();
             startPressed = true;
+            gameFinishedNaturally = client->has_final_results();
             QApplication::quit();
         } catch (const std::exception& e) {
             QMessageBox::warning(loginWindow, "Error de conexión", e.what());
@@ -59,16 +61,16 @@ int main(int argc, char *argv[]) try {
     loginWindow->show();
     QApplication::exec();
 
-    if (startPressed && client) {
+    if (startPressed && client && gameFinishedNaturally) {
         audioManager.changeState(GameState::RESULTS);
         
         auto resultsWindow = new FinalResultsWindow();
 
         if (client->has_final_results()) {
             FinalScoreList results = client->get_final_results();
-            resultsWindow->displayResults(results);
+            resultsWindow->displayResults(results, playerConfig.playerName);
         } else {
-            resultsWindow->displayResults(FinalScoreList());
+            resultsWindow->displayResults(FinalScoreList(), playerConfig.playerName);
         }
 
         resultsWindow->show();

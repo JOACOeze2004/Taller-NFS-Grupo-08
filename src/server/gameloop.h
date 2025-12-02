@@ -58,6 +58,8 @@ public:
     int get_races_completed() const;
     void reset_race();
     bool has_active_players() const;
+    void reset_upgrade_penalties();
+    int get_upgrade_penalty(int player_id) const;
 
 private:
     Queue<ClientCommand> cmd_queue;
@@ -86,10 +88,15 @@ private:
     void generate_npcs();
     
     bool handle_disconnect(const int command_id, const int id);
-    bool handle_upgrade(const int command, Car& car);
+    bool handle_upgrade(const int command, Car& car, const int player_id);
 
     bool handle_car_action(const int command, Car& car);
     bool handle_race_action(const int command, int id);
+    bool handle_skip_to_last_race_cheat(const int command);
+    bool handle_force_start(const int command);
+    Car* find_car(const int id);
+
+
 
 
     template<typename CustomizedSnapshot>
@@ -99,7 +106,7 @@ private:
             for (auto& [id, car] : cars) {
                 Snapshot dto = build_base_snapshot(cars_DTO, state, time_ms, id);
                 custom_snapshot(dto, id);
-                monitor.broadcast(dto, game_id, id);
+                monitor.broadcast(dto, std::string(game_id) , id);
             }
         }
     };

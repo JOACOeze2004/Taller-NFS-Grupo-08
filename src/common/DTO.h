@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include "car_DTO.h"
+#include "upgrades.h"
 
 struct LobbyCarDTO {
     int car_id;
@@ -31,16 +32,6 @@ enum Map {
     LIBERTY_CITY
 };
 
-enum Upgrades {
-    NONE_UPGRADE,
-    ACCELERATION_UPGRADE,
-    HANDLING_UPGRADE,
-    NITRO_UPGRADE,
-    LIFE_UPGRADE,
-    BRAKE_UPGRADE,
-    MASS_UPGRADE
-};
-
 enum CollisionType {
     NONE_COLLISION,
     CHILL_COLLISION,
@@ -54,9 +45,9 @@ struct CheckpointCoords{
 };
 
 struct HintCoords{
-    float x;
-    float y;
-    float angle;
+    float x = 0;
+    float y = 0;
+    float angle = 0;
 };
 
 enum TypeCheckpoint{
@@ -91,6 +82,10 @@ struct Snapshot {
     std::map<Upgrades, std::chrono::seconds> prices;
     std::vector<CarRacingInfo> cars_finished;
     std::map<int, long long> player_total_times;
+    int total_checkpoints; 
+    int current_checkpoint;
+    std::map<Upgrades, int> upgrades;
+    int upgrade_penalty_seconds;
 };
 
 using FinalScoreList = std::vector<CarRacingInfo>;

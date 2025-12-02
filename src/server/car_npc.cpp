@@ -3,14 +3,16 @@
 #include "src/common/DTO.h"
 #include "src/common/constants.h"
 
+#include "config.h"
 #include "parser_yaml.h"
 
 CarNPC::CarNPC(GraphNode& start_corner, b2WorldId& world) {
     b2BodyDef body = b2DefaultBodyDef();
     body.type = b2_dynamicBody;
     body.linearDamping = 2.0f;
-    body.angularDamping = 7.0f;
+    body.angularDamping = 7.5f;
     body.position = {start_corner.x,start_corner.y};
+    act_pos = {start_corner.x, start_corner.y};
     body_id = b2CreateBody(world, &body);
     b2Body_EnableContactEvents(body_id, true);
     b2Body_EnableHitEvents(body_id, true);
@@ -21,6 +23,8 @@ CarNPC::CarNPC(GraphNode& start_corner, b2WorldId& world) {
     b2ShapeId shape = b2CreatePolygonShape(body_id, &shape_def, &box);
     b2Shape_EnableContactEvents(shape, true);
     b2Shape_EnableHitEvents(shape, true);
+
+    car_id = rand() % 6;
 }
 
 b2Vec2 CarNPC::get_position() {
@@ -33,7 +37,7 @@ void CarNPC::move(GraphNode& target) {
     float speed = b2Length(vel);
 
     float accel = 6.0f;
-    float limit = MAX_SPEED;
+    float limit = Config::instance().car.max_speed;
 
     if (speed < limit) {
         b2Vec2 velocity = b2Body_GetWorldVector(body_id, {1,0});
@@ -42,6 +46,25 @@ void CarNPC::move(GraphNode& target) {
     }
     rotate(target);
     apply_friction();
+    last_pos = act_pos;
+    act_pos = get_position();
+}
+
+void CarNPC::reverse() {
+    float accel = -12.0f;
+    b2Vec2 velocity = b2Body_GetWorldVector(body_id, {1,0});
+    b2Vec2 force = {velocity.x * accel, velocity.y * accel};
+    b2Body_ApplyForceToCenter(body_id, force, true);
+}
+
+float CarNPC::get_speed() {
+    b2Vec2 vel = b2Body_GetLinearVelocity(body_id);
+    float speed = b2Length(vel);
+    return speed;
+}
+
+b2Vec2 CarNPC::get_last_pos() {
+    return last_pos;
 }
 
 void CarNPC::rotate(GraphNode& target) {
@@ -74,8 +97,7 @@ CarDTO CarNPC::get_state() {
     float y = pos.y;
     b2Rot rot = b2Body_GetRotation(body_id);
     float angle = atan2(rot.s, rot.c);
-
-    return {x, y,0, angle, 0, false, 0, 0, 0, NPC_STATE, 0};
+    return {x, y,0, angle, car_id, false, 0, 0, 0, NPC_STATE, 0};
 }
 
 b2Vec2 CarNPC::get_forward() {

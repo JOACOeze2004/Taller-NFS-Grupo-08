@@ -1,17 +1,47 @@
 #include "server_protocol.h"
+
 #include <cstring>
+
+#include "config.h"
 
 ServerProtocol::ServerProtocol(Socket& _socket) : protocol(_socket) {  }
 
-uint8_t ServerProtocol::receive_standar_command() const {
-    return protocol.receive_byte();
-}
+uint8_t ServerProtocol::receive_standar_command() const {  return protocol.receive_byte(); }
 
 void ServerProtocol::send_cars(const Snapshot& snapshot){
     protocol.send_big_endian_16(snapshot.cars.size());
     for (const auto& [car_id, car] : snapshot.cars) {
         protocol.send_big_endian_16(car_id);
         send_car_state(car); 
+    }
+}
+
+void ServerProtocol::send_results(const FinalScoreList& results){ 
+    protocol.send_big_endian_16(results.size());
+    for (const auto& result : results) {
+        uint16_t name_len = static_cast<uint16_t>(result.name.size());
+        protocol.send_big_endian_16(name_len);
+        protocol.send_string(result.name);
+        protocol.send_float(result.time);
+        protocol.send_byte(result.position);
+    }
+}
+
+void ServerProtocol::send_cars_finished(const Snapshot& snapshot) {
+    protocol.send_big_endian_16(snapshot.cars_finished.size());
+    for (const auto& [player_name, time, position] : snapshot.cars_finished) {
+        protocol.send_big_endian_16(static_cast<uint16_t>(player_name.size()));
+        protocol.send_string(player_name);
+        protocol.send_big_endian_32(time);
+        protocol.send_big_endian_32(position);
+    }
+}
+
+void ServerProtocol::send_player_total_times(const Snapshot& snapshot) {
+    protocol.send_big_endian_16(snapshot.player_total_times.size());
+    for (const auto& [player_id, total_time] : snapshot.player_total_times) {
+        protocol.send_big_endian_16(player_id);
+        protocol.send_big_endian_64(total_time);
     }
 }
 
@@ -31,12 +61,15 @@ void ServerProtocol::send_checkpoint_hint(const Snapshot& snapshot){
     protocol.send_float(snapshot.hint.y);
     protocol.send_float(snapshot.hint.angle);
     protocol.send_byte(static_cast<uint8_t>(snapshot.type_checkpoint));
+    protocol.send_big_endian_16(snapshot.total_checkpoints);
+    protocol.send_big_endian_16(snapshot.current_checkpoint);
 }
 
 void ServerProtocol::send_remaining_data(const Snapshot& snapshot){
     protocol.send_big_endian_32(snapshot.time_ms);
     protocol.send_byte(static_cast<uint8_t>(snapshot.state));
     protocol.send_bool(snapshot.is_owner);
+    protocol.send_big_endian_16(snapshot.upgrade_penalty_seconds);
 }
 
 void ServerProtocol::send_lobby_cars(const Snapshot& snapshot){
@@ -54,20 +87,26 @@ void ServerProtocol::send_prices(const Snapshot& snapshot){
     }
 }
 
+void ServerProtocol::send_car_upgrades(const Snapshot& snapshot){
+    protocol.send_big_endian_16(snapshot.upgrades.size());
+    for (const auto& [type, level] : snapshot.upgrades) {
+        protocol.send_byte(static_cast<uint8_t>(type));
+        protocol.send_big_endian_16(level);
+    }
+}
+
 void ServerProtocol::send_car_state(const CarDTO& car){
     protocol.send_float(car.x);
     protocol.send_float(car.y);
     protocol.send_float(car.velocity);
     protocol.send_float(car.angle);
-    protocol.send_big_endian_32(car.car_id);
+    protocol.send_big_endian_16(car.car_id);
     
-    float life_percentage = (static_cast<float>(car.life) * 100.0f) / static_cast<float>(MAX_LIFE);
-
-    protocol.send_float(life_percentage);
+    protocol.send_float(car.life);
     protocol.send_bool(car.nitro);
     protocol.send_float(car.remaining_nitro);
     protocol.send_byte(static_cast<uint8_t>(car.state));
-    protocol.send_big_endian_32(car.remaining_upgrades);
+    protocol.send_big_endian_16(car.remaining_upgrades);
 }
 
 void ServerProtocol::send_lobby_car_state(const LobbyCarDTO& car) {
@@ -87,8 +126,7 @@ void ServerProtocol::send_games_list(const std::vector<std::string>& games) {
     }
 }
 
-void ServerProtocol::send_game_init_data(const std::string& map_path,
-                                   float spawn_x, float spawn_y) {
+void ServerProtocol::send_game_init_data(const std::string& map_path, float spawn_x, float spawn_y) {
     auto path_length = static_cast<uint16_t>(map_path.size());
     protocol.send_big_endian_16(path_length);
     protocol.send_string(map_path);
@@ -102,9 +140,7 @@ void ServerProtocol::send_game_init_data(const std::string& map_path,
     protocol.send_big_endian_32(y_bytes);
 }
 
-void ServerProtocol::receive_player_config(std::string& name, uint8_t& car_id,
-                                     std::string& map_name) {
-
+void ServerProtocol::receive_player_config(std::string& name, uint8_t& car_id, std::string& map_name) {
     uint16_t name_length = protocol.receive_big_endian_16();
     name = protocol.receive_string(name_length);
 
@@ -132,20 +168,9 @@ void ServerProtocol::send_game_state(const Snapshot& snapshot) {
     send_remaining_data(snapshot);
     send_lobby_cars(snapshot);
     send_prices(snapshot);
-
-    protocol.send_big_endian_16(snapshot.cars_finished.size());
-    for (const auto& [player_name, time, position] : snapshot.cars_finished) {
-        protocol.send_big_endian_16(static_cast<uint16_t>(player_name.size()));
-        protocol.send_string(player_name);
-        protocol.send_big_endian_32(time);
-        protocol.send_big_endian_32(position);
-    }
-
-    protocol.send_big_endian_16(snapshot.player_total_times.size());
-    for (const auto& [player_id, total_time] : snapshot.player_total_times) {
-        protocol.send_big_endian_16(player_id);
-        protocol.send_big_endian_64(total_time);
-    }
+    send_cars_finished(snapshot);
+    send_player_total_times(snapshot);
+    send_car_upgrades(snapshot);
 }
 
 void ServerProtocol::send_error_message(const std::string& msg) {
@@ -156,22 +181,8 @@ void ServerProtocol::send_error_message(const std::string& msg) {
     protocol.send_string(msg);
 }
 
-void ServerProtocol::send_ok() {
-    protocol.send_byte(SEND_OK_MESSAGE);
-}
+void ServerProtocol::send_ok() { protocol.send_byte(SEND_OK_MESSAGE); }
 
-void ServerProtocol::send_final_results(const FinalScoreList& results) {
-    protocol.send_big_endian_16(results.size());
+void ServerProtocol::send_final_results(const FinalScoreList& results) { this->send_results(results); }
 
-    for (const auto& result : results) {
-        uint16_t name_len = static_cast<uint16_t>(result.name.size());
-        protocol.send_big_endian_16(name_len);
-        protocol.send_string(result.name);
-        protocol.send_float(result.time);
-        protocol.send_byte(result.position);
-    }
-}
-
-void ServerProtocol::close(){
-    protocol.close_socket();    
-}
+void ServerProtocol::close(){ protocol.close_socket(); }

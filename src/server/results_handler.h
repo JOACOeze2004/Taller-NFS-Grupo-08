@@ -13,6 +13,8 @@ private:
     std::vector<CarRacingInfo> finished;
     std::vector<CarRacingInfo> deads;
     std::map<int, long long> player_total_times;
+    std::map<int, int> current_race_upgrade_penalties;
+
 public:
     ResultsHandler() = default;
     ~ResultsHandler() = default;
@@ -22,10 +24,14 @@ public:
     bool add_dead(const int id, const std::string& name, int time, int max_time);
     bool is_player_in_finished(const std::string& name) const;
     bool is_player_in_deads(const std::string& name) const;
+
+    void add_upgrade_penalty(int player_id, int seconds);
+    void subtract_upgrade_penalty(int player_id, int seconds);
+    int get_upgrade_penalty(int player_id) const;
     
     FinalScoreList calculate_final_scores(const std::unordered_map<int, std::string>& names) const;
     void reset_for_next_race();
-    void reset_all();
+    void reset_upgrade_penalties();
     
     const std::vector<CarRacingInfo>& get_finished() const;
     const std::vector<CarRacingInfo>& get_deads() const;
@@ -33,6 +39,8 @@ public:
 
     void add_upgrade_time(int player_id, int ms);
     void subtract_upgrade_time(int player_id, int ms);
+
+    void delete_user(const int& player_id);
 };
 
 

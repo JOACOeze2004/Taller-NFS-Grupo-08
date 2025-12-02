@@ -79,3 +79,13 @@ void TextRenderer::render(SDL_Renderer* renderer, const std::string& text, int x
     SDL_RenderCopy(renderer, current_texture, nullptr, &dst);
     SDL_FreeSurface(surface);
 }
+
+void TextRenderer::render_with_outline(SDL_Renderer* renderer, const std::string& text, int x, int y, SDL_Color color, SDL_Color outline_color) {
+    if (!font || text.empty()) return;
+    
+    render(renderer, text, x - 1, y, outline_color);
+    render(renderer, text, x + 1, y, outline_color);
+    render(renderer, text, x, y - 1, outline_color);
+    render(renderer, text, x, y + 1, outline_color);
+    render(renderer, text, x, y, color);
+}

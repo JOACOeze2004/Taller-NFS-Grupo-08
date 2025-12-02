@@ -34,6 +34,23 @@ bool ResultsHandler::is_player_in_deads(const std::string& name) const {
     return std::ranges::any_of(deads,[&](const CarRacingInfo& p) { return p.name == name; });
 }
 
+void ResultsHandler::add_upgrade_penalty(int player_id, int seconds) { current_race_upgrade_penalties[player_id] += seconds; }
+
+void ResultsHandler::subtract_upgrade_penalty(int player_id, int seconds) {
+    auto it = current_race_upgrade_penalties.find(player_id);
+    if (it != current_race_upgrade_penalties.end()) {
+        it->second -= seconds;
+        if (it->second < 0) {
+            it->second = 0;
+        }
+    }
+}
+
+int ResultsHandler::get_upgrade_penalty(int player_id) const {
+    auto it = current_race_upgrade_penalties.find(player_id);
+    return (it != current_race_upgrade_penalties.end()) ? it->second : 0;
+}
+
 FinalScoreList ResultsHandler::calculate_final_scores(const std::unordered_map<int, std::string>& names) const {
     FinalScoreList results;
     for (const auto& [id, total_time] : player_total_times) {
@@ -51,11 +68,7 @@ void ResultsHandler::reset_for_next_race() {
     deads.clear();
 }
 
-void ResultsHandler::reset_all() {
-    finished.clear();
-    deads.clear();
-    player_total_times.clear();
-}
+void ResultsHandler::reset_upgrade_penalties() { current_race_upgrade_penalties.clear(); }
 
 const std::vector<CarRacingInfo>& ResultsHandler::get_finished() const { return finished; }
 
@@ -73,3 +86,7 @@ void ResultsHandler::subtract_upgrade_time(int player_id, int ms) {
 }
 
 void ResultsHandler::add_upgrade_time(int player_id, int ms) { player_total_times[player_id] += ms; }
+
+void ResultsHandler::delete_user(const int& player_id) {
+    player_total_times.erase(player_id);
+}

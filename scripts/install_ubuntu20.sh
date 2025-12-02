@@ -4,6 +4,7 @@ set -euo pipefail
 GAME_NAME="need_for_speed"
 BIN_CLIENT_NAME="${GAME_NAME}-client"
 BIN_SERVER_NAME="${GAME_NAME}-server"
+BIN_EDITOR_NAME="${GAME_NAME}-editor"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 BUILD_DIR="$ROOT_DIR/build"
@@ -139,7 +140,7 @@ if [[ "$CMAKE_OK" == "false" ]]; then
   fi
 fi
 
-log "Installing dependencies: Qt5, YAML-CPP, SDL2 and codec libs"
+log "Installing dependencies: Qt5, YAML-CPP, SDL2, audio drivers and codec libs"
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
   qt5-qmake qtbase5-dev qtchooser qtbase5-dev-tools \
   libyaml-cpp-dev \
@@ -148,6 +149,7 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
   libfreetype6-dev libogg-dev libvorbis-dev libmpg123-dev \
   libxmp-dev libopus-dev libopusfile-dev libfluidsynth-dev fluidsynth \
   libwavpack1 libwavpack-dev \
+  pulseaudio pulseaudio-utils libasound2-dev alsa-utils libasound2-plugins \
   libx11-xcb1 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
   libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0 \
   libxcb-shape0 \
@@ -181,6 +183,7 @@ fi
 log "Installing executables into ${BIN_DIR}"
 SRC_CLIENT_BIN="$BUILD_DIR/taller_client"
 SRC_SERVER_BIN="$BUILD_DIR/taller_server"
+SRC_EDITOR_BIN="$BUILD_DIR/taller_editor"
 
 if [[ ! -x "$SRC_CLIENT_BIN" ]]; then
   warn "Client binary not found or not executable at: $SRC_CLIENT_BIN"
@@ -188,6 +191,10 @@ fi
 
 if [[ ! -x "$SRC_SERVER_BIN" ]]; then
   warn "Server binary not found or not executable at: $SRC_SERVER_BIN"
+fi
+
+if [[ ! -x "$SRC_EDITOR_BIN" ]]; then
+  warn "Editor binary not found or not executable at: $SRC_EDITOR_BIN"
 fi
 
 if [[ -f "$SRC_CLIENT_BIN" ]]; then
@@ -198,6 +205,11 @@ fi
 if [[ -f "$SRC_SERVER_BIN" ]]; then
   sudo install -m 755 "$SRC_SERVER_BIN" "$BIN_DIR/$BIN_SERVER_NAME"
   log "Installed server -> $BIN_DIR/$BIN_SERVER_NAME"
+fi
+
+if [[ -f "$SRC_EDITOR_BIN" ]]; then
+  sudo install -m 755 "$SRC_EDITOR_BIN" "$BIN_DIR/$BIN_EDITOR_NAME"
+  log "Installed editor -> $BIN_DIR/$BIN_EDITOR_NAME"
 fi
 
 log "Preparing configuration and data directories"
@@ -211,6 +223,7 @@ else
   info "No config/ folder found. Creating placeholder configs"
   echo "# Placeholder client config" | sudo tee "$CFG_DIR/client_config.yaml" >/dev/null
   echo "# Placeholder server config" | sudo tee "$CFG_DIR/server_config.yaml" >/dev/null
+  echo "# Placeholder editor config" | sudo tee "$CFG_DIR/editor_config.yaml" >/dev/null
 fi
 
 mkdir -p "$CFG_DIR"
@@ -221,6 +234,7 @@ if [[ -d "$ROOT_DIR/config" ]]; then
 else
   echo "# Placeholder client config" | sudo tee "$CFG_DIR/client_config.yaml" >/dev/null
   echo "# Placeholder server config" | sudo tee "$CFG_DIR/server_config.yaml" >/dev/null
+  echo "# Placeholder editor config" | sudo tee "$CFG_DIR/editor_config.yaml" >/dev/null
 fi
 
 if [[ -d "$ROOT_DIR/assets" ]]; then
@@ -336,6 +350,45 @@ EOFSERVER
 chmod +x "$DESKTOP_DIR/run_server.sh"
 log "Server launcher created -> $DESKTOP_DIR/run_server.sh"
 
+cat > "$DESKTOP_DIR/run_editor.sh" <<'EOFEDITOR'
+#!/usr/bin/env bash
+
+# Set working directory to /var/need_for_speed/game where assets/src are located
+cd "/var/need_for_speed/game" || {
+  echo "Error: Cannot change to game directory"
+  exit 1
+}
+
+# Export config file location
+export NEED_FOR_SPEED_EDITOR_CONFIG_FILE="/etc/need_for_speed/editor_config.yaml"
+
+# Export asset paths for the game to use
+export NEED_FOR_SPEED_ASSETS_DIR="/var/need_for_speed/game/assets"
+export NEED_FOR_SPEED_SRC_DIR="/var/need_for_speed/game/src"
+
+echo "================================================"
+echo "  Need For Speed - Editor Launcher"
+echo "================================================"
+echo "Working directory: $(pwd)"
+echo "Assets directory: $NEED_FOR_SPEED_ASSETS_DIR"
+echo "Source directory: $NEED_FOR_SPEED_SRC_DIR"
+echo "Config file: $NEED_FOR_SPEED_EDITOR_CONFIG_FILE"
+echo "================================================"
+echo
+
+# Launch editor from the game directory (so relative paths work)
+exec /usr/bin/need_for_speed-editor "$@"
+EOFEDITOR
+
+chmod +x "$DESKTOP_DIR/run_editor.sh"
+log "Editor launcher created -> $DESKTOP_DIR/run_editor.sh"
+
+if [[ -f "$ROOT_DIR/run_tests.sh" ]]; then
+  cp "$ROOT_DIR/run_tests.sh" "$DESKTOP_DIR/run_tests.sh"
+  chmod +x "$DESKTOP_DIR/run_tests.sh"
+  log "Test launcher copied -> $DESKTOP_DIR/run_tests.sh"
+fi
+
 sudo chown -R "$(id -u):$(id -g)" "$VAR_DIR" || true
 sudo chmod -R 755 "$VAR_DIR/game" || true
 
@@ -350,6 +403,7 @@ echo
 echo "Executables:"
 echo "  • Client: ${BIN_DIR}/${BIN_CLIENT_NAME}"
 echo "  • Server: ${BIN_DIR}/${BIN_SERVER_NAME}"
+echo "  • Editor: ${BIN_DIR}/${BIN_EDITOR_NAME}"
 echo
 echo "Configuration:"
 echo "  • Config directory: ${CFG_DIR}"
@@ -360,6 +414,8 @@ echo
 echo "Desktop Launchers:"
 echo "  • ${DESKTOP_DIR}/run_client.sh"
 echo "  • ${DESKTOP_DIR}/run_server.sh"
+echo "  • ${DESKTOP_DIR}/run_editor.sh"
+echo "  • ${DESKTOP_DIR}/run_tests.sh"
 echo
 info "=========================================="
 info "         HOW TO RUN THE GAME"
@@ -369,15 +425,26 @@ echo "1. START THE SERVER:"
 echo "   ${DESKTOP_DIR}/run_server.sh"
 echo "   Example: ${DESKTOP_DIR}/run_server.sh"
 echo "   (Default port: 8080)"
-echo "   If you need yo change the port, go to run_server.sh and change the var PORT"
+echo "   If you need to change the port, go to run_server.sh and change the var PORT"
+echo
+echo "   To run with Valgrind (memory leak detection):"
+echo "   ${DESKTOP_DIR}/run_server.sh --valgrind"
+echo "   ${DESKTOP_DIR}/run_server.sh --valgrind 8080"
 echo
 echo "2. START THE CLIENT:"
 echo "   ${DESKTOP_DIR}/run_client.sh"
 echo "   Example: ${DESKTOP_DIR}/run_client.sh"
 echo "   (Defaults: localhost 8080)"
-echo "   If you need yo change the host and the port, go to run_client.sh and change the vars PORT and HOST "
+echo "   If you need to change the host and the port, go to run_client.sh and change the vars PORT and HOST"
 echo
-echo "3. Or simply double-click the .sh files on your Desktop!"
+echo "3. START THE EDITOR:"
+echo "   ${DESKTOP_DIR}/run_editor.sh"
+echo "   Example: ${DESKTOP_DIR}/run_editor.sh"
+echo
+echo "4. RUN TESTS:"
+echo "   ${DESKTOP_DIR}/run_tests.sh"
+echo
+echo "5. Or simply double-click the .sh files on your Desktop!"
 echo
 info "=========================================="
 echo

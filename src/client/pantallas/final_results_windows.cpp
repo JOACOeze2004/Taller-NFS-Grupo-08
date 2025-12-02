@@ -8,10 +8,11 @@
 FinalResultsWindow::FinalResultsWindow(QWidget* parent)
     : QWidget(parent),
       layout(new QVBoxLayout(this)),
-      resultsTable(nullptr)
+      resultsTable(nullptr),
+      resultMessageLabel(nullptr)
 {
     setWindowTitle("Race Results");
-    showMaximized();
+    showFullScreen();
 
     backgroundImage = QPixmap("../assets/images/fondo_login.png");
 
@@ -24,6 +25,7 @@ void FinalResultsWindow::setupUI() {
     layout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
 
     setupTitle();
+    setupResultMessage();
     setupTable();
     setupExitButton();
 
@@ -37,6 +39,13 @@ void FinalResultsWindow::setupTitle() {
     layout->addWidget(title);
 }
 
+void FinalResultsWindow::setupResultMessage() {
+    resultMessageLabel = new QLabel("");
+    resultMessageLabel->setAlignment(Qt::AlignCenter);
+    resultMessageLabel->setStyleSheet("font-size: 56px; font-weight: bold; margin: 20px;");
+    layout->addWidget(resultMessageLabel);
+}
+
 void FinalResultsWindow::setupTable() {
     resultsTable = new ResultsTableWidget(this);
     layout->addWidget(resultsTable);
@@ -48,13 +57,41 @@ void FinalResultsWindow::setupExitButton() {
     StyleManager::applyGlowEffect(exitBtn);
     layout->addWidget(exitBtn);
 
-    connect(exitBtn, &QPushButton::clicked, []() {
+    connect(exitBtn, &QPushButton::clicked, this, [this]() {
+        this->close();
         QApplication::quit();
+        std::exit(0);
     });
 }
-
-void FinalResultsWindow::displayResults(const FinalScoreList& scores) {
+void FinalResultsWindow::displayResults(const FinalScoreList& scores, const std::string& playerName) {
     resultsTable->displayResults(scores);
+    bool won = false;
+    if (!scores.empty() && scores[0].name == playerName) {
+        won = true;
+    }
+    updateResultMessage(won);
+}
+
+void FinalResultsWindow::updateResultMessage(bool won) {
+    if (won) {
+        resultMessageLabel->setText("🎉 ¡GANASTE! 🎉");
+        resultMessageLabel->setStyleSheet(
+            "color: #FFD700; "
+            "font-size: 56px; "
+            "font-weight: bold; "
+            "margin: 20px;"
+        );
+        StyleManager::applyGlowEffectToLabel(resultMessageLabel);
+    } else {
+        resultMessageLabel->setText("😔 PERDISTE 😔");
+        resultMessageLabel->setStyleSheet(
+            "color: #FF4444; "
+            "font-size: 56px; "
+            "font-weight: bold; "
+            "margin: 20px;"
+        );
+        StyleManager::applyGlowEffectToLabel(resultMessageLabel);
+    }
 }
 
 void FinalResultsWindow::paintEvent(QPaintEvent* event) {
@@ -72,6 +109,5 @@ void FinalResultsWindow::paintEvent(QPaintEvent* event) {
 
         painter.drawPixmap(x, y, scaled);
     }
-
     QWidget::paintEvent(event);
 }

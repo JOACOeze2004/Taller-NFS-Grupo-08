@@ -32,7 +32,9 @@ add_library(taller_common STATIC
         src/common/protocol.h
         src/common/command.h
         src/common/car_DTO.h
-        src/common/DTO.h)
+        src/common/DTO.h
+        src/common/upgrades.h
+        src/server/config.yaml)
 
 # add the source files that make the lib
 # HEY!! TODO XXX: add more subfolders here
@@ -155,6 +157,16 @@ if(TALLER_CLIENT)
             src/client/audio_manager.cpp
             src/client/sprite_loader.cpp
             src/client/sprite_loader.h
+            src/client/minimap_renderer.cpp
+            src/client/minimap_renderer.h
+            src/client/game_renderer.cpp
+            src/client/game_renderer.h
+            src/client/ui_renderer.cpp
+            src/client/ui_renderer.h
+            src/client/camera_manager.cpp
+            src/client/camera_manager.h
+            src/client/pause_menu.cpp
+            src/client/pause_menu.h
     )
 
     # Make them depend on taller_common lib
@@ -224,7 +236,9 @@ if(TALLER_SERVER)
             src/server/car_npc.cpp
             src/server/upgrade_handler.h
             src/server/upgrade_handler.cpp
-            )
+            src/server/config.cpp
+            src/server/config.h
+    )
 
     # Make them depend on taller_common lib
     add_dependencies(taller_server taller_common)
@@ -325,6 +339,7 @@ if(TALLER_TESTS)
         ../src/common/protocol.cpp
         ../src/common/mocked_socket.cpp
         tests/test_protocol.cpp
+        ../src/server/config.cpp
     )
 
     # HEY!! TODO XXX: I'm assuming that the code under testing is in taller_common
@@ -354,5 +369,6 @@ if(TALLER_TESTS)
     target_link_libraries(taller_tests
         taller_common
         GTest::gtest_main
+        yaml-cpp
     )
 endif()

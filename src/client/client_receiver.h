@@ -13,12 +13,14 @@ class ClientReceiver : public Thread  {
     Queue<Snapshot> queue;
     FinalScoreList final_results;
     bool has_finals;
-    std::mutex finals_mutex;
+    bool server_disconnected = false;
+
 public:
     explicit ClientReceiver(ClientProtocol& protocol);
     void run() override;
     bool try_pop_snapshot(Snapshot& snapshot);
-    bool has_final_results();
+    bool has_final_results() const;
+    bool is_server_disconnected() const;
     FinalScoreList get_final_results();
 };
 

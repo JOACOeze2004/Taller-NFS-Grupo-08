@@ -20,11 +20,19 @@ class Race {
     std::map<int, bool> finished;
     std::map<int, int> positions;
     std::vector<int> positions_order;
+    std::map<int, bool> timeouted;
 
-    int get_checkpoints(int id) const;
+    
     float get_distance(const int id) const;
     bool compare_cars(int a, int b) const;
-
+    bool is_valid_checkpoint(const int id) const;
+    float calculate_distance_to_checkpoint(const Car& car, const Checkpoint& cp) const;
+    bool is_car_at_checkpoint(const Car& car, const Checkpoint& cp) const;
+    void advance_checkpoint(const int id);
+    void check_and_advance_checkpoint(int id, Car& car);
+    void advance_car_progress(const int id);
+    void teleport_car_to_checkpoint(const int id, const Checkpoint& checkpoint, const Checkpoint& checkpoint_angle);
+    Checkpoint get_checkpoint_angle(const int checkpoint_index) const;
 
 public:
     explicit Race(const std::string& track_name, std::map<int, Car> *_cars, const std::string& tracks_directory);
@@ -43,6 +51,12 @@ public:
     void update_cars();
     bool all_cars_done();
     void spawn_cars();
+    void pass_to_next_checkpoint(int id); 
+    int get_checkpoint_amount() const;
+    int get_checkpoints(const int id) const;
+    bool car_timeouted(const int& id) const;
+
+
 
     void activate_win(int& id);
 };

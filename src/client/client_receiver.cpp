@@ -2,7 +2,7 @@
 
 #include "InvalidId.h"
 
-ClientReceiver::ClientReceiver(ClientProtocol& protocol) : protocol(protocol), has_finals(false) {}
+ClientReceiver::ClientReceiver(ClientProtocol& protocol) : protocol(protocol), has_finals(false), server_disconnected(false) {}
 
 
 void ClientReceiver::run(){
@@ -12,35 +12,23 @@ void ClientReceiver::run(){
             if (snapshot.state == FINAL_RESULTS) {
                 final_results = protocol.receive_final_results();
                 has_finals = true;
-
-                for (const auto& result : final_results) {
-                    std::cout << "[CLIENT RECEIVER] Player: " << result.name
-                              << " Position: " << result.position
-                              << " Time: " << result.time << "s" << std::endl;
-                }
-
                 stop();
                 break;
             }
             queue.push(snapshot);
         }
         catch(const std::exception& e) {
+            server_disconnected = true;
             this->stop();
             break;
         } 
     }    
 }
 
-bool ClientReceiver::try_pop_snapshot(Snapshot& snapshot) {
-    return queue.try_pop(snapshot);
-}
+bool ClientReceiver::try_pop_snapshot(Snapshot& snapshot) { return queue.try_pop(snapshot);}
 
-bool ClientReceiver::has_final_results() {
-    std::lock_guard<std::mutex> lock(finals_mutex);
-    return has_finals;
-}
+bool ClientReceiver::is_server_disconnected() const { return server_disconnected; }
 
-FinalScoreList ClientReceiver::get_final_results() {
-    std::lock_guard<std::mutex> lock(finals_mutex);
-    return final_results;
-}
+bool ClientReceiver::has_final_results() const { return has_finals; }
+
+FinalScoreList ClientReceiver::get_final_results() { return final_results;}

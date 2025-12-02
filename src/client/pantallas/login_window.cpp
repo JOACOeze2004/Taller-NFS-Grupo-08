@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <iostream>
 #include <QMessageBox>
+#include <QApplication>
 
 LoginWindow::LoginWindow(QWidget *parent)
     : QWidget(parent),
@@ -16,7 +17,7 @@ LoginWindow::LoginWindow(QWidget *parent)
       selectedGameId("")
 {
     setWindowTitle("Need for Speed - Login");
-    showMaximized();
+    showFullScreen();
     backgroundImage = QPixmap("../assets/images/fondo_login.png");
 
     setupUI();
@@ -26,17 +27,30 @@ LoginWindow::LoginWindow(QWidget *parent)
 LoginWindow::~LoginWindow() = default;
 
 void LoginWindow::setupUI() {
-    layout = new QVBoxLayout(this);
-    layout->setContentsMargins(300, 50, 300, 50);
+    contentWidget = new QWidget(this);
+    contentWidget->setAttribute(Qt::WA_TranslucentBackground);
+    layout = new QVBoxLayout(contentWidget);
+    layout->setContentsMargins(20, 20, 20, 20);
     layout->setSpacing(20);
-    layout->setAlignment(Qt::AlignTop);
-
+    layout->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
     setupNameSection();
     setupCarSection();
     setupMapSection();
     setupGameActions();
+    setupExitButton();
+    scrollArea = new QScrollArea(this);
+    scrollArea->setWidget(contentWidget);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setFrameShape(QFrame::NoFrame);
 
-    setLayout(layout);
+    scrollArea->setStyleSheet("QScrollArea { background: transparent; } QWidget { background: transparent; }");
+    scrollArea->viewport()->setAutoFillBackground(false);
+
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->addWidget(scrollArea);
+
+    setLayout(mainLayout);
 }
 
 void LoginWindow::setupNameSection() {
@@ -108,6 +122,20 @@ void LoginWindow::setupConnections() {
         this->lobbyAction = SEND_JOIN_GAME;
         this->selectedGameId = gameId;
         emit startButtonClicked();
+    });
+}
+
+void LoginWindow::setupExitButton() {
+    layout->addSpacing(30);
+
+    exitButton = new QPushButton("EXIT");
+    StyleManager::styleButton(exitButton);
+    StyleManager::applyGlowEffect(exitButton);
+    layout->addWidget(exitButton, 0, Qt::AlignHCenter);
+
+    connect(exitButton, &QPushButton::clicked, this, []() {
+        QApplication::quit();
+        std::exit(0);
     });
 }
 

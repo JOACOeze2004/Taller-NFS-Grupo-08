@@ -7,6 +7,7 @@ Race::Race(const std::string& map_name, std::map<int, Car> *_cars, const std::st
     track = tracks[indx];
     for (auto& [id, car] : *cars) {
         finished[id] = false;
+        timeouted[id] = false;
         car_next_cp[id] = 0;
         car_next_hint[id] = 0;
     }
@@ -28,7 +29,6 @@ TypeCheckpoint Race::get_cp_type(const int& id) const {
     if (checkpoint+1 >= static_cast<int>(track.checkpoints.size())) {
         return FINAL;
     }
-
     return REGULAR;
 }
 
@@ -40,18 +40,29 @@ int Race::get_position(const int& id) const {
     return static_cast<int>(positions_order.size());
 }
 
-float Race::get_distance(int id) const {
+bool Race::is_valid_checkpoint(const int id) const {
     int checkpoint = get_checkpoints(id);
-    if (checkpoint >= static_cast<int>(track.checkpoints.size())) {
+    return checkpoint < static_cast<int>(track.checkpoints.size());
+}
+
+float Race::calculate_distance_to_checkpoint(const Car& car, const Checkpoint& cp) const {
+    auto [x, y] = car.get_position();
+    float dx = x - cp.x;
+    float dy = y - cp.y;
+    return std::sqrt(dx * dx + dy * dy);
+}
+
+float Race::get_distance(const int id) const {
+    if (!is_valid_checkpoint(id)) {
         return std::numeric_limits<float>::max();
     }
-    const auto& next_checkpoint = track.checkpoints[checkpoint];
+    const auto& next_checkpoint = track.checkpoints[get_checkpoints(id)];
+
     auto it = cars->find(id);
     if (it == cars->end()) {
         return std::numeric_limits<float>::max();
     }
-    auto [x, y] = it->second.get_position();
-    return std::sqrt((x - next_checkpoint.x) * (x - next_checkpoint.x) + (y - next_checkpoint.y) * (y - next_checkpoint.y));
+    return calculate_distance_to_checkpoint(it->second, next_checkpoint);
 }
 
 bool Race::compare_cars(int a, int b) const {
@@ -81,39 +92,54 @@ void Race::update_positions_order() {
     positions_order = std::move(ids);
 }
 
+bool Race::is_car_at_checkpoint(const Car& car, const Checkpoint& cp) const {
+    auto [x, y] = car.get_position();
+    float dx = x - cp.x;
+    float dy = y - cp.y;
+    float dist2 = dx * dx + dy * dy;
+    const float radius = 50.0f;
+    return dist2 <= radius * radius;
+}
+
+void Race::advance_checkpoint(const int id) {
+    int next_checkpoint = car_next_cp[id];
+    if (next_checkpoint != 0) {
+        car_next_hint[id]++;
+    }
+    car_next_cp[id]++;
+    if (next_checkpoint >= static_cast<int>(track.checkpoints.size()) - 1) {
+        finished[id] = true;
+    }
+}
+
+void Race::check_and_advance_checkpoint(int id, Car& car) {
+    int next_checkpoint = car_next_cp[id];
+    if (next_checkpoint >= static_cast<int>(track.checkpoints.size())) {
+        return;
+    }
+
+    const auto& cp = track.checkpoints[next_checkpoint];
+    
+    if (is_car_at_checkpoint(car, cp)) {
+        advance_checkpoint(id);
+    }
+}
+
 void Race::update_checkpoints() {
     for (auto& [id, car] : *cars) {
         if (car_finished(id)) {
             continue;
         }
-
-        int next_checkpoint = car_next_cp[id];
-        if (next_checkpoint >= static_cast<int>(track.checkpoints.size())) continue;
-
-        const auto& cp = track.checkpoints[next_checkpoint];
-        auto [x, y] = car.get_position();
-
-        float dx = x - cp.x;
-        float dy = y - cp.y;
-        float dist2 = dx*dx + dy*dy;
-        const float radius = 50.0f;
-
-        if (dist2 <= radius * radius) {
-            if (next_checkpoint != 0) {
-                car_next_hint[id]++;
-            }
-            car_next_cp[id]++;
-
-            std::cout << "Auto " << id
-                      << " pasa por checkpoint " << cp.order
-                      << " (" << car_next_cp[id] << "/" << track.checkpoints.size() << ")" << std::endl;
-
-            if (car_next_cp[id] == static_cast<int>(track.checkpoints.size())) {
-                finished[id] = true;
-                std::cout << "Auto " << id << " completo la carrera" << std::endl;
-            }
-        }
+        check_and_advance_checkpoint(id, car);
     }
+}
+
+bool Race::car_timeouted(const int& id) const {
+    auto it = timeouted.find(id);
+    if (it == timeouted.end()) {
+        return false;
+    }
+    return it->second;
 }
 
 bool Race::car_dead(const int& id) const {
@@ -121,9 +147,7 @@ bool Race::car_dead(const int& id) const {
     return it->second.is_dead();
 }
 
-bool Race::car_finished(const int& id) {
-    return finished[id];
-}
+bool Race::car_finished(const int& id) { return finished[id]; }
 
 StateRunning Race::get_state(const int& id, const int& time_remaining) {
     if (car_finished(id)) {
@@ -133,6 +157,11 @@ StateRunning Race::get_state(const int& id, const int& time_remaining) {
         return DEAD;
     }
     if (time_remaining <= 0) {
+        timeouted[id] = true;
+        auto it = cars->find(id);
+        if (it != cars->end()) {
+            it->second.activate_lose_race();
+        }
         return TIMEOUTED;
     }
 
@@ -168,18 +197,14 @@ HintCoords Race::get_hint(const int& id) const {
     return HintCoords{x, y, rotation};
 }
 
-Checkpoint Race::get_start() const {
-    return track.checkpoints[0];
-}
+Checkpoint Race::get_start() const { return track.checkpoints[0]; }
 
-Checkpoint Race::get_start_angle() const {
-    return track.checkpoints[1];
-}
+Checkpoint Race::get_start_angle() const { return track.checkpoints[1]; }
 
 void Race::reset_race() {
-    std::cout << "[RACE] Resetting race for next round" << std::endl;
     for (auto& [id, car] : *cars) {
         finished[id] = false;
+        timeouted[id] = false;
         car_next_cp[id] = 0;
         car_next_hint[id] = 0;
         car.reset_stats_and_upgrades();
@@ -189,9 +214,43 @@ void Race::reset_race() {
     track = tracks[indx];
 }
 
-void Race::activate_win(int& id) {
-    finished[id] = true;
+void Race::advance_car_progress(const int id) {
+    car_next_cp[id]++;
+    car_next_hint[id] = std::min(car_next_hint[id] + 1, static_cast<int>(track.hints.size()) - 1);
 }
+
+void Race::teleport_car_to_checkpoint(const int id, const Checkpoint& checkpoint, const Checkpoint& checkpoint_angle) {
+    auto it = cars->find(id);
+    if (it == cars->end()) {
+        return;
+    }
+    it->second.set_position(checkpoint.x, checkpoint.y, checkpoint_angle.x, checkpoint_angle.y);
+}
+
+Checkpoint Race::get_checkpoint_angle(const int checkpoint_index) const {
+    if (checkpoint_index + 1 < static_cast<int>(track.checkpoints.size())) {
+        return track.checkpoints[checkpoint_index + 1];
+    }
+    return track.checkpoints[checkpoint_index];
+}
+
+void Race::pass_to_next_checkpoint(int id) {
+    if (car_finished(id)) {
+        return;
+    }
+    int next_checkpoint = car_next_cp[id];
+    if (next_checkpoint >= static_cast<int>(track.checkpoints.size())) {
+        finished[id] = true;
+        return;
+    }    
+    const Checkpoint& checkpoint = track.checkpoints[next_checkpoint];
+    Checkpoint checkpoint_angle = get_checkpoint_angle(next_checkpoint);
+    
+    teleport_car_to_checkpoint(id, checkpoint, checkpoint_angle);
+    advance_car_progress(id);
+}
+
+void Race::activate_win(int& id) { finished[id] = true; }
 
 void Race::update_cars() {
     for (auto& [id, car] : *cars) {
@@ -217,3 +276,5 @@ void Race::spawn_cars(){
         car.set_spawn(start.x, start.y, start_angle.x, start_angle.y);
     }
 }
+
+int Race::get_checkpoint_amount() const { return static_cast<int>(track.checkpoints.size()); }

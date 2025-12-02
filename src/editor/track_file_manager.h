@@ -9,7 +9,9 @@ class TrackFileManager {
 public:
     static bool saveTrackWithDialog(QWidget* parent, const RaceTrackData& data, const QString& currentCity);
     static bool loadTrackWithDialog(QWidget* parent, RaceTrackData& data, QString& currentCity);
+
 private:
+    static QString getServerTracksDirectory();
     static QString getDefaultSavePath(const QString& cityId, const QString& trackName);
     static bool confirmCityChange(QWidget* parent, const QString& trackCity, const QString& currentCity);
 };

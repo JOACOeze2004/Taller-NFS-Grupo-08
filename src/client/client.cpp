@@ -10,7 +10,8 @@
 #include "graphic_client.h"
 
 Client::Client(const std::string& host, const std::string& port, AudioManager* audio)
-    : host(host), port(port), client_socket(host.c_str(), port.c_str()), protocol(client_socket), final_results_received(false), audio_manager(audio)  {}
+    : host(host), port(port), client_socket(host.c_str(), port.c_str()),
+      protocol(client_socket), final_results_received(false), audio_manager(audio) {}
 
 void Client::send_config(const PlayerConfig& config,uint8_t lobby_action, const std::string& game_id) {
     std::cout << "[CLIENT] Connected to " << host << ":" << port << std::endl;
@@ -32,7 +33,6 @@ void Client::send_config(const PlayerConfig& config,uint8_t lobby_action, const 
         std::cerr << "[CLIENT] Error sending config: " << e.what() << std::endl;
         throw;
     }
-
 }
 
 void Client::run() {
@@ -53,10 +53,10 @@ void Client::run() {
         cleanup_resources(receiver, sender, command_queue);
         return;
     }
-    
-    AudioManager audio; 
+
     ClientHandler handler(parser);
     GraphicClient graphic_client(snapshot, &handler, audio_manager);
+    handler.set_graphic_client(&graphic_client);
 
     game_loop(receiver, handler, graphic_client, snapshot);
 
@@ -104,8 +104,11 @@ bool Client::should_exit() const {
     return false;
 }
 
-bool Client::update_game_state(ClientReceiver& receiver, GraphicClient& graphic_client, 
-                               Snapshot& snapshot) {
+bool Client::update_game_state(ClientReceiver& receiver, GraphicClient& graphic_client, Snapshot& snapshot) {
+    if (receiver.is_server_disconnected()) {
+        std::cout << "[CLIENT] Lost connection to server.\n";
+        return true;
+    }
     if (receiver.has_final_results()) {
         std::cout << "[CLIENT] Final results received automatically!" << std::endl;
         final_results = receiver.get_final_results();

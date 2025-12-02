@@ -182,6 +182,7 @@ TEST(ClientProtocolTest, ReceiveGameStateMinimal) {
     data.push_back(0x00);
     data.push_back(0x00);
     data.push_back(0x00);
+    data.push_back(0x00);
     
     for (int i = 0; i < 5; ++i) {
         float f = 0.0f;
@@ -195,6 +196,14 @@ TEST(ClientProtocolTest, ReceiveGameStateMinimal) {
     }
     data.push_back(0x00);
 
+    uint16_t total = htons(25);
+    data.push_back(total >> 8);
+    data.push_back(total & 0xFF);
+
+    uint16_t current = htons(3);
+    data.push_back(current >> 8);
+    data.push_back(current & 0xFF);
+
     data.push_back(0x00);
     data.push_back(0x00);
     data.push_back(0x00);
@@ -214,6 +223,9 @@ TEST(ClientProtocolTest, ReceiveGameStateMinimal) {
     data.push_back(0x00);
     data.push_back(0x00);
     
+    data.push_back(0x00);
+    data.push_back(0x00);
+
     socket.inject_bytes(data);
 
     Snapshot snapshot = client_proto.receive_game_state();
@@ -222,6 +234,10 @@ TEST(ClientProtocolTest, ReceiveGameStateMinimal) {
     EXPECT_EQ(snapshot.cars.size(), 0);
     EXPECT_EQ(snapshot.game_id, 0x05);
     EXPECT_EQ(snapshot.position, 0x01);
+    
+    EXPECT_EQ(snapshot.cars_finished.size(), 0);
+    EXPECT_EQ(snapshot.player_total_times.size(), 0);
+    EXPECT_EQ(snapshot.upgrades.size(), 0);
 }
 
 TEST(ClientProtocolTest, ReceiveFinalResultsEmpty) {

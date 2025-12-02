@@ -18,6 +18,7 @@ using Socket = Socket;
 #include "../server/car_state.h"
 #include "car_DTO.h"
 #include "constants.h"
+#include <endian.h>
 
 class Protocol {
 public:
