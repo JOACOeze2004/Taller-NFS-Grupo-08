@@ -1,8 +1,11 @@
 #include "client_handler.h"
 #include "ClientQuitException.h"
+#include "graphic_client.h"
+#include "pause_menu.h"
 #include "../common/constants.h"
 
-ClientHandler::ClientHandler(InputParser& _parser): parser(_parser), mouse_was_down(false) {
+ClientHandler::ClientHandler(InputParser& _parser)
+    : parser(_parser), mouse_was_down(false), graphic_client(nullptr) {
     initialize_key_map();
     initialize_button_map();
     initialize_cheat_map();
@@ -18,7 +21,31 @@ void ClientHandler::handle_event() {
             } catch (...) {}
             throw ClientQuitException();
         }
+
+        if (graphic_client && graphic_client->is_game_paused()) {
+            handle_pause_menu_event(event);
+            continue;
+        }
+
+        if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
+            if (graphic_client) {
+                graphic_client->toggle_pause();
+            }
+            continue;
+        }
+
+        if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+            if (graphic_client) {
+                SDL_Rect settings_rect = graphic_client->get_settings_button_rect();
+                if (is_point_in_rect(event.button.x, event.button.y, settings_rect)) {
+                    graphic_client->toggle_pause();
+                    continue;
+                }
+            }
+        }
+
         process_event(event);
+
         if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_q){
             try {
                 parser.parse_command(SEND_DISCONNECT);
@@ -27,7 +54,58 @@ void ClientHandler::handle_event() {
             throw ClientQuitException();
         }
     }
-    update();
+
+    if (!graphic_client || !graphic_client->is_game_paused()) {
+        update();
+    }
+}
+
+void ClientHandler::handle_pause_menu_event(const SDL_Event& event) {
+    if (!graphic_client) return;
+
+    PauseMenu* menu = graphic_client->get_pause_menu();
+    if (!menu) return;
+
+    switch (event.type) {
+        case SDL_MOUSEBUTTONDOWN: {
+            if (event.button.button == SDL_BUTTON_LEFT) {
+                menu->handle_mouse_down(event.button.x, event.button.y);
+            }
+            break;
+        }
+
+        case SDL_MOUSEBUTTONUP: {
+            if (event.button.button == SDL_BUTTON_LEFT) {
+                int mouse_x = event.button.x;
+                int mouse_y = event.button.y;
+                menu->handle_mouse_up();
+
+                PauseMenuAction action = menu->handle_click(mouse_x, mouse_y);
+                if (action == PAUSE_RESUME) {
+                    graphic_client->toggle_pause();
+                } else if (action == PAUSE_QUIT) {
+                    try {
+                        parser.parse_command(SEND_DISCONNECT);
+                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    } catch (...) {}
+                    throw ClientQuitException();
+                }
+            }
+            break;
+        }
+
+        case SDL_MOUSEMOTION: {
+            menu->handle_mouse_motion(event.motion.x);
+            break;
+        }
+
+        case SDL_KEYDOWN: {
+            if (event.key.keysym.sym == SDLK_ESCAPE) {
+                graphic_client->toggle_pause();
+            }
+            break;
+        }
+    }
 }
 
 void ClientHandler::register_button(const SDL_Rect& rect, ButtonType type) {
@@ -39,6 +117,13 @@ void ClientHandler::clear_buttons() {
 }
 
 void ClientHandler::handle_button_action(ButtonType type) {
+    if (type == BUTTON_SETTINGS) {
+        if (graphic_client) {
+            graphic_client->toggle_pause();
+        }
+        return;
+    }
+
     auto it = button_command_map.find(type);
     if (it != button_command_map.end()) {
         parser.parse_command(it->second);

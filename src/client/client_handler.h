@@ -7,6 +7,8 @@
 #include <functional>
 #include <vector>
 
+class GraphicClient;
+
 enum ButtonType {
     BUTTON_READY,
     BUTTON_LIFE_UP, BUTTON_LIFE_DOWN,
@@ -15,14 +17,15 @@ enum ButtonType {
     BUTTON_HANDLING_UP, BUTTON_HANDLING_DOWN,
     BUTTON_CONTROL_UP, BUTTON_CONTROL_DOWN,
     BUTTON_NITRO_UP, BUTTON_NITRO_DOWN,
+    BUTTON_SETTINGS
 };
 
 struct ClickableButton {
     SDL_Rect rect;
     ButtonType type;
     bool enabled;
-    
-    ClickableButton(SDL_Rect r, ButtonType t) 
+
+    ClickableButton(SDL_Rect r, ButtonType t)
         : rect(r), type(t), enabled(true) {}
 };
 
@@ -34,22 +37,25 @@ class ClientHandler {
     std::unordered_map<SDL_Keycode, int> cheat_command_map;
     std::vector<ClickableButton> buttons;
     bool mouse_was_down;
+    GraphicClient* graphic_client;
 
 public:
     explicit ClientHandler(InputParser& _parser);
     void handle_event();
     ~ClientHandler();
-    
+
     void register_button(const SDL_Rect& rect, ButtonType type);
     void clear_buttons();
     bool is_mouse_over_button(const SDL_Rect& rect) const;
+    void set_graphic_client(GraphicClient* gc) { graphic_client = gc; }
 
 private:
     void process_event(const SDL_Event& event);
     void process_mouse_event(const SDL_Event& event);
     void process_keyboard_event(const SDL_Event& event);
     void process_mouse_click(int x, int y);
-    void handle_button_action(ButtonType type);  
+    void handle_button_action(ButtonType type);
+    void handle_pause_menu_event(const SDL_Event& event);
     void update();
     void initialize_key_map();
     void initialize_button_map();

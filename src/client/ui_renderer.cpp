@@ -10,40 +10,40 @@ UIRenderer::UIRenderer(SDL_Renderer* rend, const std::string& font_path, int fon
 
 void UIRenderer::draw_position(int position, int total_cars) {
     if (!text) return;
-    
+
     const int panel_x = 490;
     const int panel_y = 10;
     const int panel_w = 220;
     const int panel_h = 45;
-    
+
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, 20, 20, 40, 200);
     SDL_Rect panel_rect = {panel_x, panel_y, panel_w, panel_h};
     SDL_RenderFillRect(renderer, &panel_rect);
-    
+
     SDL_SetRenderDrawColor(renderer, 255, 215, 0, 255);
     SDL_RenderDrawRect(renderer, &panel_rect);
-    
+
     std::string msg = "POSITION: " + std::to_string(position) + " / " + std::to_string(total_cars);
     text->render_with_outline(renderer, msg, 500, 20, COLOR_WHITE, COLOR_BLACK);
 }
 
 void UIRenderer::draw_time(int time_ms) {
     if (!text) return;
-    
+
     const int panel_x = 490;
     const int panel_y = 65;
     const int panel_w = 220;
     const int panel_h = 45;
-    
+
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, 20, 20, 40, 200);
     SDL_Rect panel_rect = {panel_x, panel_y, panel_w, panel_h};
     SDL_RenderFillRect(renderer, &panel_rect);
-    
+
     SDL_SetRenderDrawColor(renderer, 255, 215, 0, 255);
     SDL_RenderDrawRect(renderer, &panel_rect);
-    
+
     int total_seconds = time_ms / 1000;
     int minutes = total_seconds / 60;
     int seconds = total_seconds % 60;
@@ -227,20 +227,20 @@ void UIRenderer::draw_results(const std::vector<CarRacingInfo>& cars_finished) {
 
 void UIRenderer::draw_checkpoints_info(int current_checkpoint, int total_checkpoints) {
     if (!text) return;
-    
+
     const int panel_x = 8;
     const int panel_y = 10;
     const int panel_w = 260;
     const int panel_h = 45;
-    
+
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, 20, 20, 40, 200);
     SDL_Rect panel_rect = {panel_x, panel_y, panel_w, panel_h};
     SDL_RenderFillRect(renderer, &panel_rect);
-    
+
     SDL_SetRenderDrawColor(renderer, 255, 215, 0, 255);
     SDL_RenderDrawRect(renderer, &panel_rect);
-    
+
     std::string checkpoints_text = "Checkpoints: " + std::to_string(current_checkpoint) + " / " + std::to_string(total_checkpoints);
     text->render_with_outline(renderer, checkpoints_text, panel_x + 10, panel_y + 12, COLOR_WHITE, COLOR_BLACK);
 }
@@ -315,6 +315,51 @@ void UIRenderer::draw_upgrades_info(const std::map<Upgrades, int>& upgrades,
             current_x += icon_size + icon_spacing;
             count++;
         }
+    }
+}
+
+SDL_Rect UIRenderer::get_settings_button_rect() const {
+    return {
+        screen_width - SETTINGS_BUTTON_SIZE - SETTINGS_BUTTON_MARGIN,
+        screen_height - SETTINGS_BUTTON_SIZE - SETTINGS_BUTTON_MARGIN,
+
+        SETTINGS_BUTTON_SIZE,
+        SETTINGS_BUTTON_SIZE
+    };
+}
+
+void UIRenderer::draw_settings_button(bool is_hovered) {
+    SDL_Rect button_rect = get_settings_button_rect();
+
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+    if (is_hovered) {
+        SDL_SetRenderDrawColor(renderer, 50, 164, 255, 230);
+    } else {
+        SDL_SetRenderDrawColor(renderer, 20, 20, 40, 200);
+    }
+    SDL_RenderFillRect(renderer, &button_rect);
+
+    SDL_SetRenderDrawColor(renderer, 255, 215, 0, 150);
+    SDL_RenderDrawRect(renderer, &button_rect);
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+    int line_h = 3;
+    int margin_x = 6;
+    int gap = 5;
+
+    int total_h = (line_h * 3) + (gap * 2);
+    int start_y = button_rect.y + (button_rect.h - total_h) / 2;
+
+    for (int i = 0; i < 3; i++) {
+        SDL_Rect line = {
+            button_rect.x + margin_x,
+            start_y + (i * (line_h + gap)),
+            button_rect.w - (margin_x * 2),
+            line_h
+        };
+        SDL_RenderFillRect(renderer, &line);
     }
 }
 
