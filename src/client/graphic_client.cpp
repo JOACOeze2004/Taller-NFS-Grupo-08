@@ -156,7 +156,7 @@ void GraphicClient::handle_audio_events(const Snapshot& snapshot) {
     const CarDTO& player_car = player_it->second;
 
     static int previous_state = snapshot.state;
-    if (previous_state == IN_LOBBY && snapshot.state == IN_RACE) {
+    if (previous_state == IN_WORK_SHOP && snapshot.state == IN_COUNTDOWN) {
         audio_manager->playSoundEffect(SoundEffect::RACE_START);
     }
     previous_state = snapshot.state;
