@@ -2,6 +2,7 @@
 #include "style_manager.h"
 #include <QPixmap>
 #include <iostream>
+#include <QSizePolicy>
 
 CarButton::CarButton(int carId, QWidget* parent)
     : QPushButton(parent), carId(carId) {
@@ -11,14 +12,12 @@ CarButton::CarButton(int carId, QWidget* parent)
 
     if (!carPixmap.isNull()) {
         setIcon(QIcon(carPixmap));
-        setIconSize(QSize(120, 90));
+        setIconSize(QSize(100, 75));
     } else {
         setText(QString("Auto %1").arg(carId));
-        std::cout << "[CLIENT] WARNING: No se pudo cargar: "
-                  << imagePath.toStdString() << std::endl;
     }
-
-    setFixedSize(140, 110);
+    setMinimumSize(80, 60);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setCheckable(true);
 }
 
