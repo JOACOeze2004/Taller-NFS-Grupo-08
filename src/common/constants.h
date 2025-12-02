@@ -46,7 +46,7 @@
 #define NORMAL 0
 #define REVERSE 1
 #define UNDEFINED_CORNER (-1)
-#define MIN_DISTANCE 100.0f
+#define MIN_DISTANCE 1200.0f
 #define MAX_REVERSE_TIMER 1.0f
 #define MIN_SPEED 0.25f
 #define MIN_DIFF 0.01f
