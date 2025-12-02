@@ -185,13 +185,16 @@ void GraphicClient::draw(const Snapshot& snapshot) {
         case IN_RACE:
             draw_race_state(snapshot);
             break;
+        case IN_COUNTDOWN:
+            draw_countdown_state(snapshot);
+            break;
         default:
             break;
     }
     SDL_RenderPresent(renderer);
 }
 
-void GraphicClient::draw_workshop_state(const Snapshot& snapshot) {
+void GraphicClient::draw_workshop_state(const Snapshot& snapshot) {   
     upgrade_phase->render(snapshot);
 }
 
@@ -238,6 +241,21 @@ void GraphicClient::draw_race_state(const Snapshot& snapshot) {
             ui_renderer->draw_upgrades_info(snapshot.upgrades, upgrade_icons_texture, upgrade_sprites);
         }
     }
+}
+
+void GraphicClient::draw_countdown_state(const Snapshot& snapshot) {
+    float camera_x = camera_manager->get_camera_x();
+    float camera_y = camera_manager->get_camera_y();
+
+    game_renderer->draw_background(camera_x, camera_y);
+    game_renderer->draw_checkpoint(snapshot.checkpoint, snapshot.type_checkpoint, camera_x, camera_y);
+    game_renderer->draw_hint(snapshot.hint, camera_x, camera_y);
+    game_renderer->draw_cars(cars, camera_x, camera_y);
+    minimap_renderer->draw(cars, camera_manager->get_camera_id(),
+                          snapshot.checkpoint, snapshot.type_checkpoint, snapshot.hint);
+    game_renderer->draw_speedometer(cars[player_car_id].velocity);
+    ui_renderer->draw_game_id(snapshot.game_id);
+    ui_renderer->draw_countdown(snapshot.time_ms);
 }
 
 GraphicClient::~GraphicClient() {

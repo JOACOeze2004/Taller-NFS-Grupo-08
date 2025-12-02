@@ -32,6 +32,7 @@ public:
     void draw_upgrades_info(const std::map<Upgrades, int>& upgrades,
                            SDL_Texture* icons_texture,
                            const std::vector<UpgradeData>& upgrade_data);
+    void draw_countdown(int time_ms);
     
     bool is_text_ok() const { return text && text->ok(); }
 };

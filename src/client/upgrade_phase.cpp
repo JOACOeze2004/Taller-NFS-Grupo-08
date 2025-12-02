@@ -120,6 +120,7 @@ void UpgradePhase::init_upgrade_buttons() {
 }
 
 void UpgradePhase::render_background() {
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, COLOR_UPGRADE_BG.r, COLOR_UPGRADE_BG.g, 
                           COLOR_UPGRADE_BG.b, COLOR_UPGRADE_BG.a);
     SDL_Rect fullscreen = {0, 0, screen_width, screen_height};

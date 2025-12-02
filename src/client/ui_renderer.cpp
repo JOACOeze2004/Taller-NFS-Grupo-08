@@ -317,3 +317,20 @@ void UIRenderer::draw_upgrades_info(const std::map<Upgrades, int>& upgrades,
         }
     }
 }
+
+void UIRenderer::draw_countdown(int time_ms) {
+    int seconds_left = (time_ms + 999) / 1000;
+    
+    if (seconds_left < 0 || seconds_left > 3) return;
+    
+    if (seconds_left == 0) seconds_left = 1;
+    
+    TextRenderer countdown_text("../assets/fonts/NFS.ttf", 250);
+    if (!countdown_text.ok()) return;
+    
+    std::string msg = std::to_string(seconds_left);
+    SDL_Color text_color = {255, 255, 0, 255};
+    int text_x = (screen_width / 2) - 75;
+    int text_y = (screen_height / 2) - 75;
+    countdown_text.render_with_outline(renderer, msg, text_x, text_y, text_color, COLOR_BLACK);
+}

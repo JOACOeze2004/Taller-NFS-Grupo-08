@@ -60,6 +60,7 @@ private:
     void draw_workshop_state(const Snapshot& snapshot);
     void draw_lobby_state(const Snapshot& snapshot);
     void draw_race_state(const Snapshot& snapshot);
+    void draw_countdown_state(const Snapshot& snapshot);
 
     void update_car(int id, const CarDTO& car_state);
     void clear_cars(const std::unordered_map<int, CarDTO>& cars_in_dto);
