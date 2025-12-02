@@ -31,33 +31,42 @@ void Phase::run() {
     this->end();
 }
 
-int Phase::get_time_remaining_ms(const float base_time) const {
-    if (this->get_current_phase_state() == IN_LOBBY){
-        return 1;
-    }    
+bool Phase::is_in_lobby() const { return this->get_current_phase_state() == IN_LOBBY; }
+
+int Phase::get_elapsed_ms() const {
     auto now = std::chrono::steady_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count();
-    return std::max(0, static_cast<int>(base_time) - static_cast<int>(elapsed));
+    return static_cast<int>( std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count());
+}
+
+int Phase::calculate_remaining_time(float base_time, int elapsed_ms) const { return std::max(0, static_cast<int>(base_time) - elapsed_ms); }
+
+int Phase::calculate_remaining_time_with_penalty(float base_time, int penalty_ms, int elapsed_ms) const {
+    int available_time = static_cast<int>(base_time) - penalty_ms;
+    return std::max(0, available_time - elapsed_ms);
+}
+
+int Phase::get_time_remaining_ms(const float base_time) const {
+    if (is_in_lobby()) {
+        return 1;
+    }
+    int elapsed = get_elapsed_ms();
+    return calculate_remaining_time(base_time, elapsed);
 }
 
 int Phase::get_time() const {
-    if (this->get_current_phase_state() == IN_LOBBY){
+    if (is_in_lobby()) {
         return 1;
     }
-    auto now = std::chrono::steady_clock::now();
-    return static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count()/1000);
+    return get_elapsed_ms() / 1000;
 }
 
 int Phase::get_time_remaining_ms(const float base_time, int player_id) const {
-    if (this->get_current_phase_state() == IN_LOBBY){
+    if (is_in_lobby()) {
         return 1;
-    }    
-    
-    auto now = std::chrono::steady_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count();
+    }
+    int elapsed = get_elapsed_ms();
     int penalty_ms = gameloop->get_upgrade_penalty(player_id) * 1000;
-    int available_time = static_cast<int>(base_time) - penalty_ms;    
-    return std::max(0, available_time - static_cast<int>(elapsed));
+    return calculate_remaining_time_with_penalty(base_time, penalty_ms, elapsed);
 }
 
 Phase::~Phase() {}
