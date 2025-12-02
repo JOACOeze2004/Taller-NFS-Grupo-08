@@ -262,8 +262,8 @@ void UIRenderer::draw_upgrades_info(const std::map<Upgrades, int>& upgrades,
     
     if (total_icons == 0) return;
     
-    const int max_icons_per_row = 4;
-    int icons_per_row = std::min(total_icons, max_icons_per_row);
+    const int max_icons_per_row = 3;
+    int icons_per_row = std::max(total_icons, max_icons_per_row);
     const int panel_w = 20 + icons_per_row * (icon_size + icon_spacing);
     
     int icon_rows = (total_icons + icons_per_row - 1) / icons_per_row;
