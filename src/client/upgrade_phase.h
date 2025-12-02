@@ -56,7 +56,6 @@ private:
     void render_title();
     void render_upgrade_buttons(const std::map<Upgrades, std::chrono::seconds>& prices, const std::map<Upgrades, int>& current_upgrades);
     void render_instructions();
-    void render_remaining_upgrades(int remaining_upgrades);
     void render_actual_upgrades(std::map<Upgrades, int> upgrades);
     void render_penalty_time(int penalty_seconds);
 

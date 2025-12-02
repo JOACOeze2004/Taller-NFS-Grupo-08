@@ -136,24 +136,6 @@ void UpgradePhase::render_title() {
     text->render(renderer, title, title_x, title_y, COLOR_UPGRADE_TITLE);
 }
 
-void UpgradePhase::render_remaining_upgrades(int remaining_upgrades) {
-    if (!text) return;
-    
-    std::string info;
-    if (remaining_upgrades == 1) {
-        info = "You have 1 upgrade point to spend";
-    } else if (remaining_upgrades == 0) {
-        info = "No upgrade points remaining";
-    } else {
-        info = "You have " + std::to_string(remaining_upgrades) + " upgrade points to spend";
-    }
-    
-    int est_width = static_cast<int>(info.size()) * 11;
-    int info_x = (screen_width - est_width) / 2;
-    int info_y = 55;
-    text->render(renderer, info, info_x, info_y, COLOR_UPGRADE_INFO);
-}
-
 void UpgradePhase::render_upgrade_buttons(const std::map<Upgrades, std::chrono::seconds>& prices, const std::map<Upgrades, int>& current_upgrades) {
     
     if (handler) {
@@ -362,7 +344,7 @@ void UpgradePhase::render(const Snapshot& snapshot) {
     
     render_background();
     render_title();
-    render_remaining_upgrades(snapshot.cars.at(snapshot.id).remaining_upgrades);
+    
     render_upgrade_buttons(snapshot.prices, snapshot.upgrades);
     render_instructions();
     render_actual_upgrades(snapshot.upgrades);
