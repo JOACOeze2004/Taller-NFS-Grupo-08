@@ -9,7 +9,7 @@ GraphicClient::GraphicClient(const Snapshot& initial_snapshot, ClientHandler* _h
       screen_width(DEFAULT_SCREEN_WIDTH), screen_height(DEFAULT_SCREEN_HEIGHT),
       handler(_handler), ready_sent(false), audio_manager(audio),
       previous_collision(NONE_COLLISION), previous_using_nitro(false),
-      previous_checkpoint_count(0), human_count(0), end_race_sound_played(false), is_paused(false) {
+      previous_checkpoint_count(0), human_count(0), end_race_sound_played(false),is_paused(false) {
 
     initialize_sdl();
     initialize_window();
@@ -207,6 +207,9 @@ void GraphicClient::draw(const Snapshot& snapshot) {
             break;
         case IN_LOBBY:
             draw_lobby_state(snapshot);
+            if (is_paused) {
+                pause_menu->render();
+            }
             break;
         case IN_RACE:
             draw_race_state(snapshot);
