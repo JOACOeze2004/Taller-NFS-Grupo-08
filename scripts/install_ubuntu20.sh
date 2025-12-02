@@ -140,7 +140,7 @@ if [[ "$CMAKE_OK" == "false" ]]; then
   fi
 fi
 
-log "Installing dependencies: Qt5, YAML-CPP, SDL2 and codec libs"
+log "Installing dependencies: Qt5, YAML-CPP, SDL2, audio drivers and codec libs"
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
   qt5-qmake qtbase5-dev qtchooser qtbase5-dev-tools \
   libyaml-cpp-dev \
@@ -149,6 +149,7 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
   libfreetype6-dev libogg-dev libvorbis-dev libmpg123-dev \
   libxmp-dev libopus-dev libopusfile-dev libfluidsynth-dev fluidsynth \
   libwavpack1 libwavpack-dev \
+  pulseaudio pulseaudio-utils libasound2-dev alsa-utils libasound2-plugins \
   libx11-xcb1 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
   libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0 \
   libxcb-shape0 \
