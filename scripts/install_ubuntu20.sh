@@ -5,6 +5,7 @@ GAME_NAME="need_for_speed"
 BIN_CLIENT_NAME="${GAME_NAME}-client"
 BIN_SERVER_NAME="${GAME_NAME}-server"
 BIN_EDITOR_NAME="${GAME_NAME}-editor"
+BIN_TESTS_NAME="${GAME_NAME}-tests"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 BUILD_DIR="$ROOT_DIR/build"
@@ -309,40 +310,30 @@ EOFCLIENT
 chmod +x "$DESKTOP_DIR/run_client.sh"
 log "Client launcher created -> $DESKTOP_DIR/run_client.sh"
 
-cat > "$DESKTOP_DIR/run_server.sh" <<EOFSERVER
+cat > "$DESKTOP_DIR/run_server.sh" <<'EOFSERVER'
 #!/usr/bin/env bash
+GAME_NAME="need_for_speed"
+BIN_SERVER_NAME="${GAME_NAME}-server"
 
-cd "$VAR_DIR/game" || cd /var/need_for_speed/game || {
-  echo "Error: Cannot change to game directory"
-  exit 1
-}
+export NEED_FOR_SPEED_SERVER_CONFIG_FILE="/etc/need_for_speed/server_config.yaml"
 
-export NEED_FOR_SPEED_SERVER_CONFIG_FILE="$CFG_DIR/server_config.yaml"
-export NEED_FOR_SPEED_ASSETS_DIR="$VAR_DIR/game/assets"
-export NEED_FOR_SPEED_SRC_DIR="$VAR_DIR/game/src"
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 USE_VALGRIND=false
 PORT=8080
 
-if [[ "\$1" == "--valgrind" ]]; then
+if [[ "$1" == "--valgrind" ]]; then
     USE_VALGRIND=true
-    PORT="\${2:-8080}"
+    PORT="${2:-8080}"
 else
-    PORT="\${1:-8080}"
+    PORT="${1:-8080}"
 fi
 
-echo "================================================"
-echo "  Need For Speed - Server Launcher"
-echo "================================================"
-echo "Working directory: \$(pwd)"
-echo "Starting server on port: \$PORT"
-echo "================================================"
-
-if \$USE_VALGRIND; then
+if $USE_VALGRIND; then
     echo "[SERVER] Running under Valgrind..."
-    exec valgrind --leak-check=full --track-origins=yes "$BIN_DIR/$BIN_SERVER_NAME" "\$PORT"
+    exec valgrind --leak-check=full --track-origins=yes --show-reachable=yes --error-exitcode=2 --show-leak-kinds=all --trace-children=yes /usr/bin/$BIN_SERVER_NAME "$PORT"
 else
-    exec "$BIN_DIR/$BIN_SERVER_NAME" "\$PORT"
+    exec /usr/bin/$BIN_SERVER_NAME "$PORT"
 fi
 EOFSERVER
 
