@@ -184,6 +184,7 @@ log "Installing executables into ${BIN_DIR}"
 SRC_CLIENT_BIN="$BUILD_DIR/taller_client"
 SRC_SERVER_BIN="$BUILD_DIR/taller_server"
 SRC_EDITOR_BIN="$BUILD_DIR/taller_editor"
+SRC_TESTS_BIN="$BUILD_DIR/taller_tests"
 
 if [[ ! -x "$SRC_CLIENT_BIN" ]]; then
   warn "Client binary not found or not executable at: $SRC_CLIENT_BIN"
@@ -195,6 +196,10 @@ fi
 
 if [[ ! -x "$SRC_EDITOR_BIN" ]]; then
   warn "Editor binary not found or not executable at: $SRC_EDITOR_BIN"
+fi
+
+if [[ ! -x "$SRC_TESTS_BIN" ]]; then
+  warn "Tests binary not found or not executable at: $SRC_TESTS_BIN"
 fi
 
 if [[ -f "$SRC_CLIENT_BIN" ]]; then
@@ -212,18 +217,9 @@ if [[ -f "$SRC_EDITOR_BIN" ]]; then
   log "Installed editor -> $BIN_DIR/$BIN_EDITOR_NAME"
 fi
 
-log "Preparing configuration and data directories"
-sudo mkdir -p "$CFG_DIR" "$VAR_DIR"
-sudo chown -R "$(id -u):$(id -g)" "$CFG_DIR" "$VAR_DIR" || true
-
-if [[ -d "$ROOT_DIR/config" ]]; then
-  info "Copying config files from repo/config -> $CFG_DIR"
-  sudo cp -r "$ROOT_DIR/config/"* "$CFG_DIR/" || true
-else
-  info "No config/ folder found. Creating placeholder configs"
-  echo "# Placeholder client config" | sudo tee "$CFG_DIR/client_config.yaml" >/dev/null
-  echo "# Placeholder server config" | sudo tee "$CFG_DIR/server_config.yaml" >/dev/null
-  echo "# Placeholder editor config" | sudo tee "$CFG_DIR/editor_config.yaml" >/dev/null
+if [[ -f "$SRC_TESTS_BIN" ]]; then
+  sudo install -m 755 "$SRC_TESTS_BIN" "$BIN_DIR/$BIN_TESTS_NAME"
+  log "Installed tests -> $BIN_DIR/$BIN_TESTS_NAME"
 fi
 
 mkdir -p "$CFG_DIR"
@@ -316,35 +312,38 @@ log "Client launcher created -> $DESKTOP_DIR/run_client.sh"
 cat > "$DESKTOP_DIR/run_server.sh" <<EOFSERVER
 #!/usr/bin/env bash
 
-# Set working directory to /var/need_for_speed/game where assets/src are located
 cd "$VAR_DIR/game" || cd /var/need_for_speed/game || {
   echo "Error: Cannot change to game directory"
   exit 1
 }
 
-# Export config file location
 export NEED_FOR_SPEED_SERVER_CONFIG_FILE="$CFG_DIR/server_config.yaml"
-
-# Export asset paths for the game to use
 export NEED_FOR_SPEED_ASSETS_DIR="$VAR_DIR/game/assets"
 export NEED_FOR_SPEED_SRC_DIR="$VAR_DIR/game/src"
 
-# Default port
-PORT="\${1:-8080}"
+USE_VALGRIND=false
+PORT=8080
+
+if [[ "\$1" == "--valgrind" ]]; then
+    USE_VALGRIND=true
+    PORT="\${2:-8080}"
+else
+    PORT="\${1:-8080}"
+fi
 
 echo "================================================"
 echo "  Need For Speed - Server Launcher"
 echo "================================================"
 echo "Working directory: \$(pwd)"
-echo "Assets directory: \$NEED_FOR_SPEED_ASSETS_DIR"
-echo "Source directory: \$NEED_FOR_SPEED_SRC_DIR"
-echo "Config file: \$NEED_FOR_SPEED_SERVER_CONFIG_FILE"
 echo "Starting server on port: \$PORT"
 echo "================================================"
-echo
 
-# Launch server from the game directory (so relative paths work)
-exec "$BIN_DIR/$BIN_SERVER_NAME" "\$PORT"
+if \$USE_VALGRIND; then
+    echo "[SERVER] Running under Valgrind..."
+    exec valgrind --leak-check=full --track-origins=yes "$BIN_DIR/$BIN_SERVER_NAME" "\$PORT"
+else
+    exec "$BIN_DIR/$BIN_SERVER_NAME" "\$PORT"
+fi
 EOFSERVER
 
 chmod +x "$DESKTOP_DIR/run_server.sh"
@@ -383,11 +382,22 @@ EOFEDITOR
 chmod +x "$DESKTOP_DIR/run_editor.sh"
 log "Editor launcher created -> $DESKTOP_DIR/run_editor.sh"
 
-if [[ -f "$ROOT_DIR/run_tests.sh" ]]; then
-  cp "$ROOT_DIR/run_tests.sh" "$DESKTOP_DIR/run_tests.sh"
-  chmod +x "$DESKTOP_DIR/run_tests.sh"
-  log "Test launcher copied -> $DESKTOP_DIR/run_tests.sh"
-fi
+cat > "$DESKTOP_DIR/run_tests.sh" <<EOFTESTS
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "================================================"
+echo "  Need For Speed - Test Runner"
+echo "================================================"
+echo "Running tests..."
+echo "================================================"
+echo
+
+exec "$BIN_DIR/$BIN_TESTS_NAME"
+EOFTESTS
+
+chmod +x "$DESKTOP_DIR/run_tests.sh"
+log "Test launcher created -> $DESKTOP_DIR/run_tests.sh"
 
 sudo chown -R "$(id -u):$(id -g)" "$VAR_DIR" || true
 sudo chmod -R 755 "$VAR_DIR/game" || true
@@ -404,6 +414,7 @@ echo "Executables:"
 echo "  • Client: ${BIN_DIR}/${BIN_CLIENT_NAME}"
 echo "  • Server: ${BIN_DIR}/${BIN_SERVER_NAME}"
 echo "  • Editor: ${BIN_DIR}/${BIN_EDITOR_NAME}"
+echo "  • Tests: ${BIN_DIR}/${BIN_TESTS_NAME}"
 echo
 echo "Configuration:"
 echo "  • Config directory: ${CFG_DIR}"
