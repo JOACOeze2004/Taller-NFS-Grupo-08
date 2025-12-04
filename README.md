@@ -1,45 +1,43 @@
-# Ejemplo de CMAKE para el TP Final
+# TP Grupal final Taller de programación: Need for speed
 
-**Importante:** el primer commit de este repositorio tiene el setup
-básico para el TP Final que incluye la instalación de la lib de Google
-Tests, `SDL2` y `SDL2pp` (el wrapper de C++).
+Trabajo Práctico grupal final de la materia Taller de Programación de FIUBA. 
 
-El resto de los commits son a modo de ejemplo de como se pueden
-agregar mas código fuente al proyecto.
+# Grupo 08
 
-Este ejemplo **no** incluye instalarse otras libs que son dependencias
-tanto de `SDL2` como de `SDL2pp` (pero si estan documentadas en el
-`CMakeFile` para Xubuntu 24.04).
+* **Integrante 1** - [Yoel Gaston Arlia ](https://github.com/Arlia1)
+* **Integrante 2** - [Espiñeyra Luca Matias](https://github.com/Lucaaesp)
+* **Integrante 3** - [Joaquin Méndez Archerrizo](https://github.com/JOACOeze2004)
+* **Integrante 4** - [Malena Sein](https://github.com/MalenaSein)
 
-Este repo **no** incluye tampoco un instalador.
+Correctores: **Abril Diaz Miguez y Nathalia Encinoza**
 
-**Se deben agregar las librerias necesarias y el instalador.**
+## Acerca del trabajo
+El trabajo práctico constaba de hacer un need for speed, es decir un juego de carreras, pero con la vista al estilo de los primeros GTA. Además, se deben tener ciertos requerimientos como:
+- Hacer un juego, que sea jugable y que se vea bien.
+- Tener múltiples partidas a la vez.
+- Sistema de autos, con estadísticas propias y mejorables entre carreras. Junto con un sistema de físicas usando Box2d.
+- NPCS
+- Poder crear tus propias carreras con el editor.
 
-También el ejemplo usa una estructura de carpetas muy simple:
+Y mas cosas.
 
+## Instalador del proyecto
+
+El instalador junto con otros scripts para ejecutar el servidor, cliente, editor y tests.
+
+
+Para instalar el juego, ejecutar esto en una Máquina virtual limpia. Con Ubuntu 24.04 o tambien es valido para Mint 21.2
+```bash
+./install_ubuntu20.sh
 ```
-client/
-server/
-editor/
-common/
-```
+Luego seguir las instrucciones que marca el instalador una vez finalizada la instalación de todas las dependencias y el buildeo del proyecto. **Cualquier duda, revisar el manual de usuario.**
 
-Bien se puede mejorar (cambiando el cmakefile) agregando mas
-sub-carpetas.
 
-Asi tambien **deben** ser cambiados los *targets* del cmake (`taller_client`,
-`taller_server`, ...) por nombres mas acordes al TP que se este
-haciendo.
+## Documentación
+Toda la documentación (manual de usuario y del proyecto, documentación técnica y vídeo promocional) se encuentra en el siguiente drive:
+https://drive.google.com/drive/folders/1Ax1yDGyXlEDk1JzU5CE7GVNueY__UWOR?hl=es-419
+Nota: entrar con mail fiuba para poder entrar directamente sin pedir permisos.
 
-Tambien, por default solo se compila una version *debug* sin
-optimizar. Si se quiere compilar binarios optimizados
-(lo que cmake llama *release*) se puede, solo hay modificar
-cmake.
 
-Aprender del ejemplo para saber como extenderlo!
-
-**Importante:** este repositorio **no** incluye pre-commits hooks,
-ni scripts adicionales (como correr valgrind).
-
-**Eso esta a cargo de los estudiantes,** tal como fue mostrado
-en los tps individuales, recaps y hands-on.
+## Créditos
+La clase [Socket, resolver, resolverError](https://github.com/eldipa/hands-on-sockets-in-cpp), [Thread y queue](https://github.com/eldipa/hands-on-threads) (en src/common) fue diseñada y creada por la cátedra **Veiga, materia Taller de Programación** así que todos los créditos a los mismos.
